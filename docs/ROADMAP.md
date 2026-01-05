@@ -33,7 +33,7 @@
 | ID   | User story / tâche                                                                              | Sprint cible | Priorité | Etat  |
 | ---- | ----------------------------------------------------------------------------------------------- | ------------ | -------- | ----- |
 | US1  | Structurer le repo GIT                                                                          | DAY1         | Haute    | TODO  |
-| US2  | Réfléchir à une architecture logiciel                                                           | DAY1         | Haute    | DOING  |
+| US2  | Réfléchir à une architecture logiciel                                                           | DAY1         | Haute    | DOING |
 | US3  | Réflechir à une librairie UI                                                                    | DAY1         | Haute    | DONE  |
 | US4  | Implémentation de donjon                                                                        | DAY1         | Moyenne  | TODO  |
 | US5  | Implémenter les entités de base                                                                 | DAY1         | Moyenne  | TODO  |
@@ -47,9 +47,9 @@
 | US13 | Exportation de la configuration du donjon                                                       | DAY4         | Faible   | TODO  |
 | US14 | gestion des niveaux avec 3 modes (facile choix libre, normal avec checkpoint, expert sans mort) | DAY5         | Faible   | TODO  |
 | US15 | Choix des boutons pour l'utilisateur (réinitialiser vague, quitter etc)                         | DAY2         | Haute    | TODO  |
-| US16 | Système d'avancement de tour                                                                    | DAY2         | Haute     | TODO  |
-| US17 | Chargement de donjon                                                   | DAY4         | Moyenne  | TODO  |
+| US16 | Système d'avancement de tour                                                                    | DAY2         | Haute    | TODO  |
+| US17 | Chargement de donjon                                                                            | DAY4         | Moyenne  | TODO  |
 | US18 | Vérifier l'équilibre des niveaux                                                                | DAY5         | Faible   | TODO  |
-| US19 | Implémenter les niveaux                                                                         | DAY3         | Moyenne         | TODO  |
-
+| US19 | Implémenter les niveaux                                                                         | DAY3         | Moyenne  | TODO  |
+| US20 | Mettre en place des pipelines de test sur Gitlab                                                | DAY2         | Moyenne  | TODO  |
 ## 4. Dette technique et améliorations futures
