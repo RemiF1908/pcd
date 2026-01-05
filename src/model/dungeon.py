@@ -34,6 +34,12 @@ class Dungeon:
         row, col = coord
         return 0 <= row < self.dimension[0] and 0 <= col < self.dimension[1]
     
+    def place_entity(self, entity: object, position: tuple[int,int]) -> None:
+        """Place une entité à la position spécifiée dans le donjon."""
+        if self.is_within_bounds(position):
+            cell = self.get_cell(position)
+            cell.entity = entity
+    
     def __repr__(self) -> str:
         return f"Dungeon(dimension={self.dimension}, entry={self.entry}, exit={self.exit})"
     
