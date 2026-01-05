@@ -33,6 +33,7 @@
 | ID   | User story / tâche                                                                              | Sprint cible | Priorité | Etat  |
 | ---- | ----------------------------------------------------------------------------------------------- | ------------ | -------- | ----- |
 | US1  | Structurer le repo GIT                                                                          | DAY1         | Haute    | TODO  |
+| US2  | Réfléchir à une architecture logiciel                                                           | DAY1         | Haute    | DOING  |
 | US3  | Réflechir à une librairie UI                                                                    | DAY1         | Haute    | DONE  |
 | US4  | Implémentation de donjon                                                                        | DAY1         | Moyenne  | TODO  |
 | US5  | Implémenter les entités de base                                                                 | DAY1         | Moyenne  | TODO  |
