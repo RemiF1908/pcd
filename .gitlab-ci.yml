@@ -2,7 +2,7 @@ image: python:3.11
 
 stages:
   - test
-
+  - build
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -19,3 +19,17 @@ test_job:
   
   script:
     - python -m pytest -s -v ./tests
+
+generer-pdf:
+  stage: build
+  image: 
+    name: minlag/mermaid-cli:latest
+    entrypoint: [""]
+  
+  script:
+    - mmdc -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
+  
+  artifacts:
+    paths:
+      - docs/classDiagram.pdf
+    expire_in: 1 week
