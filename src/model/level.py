@@ -60,6 +60,9 @@ class Level:
         if hero in self.heroes:
             self.heroes.remove(hero)
             self.nb_heroes = len(self.heroes)
+
+    def awake_hero(self, hero : Hero) : 
+        hero.isAlive = True
     
     def get_alive_heroes(self) -> List[Hero]:
         """Retourne la liste des héros encore en vie."""

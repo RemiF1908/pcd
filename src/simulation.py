@@ -2,6 +2,7 @@ import os, time
 from .VARIABLES import *
 from .model.hero import Hero
 from .model.dungeon import Dungeon
+from .model.level import *
 from typing import List, Optional, Any, Dict
 
 # Use the project package path so imports work when running tests and
@@ -21,22 +22,16 @@ class Simulation:
 
     def __init__(
         self,
-        dungeon: Dungeon = None,
-        budget_tot: int = 0,
+        level: Level,
+        dungeon: Dungeon = None,    
         score: int = 0,
-        level: int = 1,
-        nb_heroes: int = 0,
-        heroes: Optional[List[Hero]] = None,
-        current_budget: int = 0,
 
     ) -> None:
         self.dungeon = dungeon
-        self.budget_tot = int(budget_tot)
         self.score = int(score)
-        self.level = int(level)
-        self.nb_heroes = int(nb_heroes)
-        self.heroes = list(heroes) if heroes else []
-        self.current_budget = int(current_budget)
+        self.level = level
+        self.heroes = self.level.heroes
+        self.current_budget = self.level.budget_tot
         self.ticks = 0
         self.running = False
         self.tresorReached = False
@@ -58,7 +53,8 @@ class Simulation:
             self.step()
             self.ticks += 1
             time.sleep(0.5)
-            
+        
+
     def stop(self) -> None:
         """Stop the simulation loop."""
         self.running = False
@@ -87,6 +83,7 @@ class Simulation:
                 if self.dungeon.validMove(nextMove) :
                     h.move(nextMove)
                     self.apply_cell_effects(h)
+                    h.stepsTaken += 1
             except Exception:
                 print("illegal move")
 
