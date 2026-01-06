@@ -1,4 +1,5 @@
 from typing import List, Optional
+from .path_strategies import PathStrategyFactory
 
 
 class Hero:
@@ -21,8 +22,7 @@ class Hero:
     def take_damage(self, damage: int):
         self.pv_cur -= damage
         if self.pv_cur <= 0:
-            if self.isAlive:
-                self.isAlive = False
+            self.isAlive = False
             self.pv_cur = 0
 
     def move(self, new_coord: tuple):
@@ -35,3 +35,10 @@ class Hero:
     def update(self, dungeon):
         entity = dungeon.get_cell(self.coord).entity
         self.take_damage(entity.damage)
+
+    def compute_path(self, dungeon, start, goal):
+        """Compute path using the assigned strategy."""
+        path_strategy = PathStrategyFactory.create(self.strategy)
+        self.path = path_strategy.find_path(dungeon, start, goal)
+
+    
