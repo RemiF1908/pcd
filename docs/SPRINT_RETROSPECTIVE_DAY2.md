@@ -41,11 +41,14 @@
 - Système d'avancement de tours implémenté et opérationnel
 - Commandes utilisateur complètes (réinitialiser, lancer vague, tour suivant, quitter)
 - CI/CD GitLab configuré pour l'exécution automatique des tests
+- Bonne communication d'équipe
+- Bonne répartition des tâches 
 
 **Points d'amélioration :**
 - Documentation des algorithmes d'IA non finalisée (BFS, Dijkstra, Dijkstra pondéré)
 - Fonction de scoring partiellement définie, reste à implémenter
 - Tâche de revue et documentation non commencée
+- Mise en lien TUI (View) et GameController à  
 
 **Décisions prises :**
 - Choix des algorithmes d'IA identifiés mais restent à documenter en détail
