@@ -1,7 +1,7 @@
 # 🌀 Rétrospective de Backlog – Fin de Sprint
 
 **Sprint n° :** 1  
-**Jour :** mardi
+**Jour :** Lundi
 
 ---
 
