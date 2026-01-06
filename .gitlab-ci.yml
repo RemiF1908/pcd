@@ -4,6 +4,7 @@ stages:
   - test
   - build
 
+
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
@@ -29,6 +30,8 @@ generer-pdf:
   rules:
     - changes:
         - docs/classDiagram.mmd
+    - when: manual
+      allow_failure: true
   
   script:
     - mmdc -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
