@@ -1,7 +1,7 @@
 import os, time
-import VARIABLES as VAR
-from model.hero import Hero
-from model.dungeon import Dungeon
+from .config import *
+from .model.hero import Hero
+from .model.dungeon import Dungeon
 from typing import List, Optional, Any, Dict
 
 # Use the project package path so imports work when running tests and
@@ -28,7 +28,6 @@ class Simulation:
         nb_heroes: int = 0,
         heroes: Optional[List[Hero]] = None,
         current_budget: int = 0,
-
     ) -> None:
         self.dungeon = dungeon
         self.budget_tot = int(budget_tot)
@@ -52,15 +51,15 @@ class Simulation:
         """
         self.running = True
         count_awake_hero = 0
-        while not(self.tresorReached or self.allHeroesDead or not(self.running)):
-            if (count_awake_hero <= VAR.TOURBOUCLE_REVEIl_HERO * (self.nb_heroes - 1)):
-                if count_awake_hero % VAR.TOURBOUCLE_REVEIl_HERO == 0:
-                    self.heroes[count_awake_hero//VAR.TOURBOUCLE_REVEIl_HERO].awake()
+        while not (self.tresorReached or self.allHeroesDead or not (self.running)):
+            if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.nb_heroes - 1):
+                if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
+                    self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
                 count_awake_hero += 1
 
             self.step()
             time.sleep(0.5)
-            
+
     def stop(self) -> None:
         """Stop the simulation loop."""
         self.running = False
@@ -87,9 +86,9 @@ class Simulation:
         for h in list(self.heroes):
             try:
                 nextMove = h.getMove()
-                if self.dungeon.validMove(nextMove) :
-                    h.move(nextMove)
+                if self.dungeon.validMove(nextMove):
                     self.apply_cell_effects(h)
+                    h.move(nextMove)
             except Exception:
                 print("illegal move")
 
@@ -102,8 +101,6 @@ class Simulation:
         except Exception:
             pass
 
-
-
     def add_hero(self, hero: Any) -> None:
         self.heroes.append(hero)
         self.nb_heroes = len(self.heroes)
@@ -115,11 +112,10 @@ class Simulation:
             pass
         self.nb_heroes = len(self.heroes)
 
-    def apply_cell_effects(self, hero : Hero) :
+    def apply_cell_effects(self, hero: Hero):
         coord = hero.getHero_coord()
         cell = self.dungeon.get_cell(coord)
         hero.take_damage(cell.get_damage())
-        
 
     def reset(self) -> None:
         self.ticks = 0
@@ -146,5 +142,3 @@ class Simulation:
             f"Simulation(level={self.level}, ticks={self.ticks}, score={self.score}, "
             f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.budget_tot})"
         )
-
-
