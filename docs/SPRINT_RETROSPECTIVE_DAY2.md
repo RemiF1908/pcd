@@ -9,9 +9,9 @@
 
 > Quel était l’objectif principal du sprint ?
 
-- 🎯 **Objectif annoncé :** 
-- ✅ **Objectif atteint ?** 
-- 📝 **Commentaire :** 
+- 🎯 **Objectif annoncé :** Implémenter le moteur de simulation avec éditeur TUI et système de tours, mettre en place CI/CD et documenter les algorithmes d'IA
+- ✅ **Objectif atteint ?** Partiellement
+- 📝 **Commentaire :** L'éditeur TUI, le système de tours et les commandes utilisateur sont fonctionnels. CI/CD opérationnel. Restent à finaliser la documentation des algorithmes d'IA et la fonction de scoring 
 
 ---
 
@@ -29,12 +29,27 @@
 
 | Élément | Nombre |
 |------|------|
-| Tâchesprévues | |
-| Tâches terminées | |
-| Tâches partiellement terminées | |
-| Tâches non commencées | 0|
+| Tâchesprévues | 7 |
+| Tâches terminées | 4 |
+| Tâches partiellement terminées | 2 |
+| Tâches non commencées | 1 |
 
 ### 📌 Observations
+
+**Points positifs :**
+- Éditeur TUI fonctionnel avec placement et suppression d'objets
+- Système d'avancement de tours implémenté et opérationnel
+- Commandes utilisateur complètes (réinitialiser, lancer vague, tour suivant, quitter)
+- CI/CD GitLab configuré pour l'exécution automatique des tests
+
+**Points d'amélioration :**
+- Documentation des algorithmes d'IA non finalisée (BFS, Dijkstra, Dijkstra pondéré)
+- Fonction de scoring partiellement définie, reste à implémenter
+- Tâche de revue et documentation non commencée
+
+**Décisions prises :**
+- Choix des algorithmes d'IA identifiés mais restent à documenter en détail
+- Critères de scoring définis : héros morts, trésor protégé, budget dépensé, temps
 
 
 ---
