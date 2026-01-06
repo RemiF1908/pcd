@@ -42,7 +42,8 @@ class Dungeon:
         return 0 <= row < self.dimension[0] and 0 <= col < self.dimension[1]
     
     def is_Walkable(self, coord : tuple[int, int]) -> bool :
-        return not isinstance(Wall, self.get_cell(coord))
+        cell = self.get_cell(coord)
+        return not isinstance(cell.entity, Wall)
 
     def validMove(self, coord) : 
         return self.is_within_bounds(coord) and self.is_Walkable(coord)
