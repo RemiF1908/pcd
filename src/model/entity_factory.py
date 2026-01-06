@@ -1,19 +1,23 @@
-"""Factory Pattern pour la construction facile des entités du donjon.
+"""Factory Facade pour la construction facile des entités du donjon.
 
-Ce module implémente le Design Pattern Factory pour créer des entités
-(Wall, Floor, Trap) de manière simple et centralisée.
+Ce module implémente le Design Pattern Factory avec une façade qui utilise
+les classes Creator concrètes (FloorCreator, WallCreator, TrapCreator).
 
 Usage:
     from src.model.entity_factory import EntityFactory
-    
+
     # Créer un sol
     floor = EntityFactory.create_floor()
-    
+
     # Créer un mur
     wall = EntityFactory.create_wall()
-    
+
     # Créer un piège
-    trap = EntityFactory.create_trap(kind="spike", damage=10)
+    trap = EntityFactory.create_trap(damage=15)
+
+    # Utilisation directe des créateurs (alternative)
+    from src.model.floor_creator import FloorCreator
+    floor = FloorCreator().build()
 """
 
 from __future__ import annotations
@@ -22,33 +26,40 @@ from .entity import Entity
 from .floor import Floor
 from .wall import Wall
 from .trap import Trap
+from .floor_creator import FloorCreator
+from .wall_creator import WallCreator
+from .trap_creator import TrapCreator
 
 
 class EntityFactory:
-    """Factory centralisée pour créer toutes les entités du donjon."""
-    
+    """Façade centralisée utilisant les classes Creator pour créer les entités."""
+
     @staticmethod
-    def create_floor(damage: int = 0) -> Floor:
+    def create_floor() -> Floor:
         """Créer une entité Floor (sol marchable).
-        
-        Args:
-            damage: Dégâts infligés en marchant sur ce sol (par défaut 0)
+
+        Returns:
+            Instance de Floor créée via FloorCreator.
         """
-        return Floor(damage=damage)
-    
+        return FloorCreator().factory_method()
+
     @staticmethod
     def create_wall() -> Wall:
-        """Créer une entité Wall (mur non franchissable)."""
-        return Wall()
-    
+        """Créer une entité Wall (mur non franchissable).
+
+        Returns:
+            Instance de Wall créée via WallCreator.
+        """
+        return WallCreator().factory_method()
+
     @staticmethod
     def create_trap(damage: int = 10) -> Trap:
         """Créer une entité Trap (piège).
 
         Args:
-            damage: Dégâts infligés par le piège
+            damage: Dégâts infligés par le piège (défaut: 10)
 
         Returns:
-            Instance de Trap configurée
+            Instance de Trap créée via TrapCreator.
         """
-        return Trap(damage=damage)
+        return TrapCreator(damage=damage).factory_method()
