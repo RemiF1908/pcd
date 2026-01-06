@@ -99,8 +99,8 @@ def draw_dungeon(
                 symbol = cell.entity.get_display_char()
                 color_pair = cell.entity.get_color_id()
             else:
-                # Case vide par défaut
-                symbol = "."
+                # + pour débuggé, ce cas n'est pas censé arriver
+                symbol = "+"
                 color_pair = 0
 
             # Dessiner le caractère
