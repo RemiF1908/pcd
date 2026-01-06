@@ -12,6 +12,9 @@ class Hero :
     def awake(self) : 
         self.isAlive = True
 
+    def getHero_coord(self) : 
+        return self.coord
+
     def take_damage(self, damage : int) :
         self.pv_cur -= damage
         if self.pv_cur <= 0 :
@@ -20,7 +23,7 @@ class Hero :
     
     def move(self, new_coord : tuple) :
         self.coord = new_coord
-        
+
 
     def getMove(self) -> tuple : 
         return self.path[self.stepsTaken]

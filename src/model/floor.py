@@ -19,7 +19,7 @@ class Floor(Entity):
 
     @property
     def damage(self) -> int:
-        return 0
+        return self._damage
 
 
     def __repr__(self) -> str:  

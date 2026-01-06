@@ -89,7 +89,7 @@ class Simulation:
                 nextMove = h.getMove()
                 if self.dungeon.validMove(nextMove) :
                     h.move(nextMove)
-
+                    self.apply_cell_effects(h)
             except Exception:
                 print("illegal move")
 
@@ -114,6 +114,12 @@ class Simulation:
         except ValueError:
             pass
         self.nb_heroes = len(self.heroes)
+
+    def apply_cell_effects(self, hero : Hero) :
+        coord = hero.getHero_coord()
+        cell = self.dungeon.get_cell(coord)
+        hero.take_damage(cell.get_damage())
+        
 
     def reset(self) -> None:
         self.ticks = 0
