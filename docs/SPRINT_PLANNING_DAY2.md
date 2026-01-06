@@ -1,6 +1,6 @@
 # SPRINT PLANNING — Day 2
 
-Date: <!-- remplir la date -->
+Date: 6/12/25
 
 ## Objectif du sprint
 
