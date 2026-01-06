@@ -26,5 +26,11 @@ class Trap(Entity):
     def damage(self) -> int:
         return self._damage
 
+    def get_display_char(self) -> str:
+        return "^"
+
+    def get_color_id(self) -> int:
+        return 3  # Rouge pour les pièges (paire curses 3)
+
     def __repr__(self) -> str:  # pragma: no cover - trivial
         return f"Trap(damage={self._damage})"

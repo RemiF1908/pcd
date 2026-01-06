@@ -1,0 +1,21 @@
+image: python:3.11
+
+stages:
+  - test
+
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+test_job:
+  stage: test
+  before_script:
+    - python --version ; pip --version
+    - pip install -r requirements.txt
+  
+  script:
+    - python -m pytest -s -v ./tests
