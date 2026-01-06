@@ -52,6 +52,28 @@ class Entity(ABC):
 		"""Puissance d'attaque (pour les monstres)."""
 		return 0
 
+	@abstractmethod
+	def get_display_char(self) -> str:
+		"""Retourne le caractère à afficher pour cette entité dans le TUI.
+
+		Chaque entité concrète doit implémenter cette méthode.
+		Exemples : '.' pour Floor, '#' pour Wall, '^' pour Trap.
+		"""
+
+	@abstractmethod
+	def get_color_id(self) -> int:
+		"""Retourne l'identifiant de la paire de couleur curses pour l'affichage.
+
+		Conventions (à respecter dans l'initialisation curses) :
+		  1 = Floor (blanc/gris)
+		  2 = Wall (blanc brillant)
+		  3 = Trap (rouge)
+		  4 = Monster (magenta)
+		  5 = Entrance (vert)
+		  6 = Exit (cyan)
+		  7 = Hero (jaune)
+		"""
+
 	def __repr__(self) -> str:  
 		try:
 			return f"{self.__class__.__name__}({self.type})"
