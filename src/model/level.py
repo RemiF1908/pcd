@@ -163,13 +163,21 @@ class LevelBuilder:
     
     def build(self) -> Level:
         """Construit et retourne le niveau configuré."""
-        return Level(
+        level = Level(
             budget_tot=self._budget_tot,
             dungeon=self._dungeon,
             difficulty=self._difficulty,
             nb_heroes=len(self._heroes),
             heroes=self._heroes.copy()
         )
+        
+        if self._dungeon:
+            for hero in level.heroes:
+                if hero.coord is None:
+                    hero.coord = self._dungeon.entry
+                hero.compute_path(self._dungeon, hero.coord, self._dungeon.exit)
+        
+        return level
     
     def reset(self) -> "LevelBuilder":
         """Réinitialise le builder pour créer un nouveau niveau."""
