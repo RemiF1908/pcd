@@ -26,20 +26,27 @@ _skip_no_terminal = pytest.mark.skipif(
 def create_test_dungeon():
     """Cree un donjon de test."""
     rows, cols = 8, 12
-    grid = [[Cell((r, c), EntityFactory.create_floor()) for c in range(cols)] for r in range(rows)]
     
-    for c in range(3, 8):
-        grid[3][c].entity = EntityFactory.create_wall()
-    for r in range(3, 6):
-        grid[r][7].entity = EntityFactory.create_wall()
+    # Créer la grille vide (sera remplie de Floor par le constructeur de Dungeon)
+    grid = [[Cell((r, c), None) for c in range(cols)] for r in range(rows)]
     
-    grid[1][5].entity = EntityFactory.create_wall()
-    grid[5][2].entity = EntityFactory.create_wall()
-    grid[2][4].entity = EntityFactory.create_trap(damage=10)
-    grid[5][3].entity = EntityFactory.create_trap(damage=15)
-    grid[6][9].entity = EntityFactory.create_trap(damage=20)
-    
+    # Créer le donjon (cela va remplir toutes les cellules avec Floor())
     dungeon = Dungeon(dimension=(rows, cols), grid=grid, entry=(0, 0), exit=(rows-1, cols-1))
+    
+    # Maintenant ajouter les murs
+    for c in range(3, 8):
+        dungeon.place_entity(EntityFactory.create_wall(), (3, c))
+    for r in range(3, 6):
+        dungeon.place_entity(EntityFactory.create_wall(), (r, 7))
+    
+    dungeon.place_entity(EntityFactory.create_wall(), (1, 5))
+    dungeon.place_entity(EntityFactory.create_wall(), (5, 2))
+    
+    # Ajouter les pièges
+    dungeon.place_entity(EntityFactory.create_trap(damage=10), (2, 4))
+    dungeon.place_entity(EntityFactory.create_trap(damage=15), (5, 3))
+    dungeon.place_entity(EntityFactory.create_trap(damage=20), (6, 9))
+    
     hero_positions = [(1, 1), (2, 3), (4, 5)]
     return dungeon, hero_positions
 
@@ -138,9 +145,12 @@ def test_curses_display_full_dungeon():
         legend_x = 2 + cols * 2 + 3
         draw_legend(stdscr, start_y=2, start_x=legend_x)
         
-        # Info
-        stdscr.addstr(rows + 4, 1, "E=Entree S=Sortie @=Hero #=Mur ^=Piege .=Sol", curses.A_DIM)
-        stdscr.addstr(rows + 5, 1, "Appuyez sur une touche pour continuer...", curses.A_DIM)
+        # Info (utiliser try/except pour éviter erreurs si terminal trop petit)
+        try:
+            stdscr.addstr(rows + 4, 1, "E=Entree S=Sortie @=Hero #=Mur ^=Piege .=Sol", curses.A_DIM)
+            stdscr.addstr(rows + 5, 1, "Appuyez sur une touche pour continuer...", curses.A_DIM)
+        except curses.error:
+            pass
         
         stdscr.refresh()
         stdscr.getch()  # Attend une touche

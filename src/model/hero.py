@@ -1,7 +1,7 @@
 class Hero : 
-    def __init__(self, pv_total, pv_cur, coord : tuple, strategy : str):
+    def __init__(self, pv_total, strategy : str, coord = None):
         self.pv_total = pv_total
-        self.pv_cur = pv_cur
+        self.pv_cur = pv_total
         self.coord = coord
         self.isAlive = False
         self.reachedGoal = False
@@ -12,6 +12,9 @@ class Hero :
     def awake(self) : 
         self.isAlive = True
 
+    def getHero_coord(self) -> tuple :
+        return self.coord
+    
     def take_damage(self, damage : int) :
         self.pv_cur -= damage
         if self.pv_cur <= 0 :
