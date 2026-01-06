@@ -52,4 +52,6 @@
 | US18 | Vérifier l'équilibre des niveaux                                                                | DAY5         | Faible   | TODO  |
 | US19 | Implémenter les niveaux                                                                         | DAY3         | Moyenne  | TODO  |
 | US20 | Mettre en place des pipelines de test sur Gitlab                                                | DAY2         | Moyenne  | DOING  |
+| US21 | Affichage TUI                                              | DAY2         | Haute  | DONE  |
+
 ## 4. Dette technique et améliorations futures
