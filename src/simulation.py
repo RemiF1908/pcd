@@ -1,4 +1,7 @@
-import os
+import os, time
+import VARIABLES as VAR
+from model.hero import Hero
+from model.dungeon import Dungeon
 from typing import List, Optional, Any, Dict
 
 # Use the project package path so imports work when running tests and
@@ -18,14 +21,14 @@ class Simulation:
 
     def __init__(
         self,
-        dungeon: Any = None,
+        dungeon: Dungeon = None,
         budget_tot: int = 0,
         score: int = 0,
         level: int = 1,
         nb_heroes: int = 0,
-        heroes: Optional[List[Any]] = None,
+        heroes: Optional[List[Hero]] = None,
         current_budget: int = 0,
-        PathFindingStrategy: Optional[Any] = None,
+
     ) -> None:
         self.dungeon = dungeon
         self.budget_tot = int(budget_tot)
@@ -34,11 +37,12 @@ class Simulation:
         self.nb_heroes = int(nb_heroes)
         self.heroes = list(heroes) if heroes else []
         self.current_budget = int(current_budget)
-        self.pathfinding = PathFindingStrategy
         self.ticks = 0
         self.running = False
+        self.tresorReached = False
+        self.allHeroesDead = False
 
-    def launch(self, steps: Optional[int] = None) -> Dict[str, Any]:
+    def launch(self) -> Dict[str, Any]:
         """Run the simulation loop.
 
         If `steps` is provided, run at most that many ticks. Otherwise
@@ -47,17 +51,19 @@ class Simulation:
         Returns a summary dict when finished.
         """
         self.running = True
-        executed = 0
-        while self.running:
-            if steps is not None and executed >= steps:
-                break
-            if self.stop_condition():
-                break
-            self.step()
-            executed += 1
+        count_awake_hero = 0
+        while not(self.tresorReached or self.allHeroesDead or not(self.running)):
+            if (count_awake_hero <= VAR.TOURBOUCLE_REVEIl_HERO * (self.nb_heroes - 1)):
+                if count_awake_hero % VAR.TOURBOUCLE_REVEIl_HERO == 0:
+                    self.heroes[count_awake_hero//VAR.TOURBOUCLE_REVEIl_HERO].awake()
+                count_awake_hero += 1
 
+            self.step()
+            time.sleep(0.5)
+            
+    def stop(self) -> None:
+        """Stop the simulation loop."""
         self.running = False
-        return self.summary()
 
     def step(self) -> None:
         """Advance the simulation by one tick.
@@ -80,15 +86,12 @@ class Simulation:
         # Let heroes act
         for h in list(self.heroes):
             try:
-                if hasattr(h, "act"):
-                    h.act(self)
+                nextMove = h.getMove()
+                if self.dungeon.validMove(nextMove) :
+                    h.move(nextMove)
+                    self.apply_cell_effects(h)
             except Exception:
-                # remove hero if it raised irrecoverably and has been flagged
-                try:
-                    if getattr(h, "dead", False):
-                        self.remove_hero(h)
-                except Exception:
-                    pass
+                print("illegal move")
 
         # Conservative bookkeeping: if dungeon exposes a score or budget
         # aggregator, prefer it. Otherwise little changes are performed
@@ -99,22 +102,7 @@ class Simulation:
         except Exception:
             pass
 
-        # Decrease budget slightly to simulate costs per tick if budget
-        # is present and positive.
-        if self.current_budget > 0:
-            self.current_budget = max(0, self.current_budget - 1)
 
-    def stop_condition(self) -> bool:
-        """Return True when the simulation should stop by default.
-
-        Default: stop when there are no heroes left or current budget
-        and total budget are both zero.
-        """
-        if len(self.heroes) == 0:
-            return True
-        if self.current_budget <= 0 and self.budget_tot <= 0:
-            return True
-        return False
 
     def add_hero(self, hero: Any) -> None:
         self.heroes.append(hero)
@@ -126,6 +114,12 @@ class Simulation:
         except ValueError:
             pass
         self.nb_heroes = len(self.heroes)
+
+    def apply_cell_effects(self, hero : Hero) :
+        coord = hero.getHero_coord()
+        cell = self.dungeon.get_cell(coord)
+        hero.take_damage(cell.get_damage())
+        
 
     def reset(self) -> None:
         self.ticks = 0
