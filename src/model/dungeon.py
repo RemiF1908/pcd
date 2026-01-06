@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from model.floor import Floor
-from model.wall import Wall
+from .floor import Floor
+from .wall import Wall
 
 from .cell import Cell
 

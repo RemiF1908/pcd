@@ -1,9 +1,9 @@
 class Hero : 
-    def __init__(self, pv_total, pv_cur, coord : tuple, strategy : str):
+    def __init__(self, pv_total, pv_cur, coord : tuple, strategy : str, isAlive=False):
         self.pv_total = pv_total
         self.pv_cur = pv_cur
         self.coord = coord
-        self.isAlive = False
+        self.isAlive = isAlive
         self.reachedGoal = False
         self.stepsTaken = 0
         self.path = None
