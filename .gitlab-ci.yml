@@ -18,4 +18,4 @@ test_job:
     - pip install -r requirements.txt
   
   script:
-    - python -m pytest -s 
+    - python -m pytest -s -v ./tests
