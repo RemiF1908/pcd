@@ -162,13 +162,17 @@ class LevelBuilder:
         return self
     
     def build(self) -> Level:
-        """Construit et retourne le niveau configuré."""
+        """Construit et retourne le niveau configuré.
+        s'assure que les coordonnées des héros sont celles de l'entrée du donjon """
+        if self._dungeon is not None:
+            for hero in self._heroes:
+                hero.coord = self._dungeon.entry
         return Level(
             budget_tot=self._budget_tot,
             dungeon=self._dungeon,
             difficulty=self._difficulty,
             nb_heroes=len(self._heroes),
-            heroes=self._heroes.copy()
+            heroes=self._heroes.copy(),
         )
     
     def reset(self) -> "LevelBuilder":
