@@ -1,5 +1,7 @@
 """Tests pour le Level Builder Pattern."""
 
+from src.model.cell import Cell
+from src.model.dungeon import Dungeon
 import pytest
 from src.model.level import Level, LevelBuilder
 from src.model.hero import Hero
@@ -161,22 +163,30 @@ def test_level_chaining_complete():
     level = (LevelBuilder()
         .set_difficulty(4)
         .set_budget(300)
-        .add_hero(pv=120, strategy="random")
+        .add_hero(pv=120, strategy="random",coord=(0,0))
         .add_hero(pv=100, strategy="shortest")
         .add_heroes(count=2, pv=80, strategy="random")
         .build())
-    
     assert level.difficulty == 4
     assert level.budget_tot == 300
     assert level.nb_heroes == 4
 
 
 def test_hero_default_coord_and_move():
-    """Vérifie que la coordonnée par défaut est None et que move() la met à jour."""
-    hero = Hero(pv_total=42, strategy="random")
-    # par défaut, aucune coord n'est assignée
-    assert hero.coord is None
-
+    """Test que les héros ont la coordonnée de l'entrée du donjon par défaut et peuvent se déplacer."""
+    hero = Hero(pv_total=42, strategy="random", coord=(5, 5))
+    assert hero.coord == (5, 5)
+    rows, cols = 12, 12
+    grid = [[Cell((r, c), None) for c in range(cols)] for r in range(rows)]
+    dungeon = Dungeon(dimension=(rows, cols), grid=grid, entry=(0, 0), exit=(rows-1, cols-1))
+    
+    level = (LevelBuilder()
+        .set_dungeon(dungeon=dungeon)
+        .set_difficulty(4)
+        .set_budget(300)
+        .add_hero_instance(hero)
+        .build())
     # déplacer le héros
+    assert(hero.coord == (dungeon.entry))
     hero.move((2, 3))
     assert hero.coord == (2, 3)

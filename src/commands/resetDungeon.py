@@ -1,4 +1,4 @@
-from commands.Command import Command
+from .Command import Command
 
 class resetDungeon(Command):
     """Commande pour réinitialiser le donjon."""

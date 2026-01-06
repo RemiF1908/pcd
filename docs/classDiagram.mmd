@@ -1,0 +1,273 @@
+classDiagram
+    class Entity {
+        <<Abstract>>
+        +type* str
+        +passable bool
+        +damage int
+        +attack_power int
+        +get_display_char()* str
+        +get_color_id()* int
+    }
+    
+    class Floor {
+        -_damage int
+        +type str
+        +passable bool
+        +damage int
+        +get_display_char() str
+        +get_color_id() int
+    }
+    
+    class Wall {
+        +type str
+        +passable bool
+        +damage int
+        +get_display_char() str
+        +get_color_id() int
+    }
+    
+    class Trap {
+        -_damage int
+        +type str
+        +passable bool
+        +damage int
+        +get_display_char() str
+        +get_color_id() int
+    }
+    
+    class Cell {
+        +coord tuple
+        +entity Entity
+        +position() tuple
+        +is_walkable() bool
+        +is_dangerous() bool
+        +get_damage() int
+    }
+    
+    class Dungeon {
+        +dimension tuple
+        +grid list~list~Cell~~
+        +entry tuple
+        +exit tuple
+        +get_cell(coord) Cell
+        +is_within_bounds(coord) bool
+        +is_Walkable(coord) bool
+        +validMove(coord) bool
+        +place_entity(entity, position)
+        +reset()
+    }
+    
+    class Hero {
+        +pv_total int
+        +pv_cur int
+        +coord tuple
+        +isAlive bool
+        +reachedGoal bool
+        +stepsTaken int
+        +path list
+        +strategy str
+        +awake()
+        +getHero_coord() tuple
+        +take_damage(damage)
+        +move(new_coord)
+        +getMove() tuple
+        +update(dungeon)
+        +compute_path(dungeon, start, goal)
+    }
+    
+    class EntityCreator {
+        <<Abstract>>
+        +factory_method()* Entity
+        +build() Entity
+    }
+    
+    class FloorCreator {
+        +factory_method() Floor
+    }
+    
+    class WallCreator {
+        +factory_method() Wall
+    }
+    
+    class TrapCreator {
+        -damage int
+        +factory_method() Trap
+    }
+    
+    class EntityFactory {
+        <<Static Facade>>
+        +create_floor() Floor
+        +create_wall() Wall
+        +create_trap(damage) Trap
+    }
+    class PathStrategy {
+        <<Interface>>
+        +find_path(dungeon, start, goal)* list
+    }
+    
+    class ShortestPathStrategy {
+        +find_path(dungeon, start, goal) list
+        -_heuristic(a, b) int
+        -_get_neighbors(dungeon, coord) list
+        -_reconstruct_path(came_from, current) list
+    }
+    
+    class SafestPathStrategy {
+        +find_path(dungeon, start, goal) list
+        -_get_neighbors(dungeon, coord) list
+        -_reconstruct_path(came_from, current) list
+    }
+    
+    class PathStrategyFactory {
+        -_strategies dict
+        +create(name) PathStrategy
+        +register_strategy(name, class)
+    }
+    
+    class Level {
+        +dungeon Dungeon
+        +budget_tot int
+        +difficulty int
+        +nb_heroes int
+        +heroes list~Hero~~
+        +level int
+        +add_hero(hero)
+        +remove_hero(hero)
+        +get_alive_heroes() list
+        +get_hero_positions() list
+        +awake_all_heroes()
+    }
+    
+    class LevelBuilder {
+        -_budget_tot int
+        -_difficulty int
+        -_heroes list
+        -_dungeon Dungeon
+        +set_dungeon(dungeon) LevelBuilder
+        +set_budget(budget) LevelBuilder
+        +set_difficulty(difficulty) LevelBuilder
+        +add_hero(pv, coord, strategy) LevelBuilder
+        +add_hero_instance(hero) LevelBuilder
+        +add_heroes(count, pv, start_coord, strategy) LevelBuilder
+        +build() Level
+        +reset() LevelBuilder
+    }
+    
+    class LevelPresets {
+        +easy(dungeon) Level
+        +medium(dungeon) Level
+        +hard(dungeon) Level
+        +custom(difficulty, budget, dungeon, hero_count, hero_pv, strategy) Level
+    }
+    
+    class Command {
+        <<Interface>>
+        +execute()*
+    }
+    
+    class placeEntity {
+        +execute(dungeon, entity, position)
+    }
+    
+    class removeEntity {
+        -dungeon Dungeon
+        -coord tuple
+        +execute()
+    }
+    
+    class resetDungeon {
+        +execute(dungeon)
+    }
+    
+    class startWave {
+        +execute(simulation)
+    }
+    
+    class stopWave {
+        +execute(simulation)
+    }
+    
+    class exportDungeon {
+        +execute(dungeon, filepath)
+    }
+    
+    class importDungeon {
+        +execute(filepath) str
+    }
+    
+    class GameInvoker {
+        +history list~Command~
+        +commandstack list~Command~
+        +execute()
+        +push_command(command)
+    }
+    
+    class Simulation {
+        +dungeon Dungeon
+        +budget_tot int
+        +score int
+        +level int
+        +nb_heroes int
+        +heroes list~Hero~~
+        +current_budget int
+        +ticks int
+        +running bool
+        +tresorReached bool
+        +allHeroesDead bool
+        +launch() dict
+        +stop()
+        +step()
+        +add_hero(hero)
+        +remove_hero(hero)
+        +apply_cell_effects(hero)
+        +reset()
+        +summary() dict
+    }
+    
+    class GameController {
+        +interface
+        +simulation Simulation
+        +start_wave()
+        +stop()
+    }
+    
+    class DungeonDisplay {
+        <<Module>>
+        +draw_dungeon(stdscr, dungeon, start_y, start_x, hero_positions)
+        +draw_legend(stdscr, start_y, start_x)
+        +draw_status(stdscr, start_y, start_x, info)
+        +display_dungeon(dungeon, hero_positions, status_info)
+    }
+    
+    Entity <|-- Floor
+    Entity <|-- Wall
+    Entity <|-- Trap
+    Cell *-- Entity : contains
+    Dungeon *-- Cell : contains
+    Dungeon o-- EntityCreator : uses
+    Simulation *-- Dungeon : uses
+    Simulation *-- Hero : manages
+    Hero --> PathStrategy : uses
+    EntityCreator <|-- FloorCreator
+    EntityCreator <|-- WallCreator
+    EntityCreator <|-- TrapCreator
+    EntityFactory --> FloorCreator : uses
+    EntityFactory --> WallCreator : uses
+    EntityFactory --> TrapCreator : uses
+    PathStrategy <|.. ShortestPathStrategy
+    PathStrategy <|.. SafestPathStrategy
+    PathStrategyFactory --> PathStrategy : creates
+    Hero --> PathStrategyFactory : uses
+    Level *-- Dungeon : contains
+    Level o-- Hero : manages
+    LevelBuilder --> Level : creates
+    LevelPresets --> LevelBuilder : uses
+    Command <|.. placeEntity
+    Command <|.. removeEntity
+    Command <|.. resetDungeon
+    Command <|.. startWave
+    Command <|.. stopWave
+    Command <|.. exportDungeon
+    Command <|.. importDungeon
+    GameInvoker *-- Command : executes
+    GameController *-- Simulation : orchestrates

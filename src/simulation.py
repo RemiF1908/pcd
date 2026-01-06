@@ -1,8 +1,7 @@
 import os, time
-from .VARIABLES import *
+from .config import *
 from .model.hero import Hero
 from .model.dungeon import Dungeon
-from .model.level import *
 from typing import List, Optional, Any, Dict
 
 # Use the project package path so imports work when running tests and
@@ -25,7 +24,6 @@ class Simulation:
         level: Level,
         dungeon: Dungeon = None,    
         score: int = 0,
-
     ) -> None:
         self.dungeon = dungeon
         self.score = int(score)
@@ -80,10 +78,10 @@ class Simulation:
         for h in list(self.heroes):
             try:
                 nextMove = h.getMove()
-                if self.dungeon.validMove(nextMove) :
-                    h.move(nextMove)
+                if self.dungeon.validMove(nextMove):
                     self.apply_cell_effects(h)
                     h.stepsTaken += 1
+                    h.move(nextMove)
             except Exception:
                 print("illegal move")
 
@@ -96,8 +94,6 @@ class Simulation:
         except Exception:
             pass
 
-
-
     def add_hero(self, hero: Any) -> None:
         self.heroes.append(hero)
         self.nb_heroes = len(self.heroes)
@@ -109,11 +105,10 @@ class Simulation:
             pass
         self.nb_heroes = len(self.heroes)
 
-    def apply_cell_effects(self, hero : Hero) :
+    def apply_cell_effects(self, hero: Hero):
         coord = hero.getHero_coord()
         cell = self.dungeon.get_cell(coord)
         hero.take_damage(cell.get_damage())
-        
 
     def reset(self) -> None:
         self.ticks = 0
@@ -140,5 +135,3 @@ class Simulation:
             f"Simulation(level={self.level}, ticks={self.ticks}, score={self.score}, "
             f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.budget_tot})"
         )
-
-
