@@ -23,7 +23,7 @@ class Hero :
     
     def move(self, new_coord : tuple) :
         self.coord = new_coord
-
+        
 
     def getMove(self) -> tuple : 
         return self.path[self.stepsTaken]

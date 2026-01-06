@@ -54,6 +54,7 @@ class Dungeon:
             cell = self.get_cell(position)
             cell.entity = entity
 
+    
     def reset(self) -> None:
         """Réinitialise le donjon en vidant toutes les cellules de leurs entités."""
         for row in self.grid:
