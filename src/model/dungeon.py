@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from .floor import Floor
 from .wall import Wall
-
 from .cell import Cell
 
 class Dungeon:

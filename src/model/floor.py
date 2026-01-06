@@ -6,7 +6,7 @@ from .entity import Entity
 class Floor(Entity):
     """Entité représentant un sol vide (case normale franchissable)."""
 
-    def __init__(self, damage: int = 0):
+    def __init__(self, damage: int = 0) -> None:
         self._damage = int(damage)
 
     @property
@@ -30,4 +30,4 @@ class Floor(Entity):
         return 1
 
     def __repr__(self) -> str:  
-        return "Floor()"
+        return f"Floor(damage={self._damage})"

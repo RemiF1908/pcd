@@ -28,9 +28,13 @@ class EntityFactory:
     """Factory centralisée pour créer toutes les entités du donjon."""
     
     @staticmethod
-    def create_floor() -> Floor:
-        """Créer une entité Floor (sol marchable)."""
-        return Floor()
+    def create_floor(damage: int = 0) -> Floor:
+        """Créer une entité Floor (sol marchable).
+        
+        Args:
+            damage: Dégâts infligés en marchant sur ce sol (par défaut 0)
+        """
+        return Floor(damage=damage)
     
     @staticmethod
     def create_wall() -> Wall:
