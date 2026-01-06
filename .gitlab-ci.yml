@@ -26,6 +26,10 @@ generer-pdf:
     name: minlag/mermaid-cli:latest
     entrypoint: [""]
   
+  rules:
+    - changes:
+        - docs/classDiagram.mmd
+  
   script:
     - mmdc -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
   
