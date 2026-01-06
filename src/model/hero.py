@@ -1,5 +1,8 @@
-class Hero : 
-    def __init__(self, pv_total, strategy : str, coord = None):
+from .path_strategies import PathStrategyFactory
+
+
+class Hero:
+    def __init__(self, pv_total, strategy: str, coord=None):
         self.pv_total = pv_total
         self.pv_cur = pv_total
         self.coord = coord
@@ -7,29 +10,33 @@ class Hero :
         self.reachedGoal = False
         self.stepsTaken = 0
         self.path = None
-        self.strategy = None
+        self.strategy = strategy
 
-    def awake(self) : 
+    def awake(self):
         self.isAlive = True
 
-    def getHero_coord(self) : 
+    def getHero_coord(self):
         return self.coord
 
-    def take_damage(self, damage : int) :
+    def take_damage(self, damage: int):
         self.pv_cur -= damage
-        if self.pv_cur <= 0 :
+        if self.pv_cur <= 0:
             self.isAlive = False
             self.pv_cur = 0
-    
-    def move(self, new_coord : tuple) :
+
+    def move(self, new_coord: tuple):
         self.coord = new_coord
 
-
-    def getMove(self) -> tuple : 
+    def getMove(self) -> tuple:
         return self.path[self.stepsTaken]
 
-    def update(self, dungeon) :
+    def update(self, dungeon):
         entity = dungeon.get_cell(self.coord).entity
         self.take_damage(entity.damage)
+
+    def compute_path(self, dungeon, start, goal):
+        """Compute path using the assigned strategy."""
+        path_strategy = PathStrategyFactory.create(self.strategy)
+        self.path = path_strategy.find_path(dungeon, start, goal)
 
     
