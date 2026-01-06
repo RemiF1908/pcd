@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from model.floor import Floor
+from model.wall import Wall
+
 from .cell import Cell
 
 class Dungeon:
@@ -23,6 +26,10 @@ class Dungeon:
         self.grid = grid
         self.entry = entry
         self.exit = exit
+
+        for row in self.grid:
+            for cell in row:
+                cell.entity = Floor()
     
     def get_cell(self, coord: tuple[int,int]) -> Cell:
         """Retourne la cellule aux coordonnées spécifiées."""
@@ -34,12 +41,25 @@ class Dungeon:
         row, col = coord
         return 0 <= row < self.dimension[0] and 0 <= col < self.dimension[1]
     
+    def is_Walkable(self, coord : tuple[int, int]) -> bool :
+        return not isinstance(Wall, self.get_cell(coord))
+
+    def validMove(self, coord) : 
+        return self.is_within_bounds(coord) and self.is_Walkable(coord)
+
     def place_entity(self, entity: object, position: tuple[int,int]) -> None:
         """Place une entité à la position spécifiée dans le donjon."""
         if self.is_within_bounds(position):
             cell = self.get_cell(position)
             cell.entity = entity
+
     
+    def reset(self) -> None:
+        """Réinitialise le donjon en vidant toutes les cellules de leurs entités."""
+        for row in self.grid:
+            for cell in row:
+                cell.entity = Floor()
+
     def __repr__(self) -> str:
         return f"Dungeon(dimension={self.dimension}, entry={self.entry}, exit={self.exit})"
     
