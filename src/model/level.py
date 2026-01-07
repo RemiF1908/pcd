@@ -44,6 +44,8 @@ class Level:
         self.heroes = list(heroes) if heroes else []
         self.nb_heroes = len(self.heroes)
         self.dungeon = dungeon
+        self.entry = self.dungeon.entry if self.dungeon else None
+        self.exit = self.dungeon.exit if self.dungeon else None
 
     @property
     def level(self) -> int:
@@ -185,8 +187,9 @@ class LevelBuilder:
         if self._dungeon:
             from .path_strategies import PathStrategyFactory
 
+            #Met les les héros à la position de l'entrée et calcule leur chemin
             for hero in level.heroes:
-                hero.coord = self._dungeon.entry
+                hero.coord = level.entry
                 # Only compute path if strategy is supported
                 try:
                     PathStrategyFactory.create(hero.strategy)
