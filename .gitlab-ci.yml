@@ -34,6 +34,7 @@ generer-pdf:
       allow_failure: true
   
   script:
+      - apk add --no-cache git
       - echo '{"executablePath":"/usr/bin/chromium-browser","args":["--no-sandbox"]}' > puppeteer-config.json
       - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
       - git config --global user.email "ci-bot@gitlab.com"
