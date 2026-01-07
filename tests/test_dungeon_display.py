@@ -14,8 +14,8 @@ from src.model.floor import Floor
 from src.model.wall import Wall
 from src.model.trap import Trap
 from src.model.entity_factory import EntityFactory
-from src.view.tui.dungeon_display import (
-    draw_dungeon,
+from src.view.tui.simulation_display import (
+    draw_simulation,
     draw_legend,
     _init_colors,
     TUIView,
@@ -221,6 +221,7 @@ def test_tui_view_creation():
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
+
     level = LevelPresets().easy(dungeon)
     simulation = Simulation(level, dungeon=dungeon)
 
@@ -312,7 +313,6 @@ def test_tui_view_update_methods():
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
-
 
     simulation = Simulation(None, dungeon=dungeon)
 
