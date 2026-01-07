@@ -8,6 +8,7 @@ from ..commands.placeEntity import placeEntity
 from ..commands.removeEntity import removeEntity
 from ..commands.exportDungeon import exportDungeon
 from ..commands.importDungeon import importDungeon
+from ..commands.getDungeonList import getDungeonList
 from ..model.entity_factory import EntityFactory
 from ..model.trap import Trap
 from ..model.wall import Wall
@@ -70,14 +71,14 @@ class GameController:
         self.invoker.push_command(command)
         self.invoker.execute()
 
-    def export_dungeon(self, filepath: str = "dungeon.json") -> None:
-        """Exporte le donjon dans un fichier JSON."""
-        command = exportDungeon(self.dungeon, filepath)
+    def export_dungeon(self, filename: str = "dungeon") -> None:
+        """Exporte le donjon dans un nom"""
+        command = exportDungeon(self.dungeon, filename)
         self.invoker.push_command(command)
         self.invoker.execute()
 
-    def import_dungeon(self, filepath: str = "dungeon.json"):
-        """Importe le donjon depuis un fichier JSON."""
+    def import_dungeon(self, filepath: str = "dungeon"):
+        """Importe le donjon depuis nom"""
         command = importDungeon(filepath)
         self.invoker.push_command(command)
         self.invoker.execute()
@@ -85,3 +86,10 @@ class GameController:
         if imported_dungeon:
             self.simulation.dungeon = imported_dungeon
         return imported_dungeon
+    
+    def getDungeonList(self):
+        """donne la liste des donjons sauvegardés"""
+        command = getDungeonList()
+        self.invoker.push_command(command)
+        self.invoker.execute()
+        return command.result

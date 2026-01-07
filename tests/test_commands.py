@@ -3,6 +3,7 @@
 import pytest
 import tempfile
 import os
+import json
 from unittest.mock import patch, MagicMock, mock_open
 from src.model.level import Level, LevelPresets
 from src.commands.Command import Command
@@ -13,6 +14,7 @@ from src.commands.stopWave import stopWave
 from src.commands.resetDungeon import resetDungeon
 from src.commands.exportDungeon import exportDungeon
 from src.commands.importDungeon import importDungeon
+from src.commands.getDungeonList import getDungeonList
 from src.commands.GameInvoker import GameInvoker
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
@@ -147,23 +149,29 @@ def test_reset_dungeon_command():
 
 def test_export_dungeon_command():
     """Test la commande exportDungeon."""
-    dungeon = create_test_dungeon()
+    dungeon = create_test_dungeon() 
 
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        filepath = f.name
+    filename = "test_dungeon_export"
+    
+    expected_filepath = f"./save/{filename}.json"
 
     try:
-        command = exportDungeon(dungeon, filepath)
+        command = exportDungeon(dungeon, filename)
         command.execute()
 
-        with open(filepath, "r") as f:
-            content = f.read()
+        assert os.path.exists(expected_filepath), f"Le fichier {expected_filepath} n'a pas été créé"
+
+        with open(expected_filepath, "r") as f:
+            content = json.load(f)
 
         assert content is not None
         assert "dimension" in content
+        assert content["dimension"] == list(dungeon.dimension) # Convert tuple to list for JSON comparison
+
     finally:
-        if os.path.exists(filepath):
-            os.unlink(filepath)
+        # Nettoyage
+        if os.path.exists(expected_filepath):
+            os.unlink(expected_filepath)
 
 
 def test_import_dungeon_command():
@@ -181,12 +189,13 @@ def test_import_dungeon_command():
     controller.place_trap((2, 2), damage=20)
     controller.place_wall((3, 3))
 
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        filepath = f.name
+    filename = "test_dungeon_export"
+    
+    expected_filepath = f"./save/{filename}.json"
 
     try:
-        controller.export_dungeon(filepath)
-        imported_dungeon = controller.import_dungeon(filepath)
+        controller.export_dungeon(filename)
+        imported_dungeon = controller.import_dungeon(filename)
 
         assert imported_dungeon is not None
         assert imported_dungeon.dimension == dungeon.dimension
@@ -200,9 +209,25 @@ def test_import_dungeon_command():
         cell = imported_dungeon.get_cell((3, 3))
         assert isinstance(cell.entity, Wall)
     finally:
-        if os.path.exists(filepath):
-            os.unlink(filepath)
+        if os.path.exists(expected_filepath):
+            os.unlink(expected_filepath)
 
+def test_getDungeonList_command():
+    """Test la commande getDungeonList."""
+
+    with tempfile.TemporaryDirectory() as tempdir:
+        filenames = ["dungeon1.json", "dungeon2.json"] 
+        
+        for fname in filenames:
+            with open(os.path.join(tempdir, fname), "w") as f:
+                f.write("{}")
+
+        command = getDungeonList()
+        command.save_directory = tempdir
+        command.execute()
+
+        expected_dungeons = ["dungeon1", "dungeon2"]
+        assert sorted(command.result) == sorted(expected_dungeons)
 
 def test_game_invoker_initialization():
     """Test l'initialisation de GameInvoker."""
