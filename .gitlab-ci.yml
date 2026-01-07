@@ -24,7 +24,7 @@ test_job:
 generer-pdf:
   stage: build
   image: 
-    name: minlag/mermaid-cli:latest
+    name: minlag/mermaid-cli:10.8.0
     entrypoint: [""]
   
   rules:
@@ -34,7 +34,7 @@ generer-pdf:
       allow_failure: true
   
   script:
-    - echo '{"args":["--no-sandbox"]}' > puppeteer-config.json
+    - echo '{"args":["--no-sandbox", "--disable-setuid-sandbox"]}' > puppeteer-config.json
     - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
   
   artifacts:
