@@ -44,6 +44,8 @@ class Level:
         self.heroes = list(heroes) if heroes else []
         self.nb_heroes = len(self.heroes)
         self.dungeon = dungeon
+        self.entry = self.dungeon.entry if self.dungeon else None
+        self.exit = self.dungeon.exit if self.dungeon else None
 
     @property
     def level(self) -> int:
@@ -61,9 +63,22 @@ class Level:
             self.heroes.remove(hero)
             self.nb_heroes = len(self.heroes)
 
+    def awake_hero(self, hero : Hero) : 
+        hero.isAlive = True
+    
     def get_alive_heroes(self) -> List[Hero]:
         """Retourne la liste des héros encore en vie."""
         return [h for h in self.heroes if h.isAlive]
+    
+    def get_nb_killed_heroes(self) -> int:
+        """Retourne la liste des héros tués."""
+        return len([h for h in self.heroes if not h.isAlive])
+
+    def get_nb_heroes(self) -> int :
+        return self.nb_heroes
+
+    def get_sum_HP(self) -> int :
+        return sum([hero.pv_total for hero in self.heroes])
 
     def get_hero_positions(self) -> List[tuple]:
         """Retourne les positions de tous les héros vivants."""
@@ -130,11 +145,13 @@ class LevelBuilder:
         # Hero signature: Hero(pv_total, strategy, coord=None)
         hero = Hero(pv, strategy, coord=coord)
         self._heroes.append(hero)
+        self._nb_heroes += 1
         return self
 
     def add_hero_instance(self, hero: Hero) -> "LevelBuilder":
         """Ajoute une instance de Hero existante."""
         self._heroes.append(hero)
+        self._nb_heroes += 1
         return self
 
     def add_heroes(
@@ -172,8 +189,9 @@ class LevelBuilder:
         if self._dungeon:
             from .path_strategies import PathStrategyFactory
 
+            #Met les les héros à la position de l'entrée et calcule leur chemin
             for hero in level.heroes:
-                hero.coord = self._dungeon.entry
+                hero.coord = level.entry
                 # Only compute path if strategy is supported
                 try:
                     PathStrategyFactory.create(hero.strategy)

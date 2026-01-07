@@ -37,7 +37,7 @@
 | US3  | Réflechir à une librairie UI                                                                    | DAY1         | Haute    | DONE  |
 | US4  | Implémentation de donjon                                                                        | DAY1         | Moyenne  | DONE  |
 | US5  | Implémenter les entités de base                                                                 | DAY1         | Moyenne  | DONE  |
-| US6  | Choisir les algorithmes d'IA                                                                    | DAY2         | Haute    | DOING  |
+| US6  | Choisir les algorithmes d'IA                                                                    | DAY2         | Haute    | DONE  |
 | US7  | Choisir une fonction de scoring                                                                 | DAY2         | Moyenne  | DOING  |
 | US8  | Croquis de l'UI                                                                                 | DAY3         | Moyenne  | TODO  |
 | US9  | En tant que joueur sur le TUI je dois pouvoir placer/retirer des objets sur la map              | DAY2         | Haute    | DOING  |
@@ -46,10 +46,13 @@
 | US12 | En tant que joueur sur le WEB je dois pouvoir choisir l'algorithme de pathfinding               | DAY4         | Moyenne  | TODO  |
 | US13 | Exportation de la configuration du donjon                                                       | DAY4         | Faible   | TODO  |
 | US14 | gestion des niveaux avec 3 modes (facile choix libre, normal avec checkpoint, expert sans mort) | DAY5         | Faible   | TODO  |
-| US15 | Choix des boutons pour l'utilisateur (réinitialiser vague, quitter etc)                         | DAY2         | Haute    | DOING  |
+| US15 | Choix des boutons pour l'utilisateur (réinitialiser vague, quitter etc)                         | DAY2         | Haute    | DONE  |
 | US16 | Système d'avancement de tour                                                                    | DAY2         | Haute    | DOING  |
 | US17 | Chargement de donjon                                                                            | DAY4         | Moyenne  | TODO  |
 | US18 | Vérifier l'équilibre des niveaux                                                                | DAY5         | Faible   | TODO  |
-| US19 | Implémenter les niveaux                                                                         | DAY3         | Moyenne  | TODO  |
-| US20 | Mettre en place des pipelines de test sur Gitlab                                                | DAY2         | Moyenne  | DOING  |
+| US19 | Implémenter les niveaux                                                                         | DAY3         | Moyenne  | DOING  |
+| US20 | Mettre en place des pipelines de test sur Gitlab                                                | DAY2         | Moyenne  | DONE  |
+| US21 | Affichage TUI                                              | DAY2         | Haute  | DONE  |
+
 ## 4. Dette technique et améliorations futures
+

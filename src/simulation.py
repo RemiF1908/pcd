@@ -1,7 +1,11 @@
 import os, time
 from .config import *
 from .model.hero import Hero
+from .model.waveResult import waveResult
 from .model.dungeon import Dungeon
+from .model.level import Level
+from .observers.Observer import Observer
+from .observers.DamageObserver import DamageObserver
 from typing import List, Optional, Any, Dict
 
 # Use the project package path so imports work when running tests and
@@ -21,44 +25,39 @@ class Simulation:
 
     def __init__(
         self,
-        dungeon: Dungeon = None,
-        budget_tot: int = 0,
-        score: int = 0,
-        level: int = 1,
-        nb_heroes: int = 0,
-        heroes: Optional[List[Hero]] = None,
-        current_budget: int = 0,
+        level: Level,
+        dungeon: Dungeon = None,    
+
     ) -> None:
         self.dungeon = dungeon
-        self.budget_tot = int(budget_tot)
-        self.score = int(score)
-        self.level = int(level)
-        self.nb_heroes = int(nb_heroes)
-        self.heroes = list(heroes) if heroes else []
-        self.current_budget = int(current_budget)
+        self.score = 0
+        self.level = level
+        self.heroes = self.level.heroes if self.level else []
+        self.current_budget = self.level.budget_tot if self.level else 0
         self.ticks = 0
         self.running = False
         self.tresorReached = False
         self.allHeroesDead = False
 
-    def launch(self) -> Dict[str, Any]:
-        """Run the simulation loop.
+        self.dmgobserver = DamageObserver()
 
-        If `steps` is provided, run at most that many ticks. Otherwise
-        run until `stop_condition()` returns True (by default it stops
-        when there are no heroes or budget is exhausted).
-        Returns a summary dict when finished.
+    def launch(self) -> Dict[str, Any]:
+        """Launch the simulation loop.
+
+        Awake a hero every TOURBOUCLE x round
         """
         self.running = True
         count_awake_hero = 0
-        while not (self.tresorReached or self.allHeroesDead or not (self.running)):
-            if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.nb_heroes - 1):
+        while not(self.tresorReached or self.allHeroesDead or not(self.running)):
+            if (count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1)):
                 if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
-                    self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
+                    self.heroes[count_awake_hero//TOURBOUCLE_REVEIl_HERO].awake()
                 count_awake_hero += 1
 
             self.step()
+    
             time.sleep(0.5)
+        return waveResult.from_simulation(self).to_dict()
 
     def stop(self) -> None:
         """Stop the simulation loop."""
@@ -74,7 +73,6 @@ class Simulation:
         corresponding information.
         """
         self.ticks += 1
-
         # Let dungeon perform an update if available
         try:
             if self.dungeon and hasattr(self.dungeon, "update"):
@@ -84,13 +82,18 @@ class Simulation:
 
         # Let heroes act
         for h in list(self.heroes):
-            try:
-                nextMove = h.getMove()
-                if self.dungeon.validMove(nextMove):
-                    self.apply_cell_effects(h)
-                    h.move(nextMove)
-            except Exception:
-                print("illegal move")
+            if h.isAlive :
+                try:
+                    nextMove = h.getMove()
+                    if self.dungeon.validMove(nextMove):
+                        h.move(nextMove)
+                        damage = self.apply_cell_effects(h)
+                        self.notifyDamageObserver(damage)
+    
+                        if self.check_on_treasure(h) :
+                            print("Treasure reached!")
+                except Exception:
+                    print("illegal move")
 
         # Conservative bookkeeping: if dungeon exposes a score or budget
         # aggregator, prefer it. Otherwise little changes are performed
@@ -101,26 +104,49 @@ class Simulation:
         except Exception:
             pass
 
-    def add_hero(self, hero: Any) -> None:
-        self.heroes.append(hero)
-        self.nb_heroes = len(self.heroes)
 
-    def remove_hero(self, hero: Any) -> None:
-        try:
-            self.heroes.remove(hero)
-        except ValueError:
-            pass
-        self.nb_heroes = len(self.heroes)
+    def check_on_treasure(self, hero : Hero) -> bool :
+        if hero.coord == self.dungeon.treasure_coord :
+            self.tresorReached = True
+            return True
+        return False
 
     def apply_cell_effects(self, hero: Hero):
         coord = hero.getHero_coord()
         cell = self.dungeon.get_cell(coord)
         hero.take_damage(cell.get_damage())
+        return cell.get_damage()
+
+    def notifyDamageObserver(self, dmg : int) :
+        self.dmgobserver.update(dmg)
+
+    def score(self) : 
+        """
+        Fonction de calcul de score
+        
+        Plus la wave dure longtemps, moins le score sera élevé. Des héros tués rapportent beaucoup de points.
+        Le budget dépensé fait office de coefficient
+        En moyenne on fera maximum Width*Height ticks pour une wave
+        """
+
+        timescore = self.ticks / (WIDTH * HEIGHT)
+        killscore = self.level.get_nb_killed_heroes() / self.level.get_nb_heroes() 
+        damagescore = self.dmgobserver.getTotalDmg() / self.level.get_sum_HP()
+        treasurePenalty = int(self.tresorReached)
+        alpha = 0.30
+        beta = 0.45
+        gamma = 0.25
+        eta = 0.9
+
+        score = (alpha * timescore + beta * killscore + gamma * damagescore ) * (1 - eta * treasurePenalty) #entre 0 et 1
+        MAX_SCORE = 10000
+        return round(score * MAX_SCORE)
+
 
     def reset(self) -> None:
         self.ticks = 0
         self.score = 0
-        self.current_budget = self.budget_tot
+        self.current_budget = self.level.budget_tot
         self.running = False
         try:
             if self.dungeon and hasattr(self.dungeon, "reset"):
@@ -128,17 +154,10 @@ class Simulation:
         except Exception:
             pass
 
-    def summary(self) -> Dict[str, Any]:
-        return {
-            "ticks": self.ticks,
-            "score": self.score,
-            "level": self.level,
-            "nb_heroes": self.nb_heroes,
-            "current_budget": self.current_budget,
-        }
+    
 
     def __repr__(self) -> str:
         return (
-            f"Simulation(level={self.level}, ticks={self.ticks}, score={self.score}, "
-            f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.budget_tot})"
+            f"Simulation(level={self.level.difficulty}, ticks={self.ticks}, score={self.score}, "
+            f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.level.budget_tot})"
         )

@@ -22,9 +22,10 @@ class Dungeon:
     def __init__(
         self,
         dimension: tuple[int, int],
-        grid: list[list[Cell]],
         entry: tuple[int, int],
         exit: tuple[int, int],
+        grid: list[list[Cell]] = None,
+
     ):
         """
         Initialise un donjon avec des dimensions, une grille de cellules, une entrée et une sortie.
@@ -33,10 +34,16 @@ class Dungeon:
         self.grid = grid
         self.entry = entry
         self.exit = exit
+        if self.grid is None:
+            self.grid = self.blank_grid(dimension[0], dimension[1])
 
         for row in self.grid:
             for cell in row:
                 cell.entity = FloorCreator().build()
+
+    def blank_grid(self, rows, cols) -> None:
+        """Crée une grille vide de cellules."""
+        return [[Cell((r, c), Floor()) for c in range(cols)] for r in range(rows)]
 
     def get_cell(self, coord: tuple[int, int]) -> Cell:
         """Retourne la cellule aux coordonnées spécifiées."""
@@ -60,7 +67,7 @@ class Dungeon:
         if self.is_within_bounds(position):
             cell = self.get_cell(position)
             cell.entity = entity
-
+    
     def reset(self) -> None:
         """Réinitialise le donjon en vidant toutes les cellules de leurs entités."""
         for row in self.grid:
