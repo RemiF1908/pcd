@@ -65,13 +65,13 @@ class Legend:
     """Légende des symboles du donjon."""
 
     ENTRIES = [
-        LegendEntry(". ", "Floor", ColorPair.FLOOR),
-        LegendEntry("# ", "Wall", ColorPair.WALL),
-        LegendEntry("^ ", "Trap", ColorPair.TRAP),
-        LegendEntry("M ", "Monster", ColorPair.MONSTER),
-        LegendEntry("E ", "Entrance", ColorPair.ENTRANCE),
-        LegendEntry("S ", "Exit", ColorPair.EXIT),
-        LegendEntry("@ ", "Hero", ColorPair.HERO),
+        LegendEntry(".", "Floor", ColorPair.FLOOR),
+        LegendEntry("#", "Wall", ColorPair.WALL),
+        LegendEntry("^", "Trap", ColorPair.TRAP),
+        LegendEntry("M", "Monster", ColorPair.MONSTER),
+        LegendEntry("E", "Entrance", ColorPair.ENTRANCE),
+        LegendEntry("S", "Exit", ColorPair.EXIT),
+        LegendEntry("@", "Hero", ColorPair.HERO),
     ]
 
     @classmethod
@@ -169,7 +169,13 @@ def draw_dungeon(
         for col in range(cols):
             pos = (row, col)
             symbol, color_pair = _get_cell_display(dungeon, pos, hero_set)
-            _draw_char(stdscr, start_y + row, start_x + col * 2, symbol, color_pair)
+            _draw_str(
+                stdscr,
+                start_y + row,
+                start_x + col * 2,
+                symbol,
+                curses.color_pair(color_pair),
+            )
 
 
 def draw_legend(stdscr, start_y: int, start_x: int) -> None:
