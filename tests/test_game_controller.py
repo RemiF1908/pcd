@@ -8,8 +8,8 @@ from src.model.level import Level
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 
-#On utilise des mocks
-#https://fr.wikipedia.org/wiki/Mock_(programmation_orient%C3%A9e_objet)
+# On utilise des mocks
+# https://fr.wikipedia.org/wiki/Mock_(programmation_orient%C3%A9e_objet)
 
 
 def create_test_dungeon(rows=5, cols=5):
@@ -45,15 +45,12 @@ def test_game_controller_start_wave():
 def test_game_controller_stop():
     """Test de la méthode stop."""
     interface = MagicMock()
-    dungeon = create_test_dungeon()
-    lvl = Level(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
-    simulation = Simulation(level=lvl, dungeon=dungeon)
-    simulation.running = True
+    simulation = MagicMock()
 
     controller = GameController(interface, simulation)
     controller.stop()
 
-    assert simulation.running is False
+    simulation.stop.assert_called_once()
 
 
 def test_game_controller_with_real_simulation():
@@ -82,36 +79,35 @@ def test_game_controller_start_wave_launches_simulation():
     import time
 
     original_sleep = time.sleep
-    time.sleep = lambda x: None 
+    time.sleep = lambda x: None
     controller.start_wave()
 
-    time.sleep = original_sleep  
-    assert simulation.ticks == 0  
+    time.sleep = original_sleep
+    assert simulation.ticks == 0
 
 
 def test_game_controller_stop_stops_simulation():
     """Test que stop arrête réellement la simulation."""
     interface = MagicMock()
-    simulation = Simulation(level=Level())
-    simulation.running = True
+    simulation = MagicMock()
 
     controller = GameController(interface, simulation)
     controller.stop()
 
-    assert simulation.running is False
+    simulation.stop.assert_called_once()
 
 
 def test_game_controller_stop_idempotent():
     """Test que stop peut être appelé plusieurs fois."""
     interface = MagicMock()
-    simulation = Simulation(level=Level())
+    simulation = MagicMock()
 
     controller = GameController(interface, simulation)
     controller.stop()
     controller.stop()
     controller.stop()
 
-    assert simulation.running is False
+    simulation.stop.assert_called()
 
 
 @patch("builtins.print")

@@ -22,9 +22,10 @@ class Dungeon:
     def __init__(
         self,
         dimension: tuple[int, int],
-        grid: list[list[Cell]],
         entry: tuple[int, int],
         exit: tuple[int, int],
+        grid: list[list[Cell]] = None,
+
     ):
         """
         Initialise un donjon avec des dimensions, une grille de cellules, une entrée et une sortie.
@@ -33,6 +34,8 @@ class Dungeon:
         self.grid = grid
         self.entry = entry
         self.exit = exit
+        if self.grid is None:
+            self.grid = self.blank_grid(dimension[0], dimension[1])
 
         for row in self.grid:
             for cell in row:

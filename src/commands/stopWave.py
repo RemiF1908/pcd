@@ -2,12 +2,13 @@ from .Command import Command
 
 
 class stopWave(Command):
-	"""Command to stop a running simulation."""
+    """Command to stop a running simulation."""
 
-	def execute(self, simulation):
-		try:
-			simulation.running = False
-			print("Wave stopped")
-		except Exception:
-			print("Failed to stop simulation: invalid object")
+    def __init__(self, simulation):
+        self.simulation = simulation
 
+    def execute(self):
+        try:
+            self.simulation.stop()
+        except Exception:
+            print("Failed to stop simulation: invalid object")

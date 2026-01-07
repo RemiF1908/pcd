@@ -3,6 +3,7 @@ image: python:3.11
 stages:
   - test
   - build
+  - deploy
 
 
 variables:
@@ -26,18 +27,40 @@ generer-pdf:
   image: 
     name: minlag/mermaid-cli:10.8.0
     entrypoint: [""]
-  
   rules:
     - changes:
         - docs/classDiagram.mmd
     - when: manual
       allow_failure: true
-  
+
   script:
     - echo '{"executablePath":"/usr/bin/chromium-browser","args":["--no-sandbox"]}' > puppeteer-config.json
     - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
-  
   artifacts:
     paths:
       - docs/classDiagram.pdf
-    expire_in: 1 week
+    expire_in: 1 day
+
+push-pdf:
+  stage: deploy
+  image: bitnami/git:latest
+  needs: ["generer-pdf"] 
+  rules:
+    - changes:
+        - docs/classDiagram.mmd
+    - when: manual
+      allow_failure: true
+  script:
+    - git config --global user.email "ci-bot@gitlab.com"
+    - git config --global user.name "Mermaid Bot"
+    
+    - git add docs/classDiagram.pdf
+    
+    - |-
+      if [[ -n $(git status -s) ]]; then
+        echo "Changement détecté, envoi vers GitLab..."
+        git commit -m "Auto-update class diagram PDF [skip ci]"
+        git push https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+      else
+        echo "Rien à commiter."
+      fi
