@@ -42,6 +42,9 @@ push-pdf:
   stage: deploy
   image: bitnami/git:latest
   needs: ["generer-pdf"] 
+  rules:
+    - changes:
+        - docs/classDiagram.mmd
   script:
     - git config --global user.email "ci-bot@gitlab.com"
     - git config --global user.name "Mermaid Bot"
