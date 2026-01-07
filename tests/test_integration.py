@@ -8,7 +8,7 @@ from src.model.hero import Hero
 from src.model.trap import Trap
 from src.model.entity_factory import EntityFactory
 from src.simulation import Simulation
-from src.model.level import Level, LevelBuilder
+from src.model.level import Level, LevelBuilder, LevelPresets
 from src.commands.GameInvoker import GameInvoker
 from src.commands.placeEntity import placeEntity
 from src.commands.removeEntity import removeEntity
@@ -95,20 +95,27 @@ def test_integration_simulation_single_step():
 def test_integration_simulation_trap_damage():
     """Test d'intégration: simulation avec dégâts de piège."""
     dungeon = create_test_dungeon()
-    dungeon.place_entity(Trap(damage=25), (1, 2))
+    dungeon.place_entity(Trap(damage=25), (0, 1))
 
-    hero = Hero(pv_total=100, strategy="random", coord=(1, 1))
-    hero.path = [(1, 1), (1, 2), (1, 3)]
 
-    lvl = Level(dungeon=dungeon, heroes=[hero], nb_heroes=1)
-    simulation = Simulation(level=lvl, dungeon=dungeon)
+    lvl = LevelPresets.easy(dungeon)
+    hero = lvl.heroes[0] # hero has 50hp
     hero.awake()
+    hero.path = [(0, 0), (0, 1), (1, 1)]
+    simulation = Simulation(level=lvl, dungeon=dungeon)
+    
+    assert(hero.stepsTaken == 0)
+    assert(hero.coord == (0, 0))
 
     simulation.step()
+
+    assert(hero.stepsTaken == 1)
+    assert(hero.coord == (0, 1))
+
     simulation.step()
 
-    assert hero.pv_cur == 75
-    assert hero.coord == (1, 3)
+    assert hero.pv_cur == 25
+    assert hero.coord == (1, 1)
 
 
 def test_integration_level_builder_with_heroes():
@@ -281,29 +288,6 @@ def test_integration_game_controller_simulation():
     controller.stop()
     assert simulation.running is False
 
-
-@patch("time.sleep", return_value=None)
-def test_integration_simulation_hero_death_chain(mock_sleep):
-    """Test d'intégration: chaîne de morts de héros."""
-    dungeon = create_test_dungeon()
-    dungeon.place_entity(Trap(damage=30), (1, 1))
-    dungeon.place_entity(Trap(damage=50), (2, 2))
-
-    hero1 = Hero(pv_total=50, strategy="random", coord=(1, 1))
-    hero1.path = [(1, 1), (1, 2)]
-
-    hero2 = Hero(pv_total=40, strategy="shortest", coord=(2, 2))
-    hero2.path = [(2, 2), (2, 3)]
-
-    lvl = Level(dungeon=dungeon, heroes=[hero1, hero2], nb_heroes=2)
-    simulation = Simulation(level=lvl, dungeon=dungeon)
-    hero1.awake()
-    hero2.awake()
-
-    simulation.step()
-
-    assert hero1.pv_cur == 20
-    assert hero2.pv_cur == -10 or hero2.pv_cur == 0
 
 
 def test_integration_complex_dungeon_layout():

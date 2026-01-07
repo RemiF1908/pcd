@@ -4,6 +4,7 @@ import pytest
 import tempfile
 import os
 from unittest.mock import patch, MagicMock, mock_open
+from src.model.level import Level, LevelPresets
 from src.commands.Command import Command
 from src.commands.placeEntity import placeEntity
 from src.commands.removeEntity import removeEntity
@@ -171,7 +172,8 @@ def test_import_dungeon_command():
     from src.simulation import Simulation
 
     dungeon = create_test_dungeon()
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
     interface = MagicMock()
 
     controller = GameController(interface, simulation)

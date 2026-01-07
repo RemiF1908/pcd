@@ -7,6 +7,7 @@ Lancer avec: pytest tests/test_dungeon_display.py -s
 import sys
 import curses
 import pytest
+from src.model.level import LevelPresets
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.floor import Floor
@@ -220,8 +221,9 @@ def test_tui_view_creation():
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -247,7 +249,9 @@ def test_tui_view_cursor_movement():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -281,7 +285,9 @@ def test_tui_view_key_bindings():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -307,7 +313,9 @@ def test_tui_view_update_methods():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+
+    simulation = Simulation(None, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -328,7 +336,9 @@ def test_tui_view_place_entity():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -357,7 +367,9 @@ def test_tui_view_remove_entity():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
@@ -383,7 +395,9 @@ def test_tui_view_controller_integration():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
+
     gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 

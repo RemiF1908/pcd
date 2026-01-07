@@ -8,23 +8,27 @@ from src.model.hero import Hero
 
 
 def make_empty_dungeon(rows=2, cols=2):
-    grid = [[Cell((r, c), None) for c in range(cols)] for r in range(rows)]
-    return Dungeon((rows, cols), grid, (0, 0), (rows - 1, cols - 1))
+    grid = [[Cell((r, c), Floor()) for c in range(cols)] for r in range(rows)]
+    return Dungeon((rows, cols), (0, 0), (rows - 1, cols - 1), grid=grid)
 
 
 def test_add_and_remove_hero_updates_count():
-    sim = Simulation(level=Level())
-    h = Hero(pv_total=10, strategy="none", coord=(0, 0))
+    from src.model.level import LevelBuilder
+
+    builder = LevelBuilder()
+    builder.add_hero(pv=10, coord=(0, 0), strategy="none")
+    lvl = builder.build()
+    sim = Simulation(level=lvl)
+
+    h = sim.heroes[0]
     h.awake()
 
-    sim.add_hero(h)
     assert h in sim.heroes
-    assert sim.nb_heroes == 1
+    assert sim.level.nb_heroes == 1
 
-    sim.remove_hero(h)
+    sim.level.remove_hero(h)
     assert h not in sim.heroes
-    assert sim.nb_heroes == 0
-
+    assert sim.level.nb_heroes == 0
 
 def test_apply_cell_effects_reduces_hero_hp_and_marks_dead():
     dungeon = make_empty_dungeon(2, 2)

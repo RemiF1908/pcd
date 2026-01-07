@@ -27,13 +27,13 @@ class Simulation:
         self,
         level: Level,
         dungeon: Dungeon = None,    
-        score: int = 0,
+
     ) -> None:
         self.dungeon = dungeon
-        self.score = int(score)
+        self.score = 0
         self.level = level
-        self.heroes = self.level.heroes
-        self.current_budget = self.level.budget_tot
+        self.heroes = self.level.heroes if self.level else []
+        self.current_budget = self.level.budget_tot if self.level else 0
         self.ticks = 0
         self.running = False
         self.tresorReached = False
@@ -49,13 +49,13 @@ class Simulation:
         self.running = True
         count_awake_hero = 0
         while not(self.tresorReached or self.allHeroesDead or not(self.running)):
-            if (count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.nb_heroes - 1)):
+            if (count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1)):
                 if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
                     self.heroes[count_awake_hero//TOURBOUCLE_REVEIl_HERO].awake()
                 count_awake_hero += 1
 
             self.step()
-            self.ticks += 1
+    
             time.sleep(0.5)
         return waveResult.from_simulation(self).to_dict()
 
@@ -72,7 +72,7 @@ class Simulation:
         `score` or `current_budget` if the provided objects expose the
         corresponding information.
         """
-
+        self.ticks += 1
         # Let dungeon perform an update if available
         try:
             if self.dungeon and hasattr(self.dungeon, "update"):
@@ -86,7 +86,6 @@ class Simulation:
                 try:
                     nextMove = h.getMove()
                     if self.dungeon.validMove(nextMove):
-                        h.stepsTaken += 1
                         h.move(nextMove)
                         damage = self.apply_cell_effects(h)
                         self.notifyDamageObserver(damage)
@@ -147,7 +146,7 @@ class Simulation:
     def reset(self) -> None:
         self.ticks = 0
         self.score = 0
-        self.current_budget = self.budget_tot
+        self.current_budget = self.level.budget_tot
         self.running = False
         try:
             if self.dungeon and hasattr(self.dungeon, "reset"):
@@ -159,6 +158,6 @@ class Simulation:
 
     def __repr__(self) -> str:
         return (
-            f"Simulation(level={self.level}, ticks={self.ticks}, score={self.score}, "
-            f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.budget_tot})"
+            f"Simulation(level={self.level.difficulty}, ticks={self.ticks}, score={self.score}, "
+            f"heroes={len(self.heroes)}, budget={self.current_budget}/{self.level.budget_tot})"
         )
