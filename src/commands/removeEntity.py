@@ -8,7 +8,7 @@ class removeEntity(Command):
         self.dungeon = dungeon
         self.coord = coord
 
-    def execute(self):
+    def execute(self, game_controller):
         cell = self.dungeon.get_cell(self.coord)
         if not isinstance(cell.entity, Floor):
             cell.entity = Floor()

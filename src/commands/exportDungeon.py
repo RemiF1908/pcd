@@ -7,7 +7,8 @@ class exportDungeon(Command):
         self.dungeon = dungeon
         self.filename = filename
         self.filepath="./save/"+filename + ".json"
-    def execute(self):
+
+    def execute(self, game_controller):
         dungeon_data = {
             "dimension": self.dungeon.dimension,
             "entry": self.dungeon.entry,

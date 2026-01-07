@@ -11,6 +11,24 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable
 import curses
+from src.commands import *
+from src.commands.GameInvoker import GameInvoker
+from src.commands.startWave import startWave
+from src.commands.stopWave import stopWave
+from src.commands.resetDungeon import resetDungeon
+from src.commands.placeEntity import placeEntity
+from src.commands.removeEntity import removeEntity
+from src.commands.exportDungeon import exportDungeon
+from src.commands.importDungeon import importDungeon
+from src.model.entity_factory import EntityFactory
+from src.commands.startWave import startWave
+from src.commands.stopWave import stopWave
+from src.commands.resetDungeon import resetDungeon
+from src.commands.placeEntity import placeEntity
+from src.commands.removeEntity import removeEntity
+from src.commands.exportDungeon import exportDungeon
+from src.commands.importDungeon import importDungeon
+from src.model.entity_factory import EntityFactory
 
 
 class ColorPair(Enum):
@@ -133,6 +151,24 @@ def _init_colors() -> None:
     curses.init_pair(6, curses.COLOR_CYAN, -1)
     # Paire 7 : Héros (jaune)
     curses.init_pair(7, curses.COLOR_YELLOW, -1)
+
+
+def _get_cell_display(
+    dungeon, pos: tuple[int, int], hero_set: set[tuple[int, int]]
+) -> tuple[str, int]:
+    """Détermine le symbole et la couleur pour une cellule."""
+    if pos in hero_set:
+        return Legend.get_symbol_for("HERO"), ColorPair.HERO.value
+    if pos == dungeon.entry:
+        return Legend.get_symbol_for("ENTRANCE"), ColorPair.ENTRANCE.value
+    if pos == dungeon.exit:
+        return Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
+
+    cell = dungeon.get_cell(pos)
+    if cell.entity is not None:
+        return cell.entity.get_display_char(), cell.entity.get_color_id()
+
+    return "+", 0
 
 
 def draw_simulation(
@@ -279,12 +315,17 @@ def draw_legend(stdscr, start_y: int, start_x: int) -> None:
 
         # Position x de la colonne
 <<<<<<< HEAD
+<<<<<<< HEAD
         x_offset = start_x + col * column_width*7
         
 =======
         x_offset = start_x + col * column_width
 
 >>>>>>> f460b27 (fix(tui): use command instead controller)
+=======
+        x_offset = start_x + col * column_width
+
+>>>>>>> 41c8c4e (refactor(commands): update execute method to accept game_controller parameter)
         # Dessine le symbole
         _draw_str(
             stdscr,
@@ -378,7 +419,18 @@ def display_simulation(
 class TUIView:
     """Interface TUI interactive avec gestion des inputs utilisateur."""
 
-    def __init__(self, game_controller) -> None:
+
+    def __init__(
+        self,
+        status_info: dict[str, Any],
+        dimension: tuple[int, int],
+        entry_pos: tuple[int, int],
+        exit_pos: tuple[int, int],
+        heros_positions: list[tuple[int, int]],
+        invoker: GameInvoker,
+        dungeon,
+        simulation,
+    ) -> None:
         """Initialise la vue TUI."""
         if game_controller is None:
             raise ValueError("game_controller cannot be None")
@@ -399,6 +451,11 @@ class TUIView:
             self.hero_positions = game_controller.get_hero_positions()
         except (AttributeError, TypeError):
             self.hero_positions = []
+        self.entry_pos = entry_pos
+        self.exit_pos = exit_pos
+        self.hero_positions = heros_positions
+        self.dungeon = dungeon
+        self.simulation = simulation
 
         self.TITLE_Y = 0
         self.TITLE_X = 1
@@ -406,11 +463,13 @@ class TUIView:
         self.DUNGEON_START_X = 1
         self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
         self.LEGEND_START_X = self.DUNGEON_START_X
+        self.LEGEND_X = self.DUNGEON_START_X
         self.STATUS_START_Y = self.DUNGEON_START_Y
         self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
         self.FOOTER_Y = self.LEGEND_START_Y + 10
         self.FOOTER_X = self.DUNGEON_START_X
         self.HELP_START_Y = self.DUNGEON_START_Y
+<<<<<<< HEAD
 <<<<<<< HEAD
         self.HELP_START_X = self.STATUS_START_X +23
         
@@ -469,6 +528,28 @@ class TUIView:
 
     def _import_dungeon(self) -> None:
         self.game_controller.import_dungeon()
+=======
+        self.HELP_START_X = self.STATUS_START_X + 30
+
+        self.invoker = invoker
+
+        # Mapping des touches vers les commandes
+        self.key_bindings: dict[int, Callable[[], None]] = {
+            ord("q"): self._quit,
+            ord("s"): self._start_wave,
+            ord("x"): self._stop_wave,
+            ord("r"): self._reset_dungeon,
+            ord("e"): self._export_dungeon,
+            ord("i"): self._import_dungeon,
+            curses.KEY_UP: self._move_cursor_up,
+            curses.KEY_DOWN: self._move_cursor_down,
+            curses.KEY_LEFT: self._move_cursor_left,
+            curses.KEY_RIGHT: self._move_cursor_right,
+            ord("t"): self._place_trap,
+            ord("w"): self._place_wall,
+            ord("d"): self._remove_entity,
+        }
+>>>>>>> 41c8c4e (refactor(commands): update execute method to accept game_controller parameter)
 
     def _move_cursor(self, delta_row: int, delta_col: int) -> None:
         "Déplace le curseur selon les deltas fournis."
@@ -490,14 +571,53 @@ class TUIView:
     def _move_cursor_right(self) -> None:
         self._move_cursor(0, 1)
 
+<<<<<<< HEAD
+=======
+    def _quit(self) -> None:
+        self.running = False
+
+    def _start_wave(self) -> None:
+        command = startWave(self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
+
+    def _stop_wave(self) -> None:
+        command = stopWave(self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
+
+    def _reset_dungeon(self) -> None:
+        command = resetDungeon(self.dungeon)
+        self.invoker.push_command(command)
+        self.invoker.execute()
+
+    def _export_dungeon(self) -> None:
+        command = exportDungeon(self.dungeon, "dungeon.json")
+        self.invoker.push_command(command)
+        self.invoker.execute()
+
+    def _import_dungeon(self) -> None:
+        command = importDungeon("dungeon.json")
+        self.invoker.push_command(command)
+        self.invoker.execute()
+
+>>>>>>> 41c8c4e (refactor(commands): update execute method to accept game_controller parameter)
     def _place_trap(self) -> None:
-        self.game_controller.place_trap(self.cursor_pos, damage=10)
+        trap = EntityFactory.create_trap(damage=10)
+        command = placeEntity(self.dungeon, trap, self.cursor_pos)
+        self.invoker.push_command(command)
+        self.invoker.execute()
 
     def _place_wall(self) -> None:
-        self.game_controller.place_wall(self.cursor_pos)
+        wall = EntityFactory.create_wall()
+        command = placeEntity(self.dungeon, wall, self.cursor_pos)
+        self.invoker.push_command(command)
+        self.invoker.execute()
 
     def _remove_entity(self) -> None:
-        self.game_controller.remove_entity(self.cursor_pos)
+        command = removeEntity(self.dungeon, self.cursor_pos)
+        self.invoker.push_command(command)
+        self.invoker.execute()
 
     def _draw_cursor(self, stdscr, start_y: int, start_x: int) -> None:
         row, col = self.cursor_pos
@@ -545,7 +665,7 @@ class TUIView:
             stdscr,
             self.hero_positions,
             self.dimension,
-            self.dungeon_grid,
+            self.dungeon,
             self.entry_pos,
             self.exit_pos,
             self.DUNGEON_START_Y,
@@ -573,3 +693,20 @@ class TUIView:
         print("oui")
 
         stdscr.refresh()
+
+    def run(self) -> None:
+        """Lance la boucle principale de la TUI."""
+
+        def _main(stdscr):
+            curses.curs_set(0)  # Cache le curseur
+            ColorPair.init_curses_colors()  # Initialise les couleurs
+            stdscr.nodelay(True)
+            stdscr.timeout(100)
+            self.running = True
+            while self.running:
+                self.render(stdscr)
+                key = stdscr.getch()
+                if key in self.key_bindings:
+                    self.key_bindings[key]()
+
+        curses.wrapper(_main)

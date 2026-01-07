@@ -7,5 +7,5 @@ class placeEntity(Command):
         self.entity = entity
         self.position = position
 
-    def execute(self):
+    def execute(self, game_controller):
         self.dungeon.place_entity(self.entity, self.position)

@@ -7,7 +7,7 @@ class stopWave(Command):
     def __init__(self, simulation):
         self.simulation = simulation
 
-    def execute(self):
+    def execute(self, game_controller):
         try:
             self.simulation.stop()
         except Exception:
