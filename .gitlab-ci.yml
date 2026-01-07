@@ -30,6 +30,9 @@ generer-pdf:
   rules:
     - changes:
         - docs/classDiagram.mmd
+    - when: manual
+      allow_failure: true
+
   script:
     - echo '{"executablePath":"/usr/bin/chromium-browser","args":["--no-sandbox"]}' > puppeteer-config.json
     - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
@@ -45,6 +48,8 @@ push-pdf:
   rules:
     - changes:
         - docs/classDiagram.mmd
+    - when: manual
+      allow_failure: true
   script:
     - git config --global user.email "ci-bot@gitlab.com"
     - git config --global user.name "Mermaid Bot"
