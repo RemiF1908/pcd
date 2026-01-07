@@ -42,12 +42,9 @@ class Simulation:
         self.allHeroesDead = False
 
     def launch(self) -> Dict[str, Any]:
-        """Run the simulation loop.
+        """Launch the simulation loop.
 
-        If `steps` is provided, run at most that many ticks. Otherwise
-        run until `stop_condition()` returns True (by default it stops
-        when there are no heroes or budget is exhausted).
-        Returns a summary dict when finished.
+        Awake a hero every TOURBOUCLE x round
         """
         self.running = True
         count_awake_hero = 0
@@ -58,6 +55,7 @@ class Simulation:
                 count_awake_hero += 1
 
             self.step()
+            self.ticks += 1
             time.sleep(0.5)
 
     def stop(self) -> None:
@@ -73,7 +71,6 @@ class Simulation:
         `score` or `current_budget` if the provided objects expose the
         corresponding information.
         """
-        self.ticks += 1
 
         # Let dungeon perform an update if available
         try:
