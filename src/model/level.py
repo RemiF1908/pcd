@@ -145,11 +145,13 @@ class LevelBuilder:
         # Hero signature: Hero(pv_total, strategy, coord=None)
         hero = Hero(pv, strategy, coord=coord)
         self._heroes.append(hero)
+        self._nb_heroes += 1
         return self
 
     def add_hero_instance(self, hero: Hero) -> "LevelBuilder":
         """Ajoute une instance de Hero existante."""
         self._heroes.append(hero)
+        self._nb_heroes += 1
         return self
 
     def add_heroes(

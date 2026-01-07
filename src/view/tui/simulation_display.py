@@ -1,30 +1,16 @@
 """
 Module d'affichage de donjon en TUI avec la librairie curses.
 
-Usage:
-    from src.view.tui.dungeon_display import display_dungeon
-    from src.model.dungeon import Dungeon
-
-    # Créer un donjon...
-    dungeon = Dungeon(...)
 
     # Afficher avec curses (bloquant, appuyer sur une touche pour quitter)
-    display_dungeon(dungeon)
-
-    # Ou utiliser directement dans une boucle curses existante :
-    # draw_dungeon(stdscr, dungeon, start_y=0, start_x=0)
 """
 
 from __future__ import annotations
-
+from src.simulation import Simulation
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable
-
 import curses
-
-if TYPE_CHECKING:
-    from src.model.dungeon import Dungeon
 
 
 class ColorPair(Enum):
@@ -83,22 +69,19 @@ class Legend:
         return "+"
 
 
-def _get_cell_display(
-    dungeon: "Dungeon", pos: tuple[int, int], hero_set: set[tuple[int, int]]
-) -> tuple[str, int]:
+def _get_cell_display(grid : list[list[tuple[str,int]]], heros_pos : list[tuple[int, int]], entry_pos: tuple[int, int], exit_pos: tuple[int, int], pos: tuple[int, int]) -> tuple[str, int]:
     """Détermine le symbole et la couleur pour une cellule."""
-    if pos in hero_set:
+    if pos in heros_pos:
         return Legend.get_symbol_for("HERO"), ColorPair.HERO.value
-    if pos == dungeon.entry:
+    if pos == entry_pos:
         return Legend.get_symbol_for("ENTRANCE"), ColorPair.ENTRANCE.value
-    if pos == dungeon.exit:
+    if pos == exit_pos:
         return Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
+    cell = grid[pos[0]][pos[1]]
+    if cell is not None:
+        return cell
 
-    cell = dungeon.get_cell(pos)
-    if cell.entity is not None:
-        return cell.entity.get_display_char(), cell.entity.get_color_id()
-
-    return "+", 0
+    return ("+", 0)
 
 
 def _draw_char(stdscr, y: int, x: int, char: str, color_pair: int = 0) -> None:
@@ -146,29 +129,38 @@ def _init_colors() -> None:
     curses.init_pair(7, curses.COLOR_YELLOW, -1)
 
 
-def draw_dungeon(
+def draw_simulation(
     stdscr,
-    dungeon: "Dungeon",
+    hero_positions: list[tuple[int, int]],
+    dimension: tuple[int, int],
+    grid : list[list[tuple[str,int]]],
+    entry_pos: tuple[int, int],
+    exit_pos: tuple[int, int],
     start_y: int = 1,
-    start_x: int = 1,
-    hero_positions: list[tuple[int, int]] | None = None,
+    start_x: int = 1
 ) -> None:
     """Dessine le donjon sur la fenêtre curses.
 
     Args:
         stdscr: Fenêtre curses standard.
-        dungeon: Instance de Dungeon à afficher.
+        simulation: Instance de Simulation à afficher.
         start_y: Ligne de départ pour l'affichage.
         start_x: Colonne de départ pour l'affichage.
-        hero_positions: Liste optionnelle de positions (row, col) des héros.
     """
-    rows, cols = dungeon.dimension
+
+    rows, cols = dimension
     hero_set = set(hero_positions) if hero_positions else set()
 
     for row in range(rows):
         for col in range(cols):
             pos = (row, col)
-            symbol, color_pair = _get_cell_display(dungeon, pos, hero_set)
+            symbol, color_pair = grid[row][col]
+            if pos in hero_set:
+                symbol, color_pair = Legend.get_symbol_for("HERO"), ColorPair.HERO.value
+            elif pos == entry_pos:
+                symbol, color_pair = Legend.get_symbol_for("ENTRANCE"), ColorPair.ENTRANCE.value
+            elif pos == exit_pos:
+                symbol, color_pair = Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
             _draw_str(
                 stdscr,
                 start_y + row,
@@ -182,43 +174,54 @@ def draw_legend(stdscr, start_y: int, start_x: int) -> None:
     """Affiche la légende des symboles."""
     _draw_str(stdscr, start_y, start_x, "=== Légende ===", curses.A_BOLD)
 
+    entries_per_line = 3
+    column_width = 2  # Largeur de chaque colonne pour espacer les entrées
+    
     for i, entry in enumerate(Legend.ENTRIES):
+        row = i // entries_per_line  # Calcule le numéro de ligne
+        col = i % entries_per_line   # Calcule le numéro de colonne (0, 1 ou 2)
+        
+        # Position x de la colonne
+        x_offset = start_x + col * column_width
+        
+        # Dessine le symbole
         _draw_str(
             stdscr,
-            start_y + 1 + i,
-            start_x,
+            start_y + 1 + row,
+            x_offset,
             entry.symbol,
             curses.color_pair(entry.color_pair.value),
         )
-        _draw_str(stdscr, start_y + 1 + i, start_x + 2, entry.label)
+        # Dessine le label
+        _draw_str(stdscr, start_y + 1 + row, x_offset + 2, entry.label)
 
-
-class Layout:
-    """Constantes de layout pour l'affichage."""
-
-    TITLE_Y = 0
-    TITLE_X = 1
-    DUNGEON_START_Y = 5
-    DUNGEON_START_X = 1
-    LEGEND_X_OFFSET = 3
-    DEFAULT_FOOTER_Y = 20
-
-
-
-def display_dungeon(
-    dungeon: "Dungeon",
-    hero_positions: list[tuple[int, int]] | None = None,
-    status_info: dict[str, Any] | None = None,
+def draw_status(
+    stdscr,
+    start_y: int,
+    start_x: int,
+    status_info: dict[str, Any],
 ) -> None:
-    """Affiche le donjon dans le terminal (bloquant).
+    """Affiche les informations de status."""
+    _draw_str(stdscr, start_y, start_x, "=== Status ===", curses.A_BOLD)
 
-    Initialise curses, dessine le donjon, la légende et le status,
-    puis attend une touche pour quitter.
+    for i, (key, value) in enumerate(status_info.items()):
+        _draw_str(stdscr, start_y + 1 + i, start_x, f"{key}: {value}")
 
+    
+
+
+def display_simulation(
+    hero_positions: list[tuple[int, int]],
+    dimension: tuple[int, int],
+    grid : list[list[tuple[str,int]]],
+    entry_pos: tuple[int, int],
+    exit_pos: tuple[int, int],
+    status_info: dict[str, Any],
+) -> None:
+    """Affiche la simulation dans une fenêtre curses.
     Args:
-        dungeon: Le donjon à afficher.
-        hero_positions: Positions des héros (optionnel).
-        status_info: Infos de status (optionnel).
+        simulation: Instance de Simulation à afficher.
+        
     """
 
     def _main(stdscr):
@@ -226,29 +229,35 @@ def display_dungeon(
         ColorPair.init_curses_colors()
         stdscr.clear()
 
-        rows, cols = dungeon.dimension
+        rows, cols = dimension
 
         _draw_str(
-            stdscr, Layout.TITLE_Y, Layout.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
+            stdscr, self.TITLE_Y, self.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
         )
 
-        draw_dungeon(
+        draw_simulation(
             stdscr,
-            dungeon,
-            Layout.DUNGEON_START_Y,
-            Layout.DUNGEON_START_X,
             hero_positions,
+            dimension,
+            grid,
+            entry_pos,
+            exit_pos,
+            self.DUNGEON_START_Y,
+            self.DUNGEON_START_X,
         )
 
-        legend_x = Layout.DUNGEON_START_Y + cols * 2 + Layout.LEGEND_X_OFFSET
-        draw_legend(stdscr, Layout.DUNGEON_START_Y, legend_x)
-
-
-        footer_y = max(rows + Layout.DUNGEON_START_Y + 2, Layout.DEFAULT_FOOTER_Y)
+        draw_legend(stdscr, self.LEGEND_START_Y, self.LEGEND_START_X)
+        draw_status(
+            stdscr,
+            self.STATUS_START_Y,
+            self.STATUS_START_X,
+            status_info
+        )
+        
         _draw_str(
             stdscr,
-            footer_y,
-            Layout.DUNGEON_START_X,
+            self.FOOTER_Y,
+            self.FOOTER_X,
             "Appuyez sur une touche pour quitter...",
             curses.A_DIM,
         )
@@ -262,43 +271,52 @@ def display_dungeon(
 class TUIView:
     """Interface TUI interactive avec gestion des inputs utilisateur."""
 
-    def __init__(self, game_controller: Any):
-        """Initialise la vue TUI.
-
-        Args:
-            game_controller: Contrôleur de jeu pour exécuter les commandes (obligatoire).
-        """
-        if game_controller is None:
-            raise ValueError("game_controller est obligatoire")
-
-        self.game_controller = game_controller
-        self.dungeon = game_controller.dungeon
+    def __init__(self,status_info: dict[str, Any],dimension: tuple[int, int], dungeon_grid : list[list[tuple[str,int]]], entry_pos: tuple[int, int], exit_pos: tuple[int, int],heros_positions: list[tuple[int, int]]) -> None:
+        """Initialise la vue TUI."""
         self.running = False
-        self.status_info: dict[str, Any] = {}
+        self.dimension = dimension
+        self.status_info: dict[str, Any] = status_info
         self.cursor_pos: tuple[int, int] = (0, 0)
-
-        # Mapping des touches vers les commandes
-        self.key_bindings: dict[int, Callable[[], None]] = {
-            ord("q"): self._quit,
-            ord("s"): self._start_wave,
-            ord("x"): self._stop_wave,
-            ord("r"): self._reset_dungeon,
-            ord("e"): self._export_dungeon,
-            ord("i"): self._import_dungeon,
-            curses.KEY_UP: self._move_cursor_up,
-            curses.KEY_DOWN: self._move_cursor_down,
-            curses.KEY_LEFT: self._move_cursor_left,
-            curses.KEY_RIGHT: self._move_cursor_right,
-            ord("t"): self._place_trap,
-            ord("w"): self._place_wall,
-            ord("d"): self._remove_entity,
-        }
-
+        self.dungeon_grid = dungeon_grid
+        self.entry_pos = entry_pos
+        self.exit_pos = exit_pos
+        self.hero_positions = heros_positions
+        
+        self.TITLE_Y = 0
+        self.TITLE_X = 1
+        self.DUNGEON_START_Y = 2
+        self.DUNGEON_START_X = 1
+        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
+        self.LEGEND_START_X = self.DUNGEON_START_X
+        self.STATUS_START_Y = self.DUNGEON_START_Y
+        self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
+        self.FOOTER_Y = self.LEGEND_START_Y + 10
+        self.FOOTER_X = self.DUNGEON_START_X
+        self.HELP_START_Y = self.DUNGEON_START_Y
+        self.HELP_START_X = self.STATUS_START_X +30
+        
+        # # Mapping des touches vers les commandes
+        # self.key_bindings: dict[int, Callable[[], None]] = {
+        #     ord("q"): self._quit,
+        #     ord("s"): self._start_wave,
+        #     ord("x"): self._stop_wave,
+        #     ord("r"): self._reset_dungeon,
+        #     ord("e"): self._export_dungeon,
+        #     ord("i"): self._import_dungeon,
+        #     curses.KEY_UP: self._move_cursor_up,
+        #     curses.KEY_DOWN: self._move_cursor_down,
+        #     curses.KEY_LEFT: self._move_cursor_left,
+        #     curses.KEY_RIGHT: self._move_cursor_right,
+        #     ord("t"): self._place_trap,
+        #     ord("w"): self._place_wall,
+        #     ord("d"): self._remove_entity,
+        # }
+    """
     def _quit(self) -> None:
         self.running = False
 
     def _start_wave(self) -> None:
-        self.game_controller.start_wave()
+        commands.startWave(self.game_controller.simulation)
 
     def _stop_wave(self) -> None:
         self.game_controller.stop()
@@ -311,11 +329,12 @@ class TUIView:
 
     def _import_dungeon(self) -> None:
         self.game_controller.import_dungeon()
+    """
 
     def _move_cursor(self, delta_row: int, delta_col: int) -> None:
-        """Déplace le curseur selon les deltas fournis."""
+        "Déplace le curseur selon les deltas fournis."
         row, col = self.cursor_pos
-        max_row, max_col = self.dungeon.dimension[0] - 1, self.dungeon.dimension[1] - 1
+        max_row, max_col = self.dimension[0] - 1, self.dimension[1] - 1
         new_row = max(0, min(max_row, row + delta_row))
         new_col = max(0, min(max_col, col + delta_col))
         self.cursor_pos = (new_row, new_col)
@@ -331,7 +350,8 @@ class TUIView:
 
     def _move_cursor_right(self) -> None:
         self._move_cursor(0, 1)
-
+        
+    """
     def _place_trap(self) -> None:
         self.game_controller.place_trap(self.cursor_pos, damage=10)
 
@@ -341,10 +361,11 @@ class TUIView:
     def _remove_entity(self) -> None:
         self.game_controller.remove_entity(self.cursor_pos)
 
+    """
     def _draw_cursor(self, stdscr, start_y: int, start_x: int) -> None:
         row, col = self.cursor_pos
         _draw_reverse_char(stdscr, start_y + row, start_x + col * 2)
-
+    
     def _draw_help(self, stdscr, start_y: int, start_x: int) -> None:
         help_text = [
             ("=== Commandes ===", curses.A_BOLD),
@@ -366,47 +387,50 @@ class TUIView:
 
         for i, (text, attr) in enumerate(help_text):
             _draw_str(stdscr, start_y + i, start_x, text, attr)
-
-    def update_hero_positions(self, positions: list[tuple[int, int]]) -> None:
-        self.hero_positions = positions
-
+    """
+    def update_hero_positions(self) -> None:
+        self.hero_positions = self.game_controller.get_hero_positions()
+    """
     def update_status_info(self, info: dict[str, Any]) -> None:
         self.status_info = info
 
     def render(self, stdscr) -> None:
+        print("render called")
         stdscr.clear()
 
-        rows, cols = self.dungeon.dimension
+        rows, cols = self.dimension
 
         _draw_str(
-            stdscr, Layout.TITLE_Y, Layout.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
+            stdscr, self.TITLE_Y, self.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
         )
 
-        draw_dungeon(
+        draw_simulation(
             stdscr,
-            self.dungeon,
-            Layout.DUNGEON_START_Y,
-            Layout.DUNGEON_START_X,
-            hero_positions=self.hero_positions,
+            self.hero_positions,
+            self.dimension,
+            self.dungeon_grid,
+            self.entry_pos,
+            self.exit_pos,
+            self.DUNGEON_START_Y,
+            self.DUNGEON_START_X,
         )
 
-        self._draw_cursor(stdscr, Layout.DUNGEON_START_Y, Layout.DUNGEON_START_X)
-
-        legend_x = Layout.DUNGEON_START_Y + cols * 2 + Layout.LEGEND_X_OFFSET
-        draw_legend(stdscr, Layout.DUNGEON_START_Y, legend_x)
+        self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
+        
+        draw_legend(stdscr, self.LEGEND_START_Y, self.LEGEND_START_X)
 
         if self.status_info:
-            draw_status(stdscr, Layout.STATUS_START_Y, legend_x, self.status_info)
+            draw_status(stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info)
 
-        help_y = max(rows + Layout.DUNGEON_START_Y + 2, Layout.DEFAULT_FOOTER_Y)
-        self._draw_help(stdscr, help_y, Layout.DUNGEON_START_X)
+        self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
 
         _draw_str(
             stdscr,
-            help_y - 1,
-            Layout.DUNGEON_START_X,
+            self.HELP_START_Y - 1,
+            self.HELP_START_X,
             f"Curseur: {self.cursor_pos}",
             curses.A_DIM,
         )
+        print("oui")
 
         stdscr.refresh()
