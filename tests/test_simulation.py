@@ -336,6 +336,7 @@ def test_simulation_step_hero_dies():
     sim.step()
 
     assert hero.pv_cur == 0
+    assert sim.dmgobserver.getTotalDmg() == 100
     assert hero.isAlive is False
 
 
