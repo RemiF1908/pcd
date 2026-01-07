@@ -15,14 +15,19 @@ from src.model.trap_creator import TrapCreator
 
 # Import du Serveur (la Vue)
 from src.view.gui.server import run_server
-
 def create_simulation_dungeon():
     """Crée un donjon statique avec des obstacles pour tester l'affichage."""
-    rows, cols = (5,5)
+    rows, cols = (5, 5)
     
     # 1. Création de la grille
     grid = [[Cell((r, c), FloorCreator().build()) for c in range(cols)] for r in range(rows)]
-    dungeon = Dungeon((rows, cols), grid, (4, 1), (0, 2))
+    
+    dungeon = Dungeon(
+        dimension=(rows, cols),
+        grid=grid,
+        entry=(4, 1),
+        exit=(0, 2)
+    )
     
     # 2. Ajout d'obstacles (Le L de murs)
     walls = [(2,0),(2,3)]
