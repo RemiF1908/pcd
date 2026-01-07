@@ -6,6 +6,8 @@ from src.model.hero import Hero
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.floor import Floor
+from src.model.wall import Wall
+from src.model.trap import Trap
 from src.view.tui.simulation_display import TUIView, ColorPair
 
 def test_simulation_display_basic(stdscr):
@@ -25,12 +27,15 @@ def test_simulation_display_basic(stdscr):
         entry=(0, 0),
         exit=(rows-1, cols-1)
     )
+    dungeon.grid[2][3] = Cell((2, 3), Wall())  # Exemple d'ajout d'une cellule spécifique
+    dungeon.grid[5][5] = Cell((5, 5), Trap())  # Exemple d'ajout d'une cellule spécifique
     
     level = (LevelBuilder()
         .set_dungeon(dungeon=dungeon)
         .set_difficulty(4)
         .set_budget(300)
         .add_hero_instance(hero)
+        .add_hero(Hero(pv_total=80, strategy="aggressive"))
         .build())
     
     # Création de la simulation
