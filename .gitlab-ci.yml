@@ -34,9 +34,20 @@ generer-pdf:
       allow_failure: true
   
   script:
-    - echo '{"executablePath":"/usr/bin/chromium-browser","args":["--no-sandbox"]}' > puppeteer-config.json
-    - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
-  
+      - echo '{"executablePath":"/usr/bin/chromium-browser","args":["--no-sandbox"]}' > puppeteer-config.json
+      - /home/mermaidcli/node_modules/.bin/mmdc -p puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
+      - git config --global user.email "ci-bot@gitlab.com"
+      - git config --global user.name "CI Bot"
+      
+      - git add docs/classDiagram.pdf
+      
+      - |-
+        if [[ -n $(git status -s) ]]; then
+          git commit -m "Auto-update class diagram PDF [skip ci]"
+          git push https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git HEAD:${CI_COMMIT_REF_NAME}
+        else
+          echo "Aucun changement détecté dans le PDF."
+        fi
   artifacts:
     paths:
       - docs/classDiagram.pdf
