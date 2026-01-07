@@ -7,7 +7,7 @@ class Hero:
         self.pv_total = pv_total
         self.pv_cur = pv_total
         self.coord = coord
-        self.isAlive = isAlive
+        self.isAlive = False
         self.reachedGoal = False
         self.stepsTaken = 0
         self.path: Optional[List[tuple]] = None

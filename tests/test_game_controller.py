@@ -4,6 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from src.controller.game_controller import GameController
 from src.simulation import Simulation
+from src.model.level import Level
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 
@@ -45,7 +46,8 @@ def test_game_controller_stop():
     """Test de la méthode stop."""
     interface = MagicMock()
     dungeon = create_test_dungeon()
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    lvl = Level(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    simulation = Simulation(level=lvl, dungeon=dungeon)
     simulation.running = True
 
     controller = GameController(interface, simulation)
@@ -58,7 +60,8 @@ def test_game_controller_with_real_simulation():
     """Test GameController avec une vraie Simulation."""
     interface = MagicMock()
     dungeon = create_test_dungeon()
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    lvl = Level(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    simulation = Simulation(level=lvl, dungeon=dungeon)
 
     controller = GameController(interface, simulation)
 
@@ -70,7 +73,8 @@ def test_game_controller_start_wave_launches_simulation():
     """Test que start_wave lance réellement la simulation."""
     interface = MagicMock()
     dungeon = create_test_dungeon()
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    lvl = Level(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    simulation = Simulation(level=lvl, dungeon=dungeon)
 
     controller = GameController(interface, simulation)
     simulation.allHeroesDead = True
@@ -88,7 +92,7 @@ def test_game_controller_start_wave_launches_simulation():
 def test_game_controller_stop_stops_simulation():
     """Test que stop arrête réellement la simulation."""
     interface = MagicMock()
-    simulation = Simulation()
+    simulation = Simulation(level=Level())
     simulation.running = True
 
     controller = GameController(interface, simulation)
@@ -100,7 +104,7 @@ def test_game_controller_stop_stops_simulation():
 def test_game_controller_stop_idempotent():
     """Test que stop peut être appelé plusieurs fois."""
     interface = MagicMock()
-    simulation = Simulation()
+    simulation = Simulation(level=Level())
 
     controller = GameController(interface, simulation)
     controller.stop()
@@ -164,14 +168,8 @@ def test_game_controller_integration_simulation_state():
     """Test que GameController maintient l'état de la simulation."""
     interface = MagicMock()
     dungeon = create_test_dungeon()
-    simulation = Simulation(
-        dungeon=dungeon,
-        level=1,
-        budget_tot=200,
-        current_budget=200,
-        nb_heroes=0,
-        heroes=[],
-    )
+    lvl = Level(dungeon=dungeon, budget_tot=200, nb_heroes=0, heroes=[])
+    simulation = Simulation(level=lvl, dungeon=dungeon)
 
     controller = GameController(interface, simulation)
 

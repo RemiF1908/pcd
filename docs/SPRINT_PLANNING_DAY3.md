@@ -13,6 +13,7 @@ Finaliser l'éditeur TUI avec placement/retrait d'objets, implémenter la foncti
 - [ ] Mettre en lien TUI et GameController : créer la boucle principale de jeu
 - [ ] Implémenter la fonction de scoring (héros morts, trésor protégé, budget dépensé, temps)
 - [ ] Finir l'implémentation des niveaux de jeu (US19)
+- [ ] Coder le résumé d'une vague quand elle se finit
 - [ ] Permettre au joueur de choisir l'algorithme de pathfinding dans l'UI (US11)
 - [ ] Créer le croquis de l'UI (US8)
 

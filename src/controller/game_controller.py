@@ -1,5 +1,6 @@
 import time
 from typing import Optional, Any
+from src.commands import placeEntity, exportDungeon, importDungeon, startWave, stopWave, resetDungeon
 
 
 class GameController:
@@ -20,7 +21,8 @@ class GameController:
         print("Starting new wave...")
         self.simulation.launch()
 
-        
+    def placeEntity(self, entity: Any, coord: tuple) -> None:
+        placeEntity.placeEntity().place_entity(self.simulation.dungeon, entity, coord)
     def stop(self) -> None:
         """Arrête la boucle principale."""
         self.simulation.stop()

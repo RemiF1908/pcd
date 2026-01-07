@@ -82,7 +82,8 @@ def test_integration_simulation_single_step():
     hero = Hero(pv_total=100, strategy="random", coord=(1, 1))
     hero.path = [(1, 1), (1, 2)]
 
-    simulation = Simulation(dungeon=dungeon, heroes=[hero], nb_heroes=1)
+    lvl = Level(dungeon=dungeon, heroes=[hero], nb_heroes=1)
+    simulation = Simulation(level=lvl, dungeon=dungeon)
     hero.awake()
 
     simulation.step()
@@ -99,7 +100,8 @@ def test_integration_simulation_trap_damage():
     hero = Hero(pv_total=100, strategy="random", coord=(1, 1))
     hero.path = [(1, 1), (1, 2), (1, 3)]
 
-    simulation = Simulation(dungeon=dungeon, heroes=[hero], nb_heroes=1)
+    lvl = Level(dungeon=dungeon, heroes=[hero], nb_heroes=1)
+    simulation = Simulation(level=lvl, dungeon=dungeon)
     hero.awake()
 
     simulation.step()
@@ -250,7 +252,8 @@ def test_integration_simulation_multiple_heroes():
     hero2 = Hero(pv_total=80, strategy="shortest", coord=(2, 1))
     hero2.path = [(2, 1), (2, 2)]
 
-    simulation = Simulation(dungeon=dungeon, heroes=[hero1, hero2], nb_heroes=2)
+    lvl = Level(dungeon=dungeon, heroes=[hero1, hero2], nb_heroes=2)
+    simulation = Simulation(level=lvl, dungeon=dungeon)
     hero1.awake()
     hero2.awake()
 
@@ -267,7 +270,8 @@ def test_integration_game_controller_simulation():
 
     interface = MagicMock()
     dungeon = create_test_dungeon()
-    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    lvl = Level(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    simulation = Simulation(level=lvl, dungeon=dungeon)
 
     controller = GameController(interface, simulation)
 
@@ -291,7 +295,8 @@ def test_integration_simulation_hero_death_chain(mock_sleep):
     hero2 = Hero(pv_total=40, strategy="shortest", coord=(2, 2))
     hero2.path = [(2, 2), (2, 3)]
 
-    simulation = Simulation(dungeon=dungeon, heroes=[hero1, hero2], nb_heroes=2)
+    lvl = Level(dungeon=dungeon, heroes=[hero1, hero2], nb_heroes=2)
+    simulation = Simulation(level=lvl, dungeon=dungeon)
     hero1.awake()
     hero2.awake()
 
