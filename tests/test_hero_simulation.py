@@ -1,4 +1,5 @@
 from src.simulation import Simulation
+from src.model.level import Level
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.trap import Trap
@@ -12,8 +13,9 @@ def make_empty_dungeon(rows=2, cols=2):
 
 
 def test_add_and_remove_hero_updates_count():
-    sim = Simulation()
-    h = Hero(10, 10, (0, 0), "none", True)
+    sim = Simulation(level=Level())
+    h = Hero(pv_total=10, strategy="none", coord=(0, 0))
+    h.awake()
 
     sim.add_hero(h)
     assert h in sim.heroes
@@ -30,8 +32,10 @@ def test_apply_cell_effects_reduces_hero_hp_and_marks_dead():
     # place trap at hero location
     dungeon.place_entity(trap, (0, 0))
 
-    h = Hero(12, 12, (0, 0), "none", True)
-    sim = Simulation(dungeon=dungeon, heroes=[h])
+    h = Hero(pv_total=12, strategy="none", coord=(0, 0))
+    h.awake()
+    lvl = Level(dungeon=dungeon, heroes=[h])
+    sim = Simulation(level=lvl, dungeon=dungeon)
 
     # first application: hp reduced but still alive
     sim.apply_cell_effects(h)
@@ -49,8 +53,10 @@ def test_hero_move_and_cell_effects_after_move():
     trap = Trap(damage=4)
     dungeon.place_entity(trap, (1, 1))
 
-    h = Hero(10, 10, (0, 0), "none", True)
-    sim = Simulation(dungeon=dungeon, heroes=[h])
+    h = Hero(pv_total=10, strategy="none", coord=(0, 0))
+    h.awake()
+    lvl = Level(dungeon=dungeon, heroes=[h])
+    sim = Simulation(level=lvl, dungeon=dungeon)
 
     # move hero to the trap cell and apply effects
     h.move((1, 1))

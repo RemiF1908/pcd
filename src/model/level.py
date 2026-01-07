@@ -61,9 +61,22 @@ class Level:
             self.heroes.remove(hero)
             self.nb_heroes = len(self.heroes)
 
+    def awake_hero(self, hero : Hero) : 
+        hero.isAlive = True
+    
     def get_alive_heroes(self) -> List[Hero]:
         """Retourne la liste des héros encore en vie."""
         return [h for h in self.heroes if h.isAlive]
+    
+    def get_nb_killed_heroes(self) -> int:
+        """Retourne la liste des héros tués."""
+        return len([h for h in self.heroes if not h.isAlive])
+
+    def get_nb_heroes(self) -> int :
+        return self.nb_heroes
+
+    def get_sum_HP(self) -> int :
+        return sum([hero.pv_total for hero in self.heroes])
 
     def get_hero_positions(self) -> List[tuple]:
         """Retourne les positions de tous les héros vivants."""

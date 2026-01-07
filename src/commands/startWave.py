@@ -1,6 +1,9 @@
 from .Command import Command
 
-class startWave(Command) :
-    def execute(self, simulation):
-        print("Wave started")
-        simulation.launch()
+
+class startWave(Command):
+    def __init__(self, simulation):
+        self.simulation = simulation
+
+    def execute(self):
+        self.simulation.launch()
