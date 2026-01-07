@@ -167,8 +167,8 @@ def test_integration_command_place_and_remove():
     """Test d'intégration: placeEntity + removeEntity."""
     dungeon = create_test_dungeon()
 
-    place_command = placeEntity()
-    place_command.execute(dungeon, EntityFactory.create_wall(), (2, 2))
+    place_command = placeEntity(dungeon, EntityFactory.create_wall(), (2, 2))
+    place_command.execute()
 
     assert not dungeon.is_Walkable((2, 2))
 

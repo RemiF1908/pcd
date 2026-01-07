@@ -41,8 +41,8 @@ def test_place_entity_command():
     wall = EntityFactory.create_wall()
     position = (2, 3)
 
-    command = placeEntity()
-    command.execute(dungeon, wall, position)
+    command = placeEntity(dungeon, wall, position)
+    command.execute()
 
     cell = dungeon.get_cell(position)
     assert cell.entity is wall
@@ -55,8 +55,8 @@ def test_place_entity_trap():
     trap = EntityFactory.create_trap(damage=20)
     position = (1, 1)
 
-    command = placeEntity()
-    command.execute(dungeon, trap, position)
+    command = placeEntity(dungeon, trap, position)
+    command.execute()
 
     cell = dungeon.get_cell(position)
     assert cell.entity is trap
@@ -69,8 +69,8 @@ def test_place_entity_floor():
     dungeon.place_entity(EntityFactory.create_wall(), (2, 2))
 
     floor = EntityFactory.create_floor()
-    command = placeEntity()
-    command.execute(dungeon, floor, (2, 2))
+    command = placeEntity(dungeon, floor, (2, 2))
+    command.execute()
 
     assert dungeon.is_Walkable((2, 2))
 
@@ -102,8 +102,8 @@ def test_start_wave_command():
     mock_simulation = MagicMock()
     mock_simulation.launch.return_value = None
 
-    command = startWave()
-    command.execute(mock_simulation)
+    command = startWave(mock_simulation)
+    command.execute()
 
     mock_simulation.launch.assert_called_once()
 
@@ -111,23 +111,22 @@ def test_start_wave_command():
 def test_stop_wave_command():
     """Test la commande stopWave."""
     mock_simulation = MagicMock()
-    mock_simulation.running = True
 
-    command = stopWave()
-    command.execute(mock_simulation)
+    command = stopWave(mock_simulation)
+    command.execute()
 
-    assert mock_simulation.running is False
+    mock_simulation.stop.assert_called_once()
 
 
 def test_stop_wave_command_with_exception():
     """Test stopWave avec simulation invalide."""
     mock_simulation = MagicMock()
     mock_simulation.running = True
-    mock_simulation.running = MagicMock(side_effect=AttributeError())
+    mock_simulation.stop = MagicMock(side_effect=AttributeError())
 
-    command = stopWave()
+    command = stopWave(mock_simulation)
     try:
-        command.execute(mock_simulation)
+        command.execute()
     except Exception:
         pass
 
@@ -138,8 +137,8 @@ def test_reset_dungeon_command():
     dungeon.place_entity(EntityFactory.create_wall(), (0, 1))
     dungeon.place_entity(EntityFactory.create_trap(damage=15), (1, 1))
 
-    command = resetDungeon()
-    command.execute(dungeon)
+    command = resetDungeon(dungeon)
+    command.execute()
 
     assert dungeon.is_Walkable((0, 1))
     assert not dungeon.get_cell((1, 1)).is_dangerous()
@@ -147,21 +146,20 @@ def test_reset_dungeon_command():
 
 def test_export_dungeon_command():
     """Test la commande exportDungeon."""
-    dungeon = MagicMock()
-    dungeon.serialize.return_value = '{"test": "data"}'
+    dungeon = create_test_dungeon()
 
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
         filepath = f.name
 
     try:
-        command = exportDungeon()
-        command.filepath = filepath
-        command.execute(dungeon, filepath)
+        command = exportDungeon(dungeon, filepath)
+        command.execute()
 
         with open(filepath, "r") as f:
             content = f.read()
 
-        assert content == '{"test": "data"}'
+        assert content is not None
+        assert "dimension" in content
     finally:
         if os.path.exists(filepath):
             os.unlink(filepath)
@@ -169,17 +167,36 @@ def test_export_dungeon_command():
 
 def test_import_dungeon_command():
     """Test la commande importDungeon."""
-    test_data = '{"test": "import"}'
+    from src.controller.game_controller import GameController
+    from src.simulation import Simulation
+
+    dungeon = create_test_dungeon()
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    interface = MagicMock()
+
+    controller = GameController(interface, simulation)
+
+    controller.place_trap((2, 2), damage=20)
+    controller.place_wall((3, 3))
 
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write(test_data)
         filepath = f.name
 
     try:
-        command = importDungeon()
-        result = command.execute(filepath)
+        controller.export_dungeon(filepath)
+        imported_dungeon = controller.import_dungeon(filepath)
 
-        assert result == test_data
+        assert imported_dungeon is not None
+        assert imported_dungeon.dimension == dungeon.dimension
+        assert imported_dungeon.entry == dungeon.entry
+        assert imported_dungeon.exit == dungeon.exit
+
+        cell = imported_dungeon.get_cell((2, 2))
+        assert isinstance(cell.entity, Trap)
+        assert cell.entity.damage == 20
+
+        cell = imported_dungeon.get_cell((3, 3))
+        assert isinstance(cell.entity, Wall)
     finally:
         if os.path.exists(filepath):
             os.unlink(filepath)
@@ -286,8 +303,8 @@ def test_place_entity_then_remove():
     dungeon = create_test_dungeon()
     wall = EntityFactory.create_wall()
 
-    place_command = placeEntity()
-    place_command.execute(dungeon, wall, (2, 2))
+    place_command = placeEntity(dungeon, wall, (2, 2))
+    place_command.execute()
 
     assert not dungeon.is_Walkable((2, 2))
 
@@ -302,16 +319,14 @@ def test_multiple_commands_with_invoker():
     dungeon = create_test_dungeon()
     invoker = GameInvoker()
 
-    invoker.push_command(placeEntity())
-    invoker.commandstack[-1].execute(dungeon, EntityFactory.create_wall(), (1, 1))
+    invoker.push_command(placeEntity(dungeon, EntityFactory.create_wall(), (1, 1)))
 
-    invoker.push_command(placeEntity())
-    invoker.commandstack[-1].execute(
-        dungeon, EntityFactory.create_trap(damage=10), (2, 2)
+    invoker.push_command(
+        placeEntity(dungeon, EntityFactory.create_trap(damage=10), (2, 2))
     )
 
-    invoker.push_command(resetDungeon())
-    invoker.commandstack[-1].execute(dungeon)
+    invoker.push_command(resetDungeon(dungeon))
+    invoker.execute()
 
     assert dungeon.is_Walkable((1, 1))
     assert not dungeon.get_cell((2, 2)).is_dangerous()

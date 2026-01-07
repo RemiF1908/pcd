@@ -219,8 +219,10 @@ def test_tui_view_creation():
     """Test creation d'une instance TUIView."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     assert tui.dungeon == dungeon
@@ -243,8 +245,10 @@ def test_tui_view_cursor_movement():
     """Test mouvement du curseur TUIView."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Test initial position
@@ -275,8 +279,10 @@ def test_tui_view_key_bindings():
     """Test que les bindings de touches sont definis."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Verifier que les touches importantes sont definies
@@ -299,8 +305,10 @@ def test_tui_view_update_methods():
     """Test les methodes de mise a jour de TUIView."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Test update_hero_positions
@@ -318,8 +326,10 @@ def test_tui_view_place_entity():
     """Test placement d'entites via TUIView."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Deplacer le curseur
@@ -345,8 +355,10 @@ def test_tui_view_remove_entity():
     """Test suppression d'entites via TUIView."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Placer un mur
@@ -369,8 +381,10 @@ def test_tui_view_controller_integration():
     """Test l'integration TUIView avec GameController."""
     dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
+    from src.simulation import Simulation
 
-    gc = GameController(interface=None, simulation=None, dungeon=dungeon)
+    simulation = Simulation(dungeon=dungeon, budget_tot=100, nb_heroes=0, heroes=[])
+    gc = GameController(interface=None, simulation=simulation)
     tui = TUIView(game_controller=gc)
 
     # Verifier que le controller a acces au donjon
