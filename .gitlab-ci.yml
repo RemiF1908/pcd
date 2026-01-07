@@ -34,8 +34,7 @@ generer-pdf:
       allow_failure: true
   
   script:
-    - /home/mermaidcli/node_modules/.bin/mmdc -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf
-  
+    - /home/mermaidcli/node_modules/.bin/mmdc -p /home/mermaidcli/puppeteer-config.json -i ./docs/classDiagram.mmd -o ./docs/classDiagram.pdf  
   artifacts:
     paths:
       - docs/classDiagram.pdf
