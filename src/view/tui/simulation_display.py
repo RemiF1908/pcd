@@ -21,7 +21,7 @@ from src.commands.removeEntity import removeEntity
 from src.commands.exportDungeon import exportDungeon
 from src.commands.importDungeon import importDungeon
 from src.model.entity_factory import EntityFactory
-from src.view.tui.input_handler import InputHandler
+from src.view.input_handler import InputHandler
 
 
 class ColorPair(Enum):
@@ -451,26 +451,39 @@ class TUIView:
         self.HELP_START_X = self.STATUS_START_X + 23
 
         self.invoker = invoker
-        self.input_handler = InputHandler(self, self.invoker)
+        self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker)
 
         # Mapping des touches vers les commandes
         self.key_bindings: dict[int, Callable[[], None]] = {
-            ord("q"): self.input_handler.quit,
+            ord("q"): self.quit,
             ord("s"): self.input_handler.start_wave,
             ord("x"): self.input_handler.stop_wave,
             ord("r"): self.input_handler.reset_dungeon,
             ord("e"): self.input_handler.export_dungeon,
             ord("i"): self.input_handler.import_dungeon,
-            curses.KEY_UP: self.input_handler.move_cursor_up,
-            curses.KEY_DOWN: self.input_handler.move_cursor_down,
-            curses.KEY_LEFT: self.input_handler.move_cursor_left,
-            curses.KEY_RIGHT: self.input_handler.move_cursor_right,
-            ord("t"): self.input_handler.place_trap,
-            ord("w"): self.input_handler.place_wall,
-            ord("z"): self.input_handler.place_dragon,
-            ord("b"): self.input_handler.place_bombe,
-            ord("d"): self.input_handler.remove_entity,
+            curses.KEY_UP: self.move_cursor_up,
+            curses.KEY_DOWN: self.move_cursor_down,
+            curses.KEY_LEFT: self.move_cursor_left,
+            curses.KEY_RIGHT: self.move_cursor_right,
+            ord("t"): lambda: self.input_handler.place_trap(self.cursor_pos),
+            ord("w"): lambda: self.input_handler.place_wall(self.cursor_pos),
+            ord("z"): lambda: self.input_handler.place_dragon(self.cursor_pos),
+            ord("b"): lambda: self.input_handler.place_bombe(self.cursor_pos),
+            ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
         }
+
+
+    def move_cursor_up(self) -> None:                                                                                                               
+        self._move_cursor(-1, 0)                                                                                                                 
+    def move_cursor_down(self) -> None:                                                                                                             
+        self._move_cursor(1, 0)                                                                                                                     
+    def move_cursor_left(self) -> None:                                                                                                             
+        self._move_cursor(0, -1)                                                                                                                    
+    def move_cursor_right(self) -> None:                                                                                                            
+        self._move_cursor(0, 1) 
+    def _draw_cursor(self, stdscr, start_y: int, start_x: int) -> None:
+        row, col = self.cursor_pos
+
 
     def _draw_cursor(self, stdscr, start_y: int, start_x: int) -> None:
         row, col = self.cursor_pos
@@ -500,6 +513,14 @@ class TUIView:
         for i, (text, attr) in enumerate(help_text):
             _draw_str(stdscr, start_y + i, start_x, text, attr)
 
+    def _move_cursor(self, delta_row: int, delta_col: int) -> None:
+        "Déplace le curseur selon les deltas fournis."
+        row, col = self.cursor_pos
+        max_row, max_col = self.dimension[0] - 1, self.dimension[1] - 1
+        new_row = max(0, min(max_row, row + delta_row))
+        new_col = max(0, min(max_col, col + delta_col))
+        self.cursor_pos = (new_row, new_col)
+
     def update_hero_positions(self, positions: list[tuple[int, int]]) -> None:
         self.hero_positions = positions
 
@@ -519,6 +540,9 @@ class TUIView:
             ):
                 self.status_info = self.invoker.game_controller.get_status_info()
 
+    def quit(self) -> None:
+        """Quitte la boucle principale de la TUI."""
+        self.running = False
     def render(self, stdscr) -> None:
         stdscr.clear()
 
@@ -561,7 +585,7 @@ class TUIView:
         )
 
         stdscr.refresh()
-
+    
     def run(self) -> None:
         """Lance la boucle principale de la TUI."""
 
