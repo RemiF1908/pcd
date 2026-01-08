@@ -62,7 +62,7 @@ class Cell:
         return int(getattr(self.entity, "damage", 0) or getattr(self.entity, "attack_power", 0))
     
     def return_damage_if_CD(self) :
-        if self.entity.current_cooldown == 0 and not self.entity.triggered :
+        if self.entity.current_cooldown == 0 :
             self.entity.triggered = True
             return self.get_damage()
         else:

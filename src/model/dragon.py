@@ -60,6 +60,9 @@ class Dragon(Entity):
         """Retourne 4 (couleur dragon : rouge)."""
         return 4
 
+    def decrease_cooldown(self):
+        self.current_cooldown -= 1
+
     @property
     def max_cooldown(self) -> int:
         return 4

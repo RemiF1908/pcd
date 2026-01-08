@@ -404,9 +404,9 @@ def draw_log(
     _draw_str(stdscr, start_y, start_x, "=== Log ===", curses.A_BOLD)
     for i, hero in enumerate(simulation.heroes):
         _draw_str(stdscr, start_y + 1 + i * 3, start_x, f"{hero.pv_cur}/{hero.pv_total} HP")
-        if simulation.dungeon.get_cell((0,2)).entity.type == "BOMBE":
-            if (simulation.dungeon.get_cell((0,2)).entity.triggered):
-                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"la bombe a explosé!")
+        if simulation.dungeon.get_cell((1,1)).entity.type == "DRAGON":
+            if (simulation.dungeon.get_cell((1,1)).entity.current_cooldown == 0):
+                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"wouaff")
             else:
                 _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"la bombe n'a pas encore explosé.")
 

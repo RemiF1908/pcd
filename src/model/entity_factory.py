@@ -69,7 +69,7 @@ class EntityFactory:
         return TrapCreator(damage=damage).factory_method()
     
     @staticmethod
-    def create_dragon(orientation : str = "R") -> Entity:
+    def create_dragon(orientation : str = "U") -> Entity:
         """Créer une entité Dragon (monstre).
 
         Returns:
