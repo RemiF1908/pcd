@@ -37,10 +37,11 @@ class ColorPair(Enum):
     FLOOR = 1
     WALL = 2
     TRAP = 3
-    MONSTER = 4
+    DRAGON = 4
     ENTRANCE = 5
     EXIT = 6
     HERO = 7
+    BOMBE = 8
 
     @classmethod
     def init_curses_colors(cls) -> None:
@@ -50,11 +51,11 @@ class ColorPair(Enum):
         curses.init_pair(cls.FLOOR.value, curses.COLOR_WHITE, -1)
         curses.init_pair(cls.WALL.value, curses.COLOR_WHITE, -1)
         curses.init_pair(cls.TRAP.value, curses.COLOR_RED, -1)
-        curses.init_pair(cls.MONSTER.value, curses.COLOR_MAGENTA, -1)
+        curses.init_pair(cls.DRAGON.value, curses.COLOR_MAGENTA, -1)
         curses.init_pair(cls.ENTRANCE.value, curses.COLOR_GREEN, -1)
         curses.init_pair(cls.EXIT.value, curses.COLOR_CYAN, -1)
         curses.init_pair(cls.HERO.value, curses.COLOR_YELLOW, -1)
-
+        curses.init_pair(cls.BOMBE.value, curses.COLOR_RED, -1)
 
 @dataclass
 class LegendEntry:
@@ -72,10 +73,11 @@ class Legend:
         LegendEntry(".", "Floor", ColorPair.FLOOR),
         LegendEntry("#", "Wall", ColorPair.WALL),
         LegendEntry("^", "Trap", ColorPair.TRAP),
-        LegendEntry("M", "Monster", ColorPair.MONSTER),
+        LegendEntry("Z", "Dragon", ColorPair.DRAGON),
         LegendEntry("E", "Entrance", ColorPair.ENTRANCE),
         LegendEntry("S", "Exit", ColorPair.EXIT),
-        LegendEntry("H", "Hero", ColorPair.MONSTER),
+        LegendEntry("H", "Hero", ColorPair.HERO),
+        LegendEntry("B", "Bombe", ColorPair.BOMBE),
     ]
 
     @classmethod
@@ -130,6 +132,8 @@ def _init_colors() -> None:
     curses.init_pair(6, curses.COLOR_CYAN, -1)
     # Paire 7 : Héros (jaune)
     curses.init_pair(7, curses.COLOR_YELLOW, -1)
+    # Paire 8 : Bombe (rouge)
+    curses.init_pair(8, curses.COLOR_RED, -1)
 
 
 def _get_cell_display(
@@ -469,6 +473,8 @@ class TUIView:
             curses.KEY_RIGHT: self._move_cursor_right,
             ord("t"): self._place_trap,
             ord("w"): self._place_wall,
+            ord("z"): self._place_dragon,
+            ord("b"): self._place_bombe,
             ord("d"): self._remove_entity,
         }
 
@@ -531,6 +537,18 @@ class TUIView:
         command = placeEntity(self.dungeon, wall, self.cursor_pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+    
+    def _place_dragon(self) -> None:
+        dragon = EntityFactory.create_dragon()
+        command = placeEntity(self.dungeon, dragon, self.cursor_pos, self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
+        
+    def _place_bombe(self) -> None:
+        bombe = EntityFactory.create_bombe()
+        command = placeEntity(self.dungeon, bombe, self.cursor_pos, self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
 
     def _remove_entity(self) -> None:
         command = removeEntity(self.dungeon, self.cursor_pos, self.simulation)
@@ -557,6 +575,8 @@ class TUIView:
             ("=== Placer entités ===", curses.A_BOLD),
             ("t: Trap (piège)", 0),
             ("w: Wall (mur)", 0),
+            ("z: Dragon", 0),
+            ("b: Bombe", 0),
             ("d: Delete (supprimer)", 0),
         ]
 

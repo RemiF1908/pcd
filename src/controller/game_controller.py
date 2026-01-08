@@ -66,6 +66,24 @@ class GameController:
         command = placeEntity(self.dungeon, wall, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        
+    def place_dragon(self, position: tuple[int, int]) -> None:
+        """Place un dragon à la position donnée."""
+        from ..model.dragon_creator import DragonCreator
+
+        dragon = DragonCreator("R").build()
+        command = placeEntity(self.dungeon, dragon, position, self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
+        
+    def place_bombe(self, position: tuple[int, int]) -> None:
+        """Place une bombe à la position donnée."""
+        from ..model.bombe_creator import BombeCreator
+
+        bombe = BombeCreator().build()
+        command = placeEntity(self.dungeon, bombe, position, self.simulation)
+        self.invoker.push_command(command)
+        self.invoker.execute()
 
     def remove_entity(self, position: tuple[int, int]) -> None:
         """Supprime l'entité à la position donnée."""
