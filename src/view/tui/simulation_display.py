@@ -75,7 +75,7 @@ class Legend:
         LegendEntry("M", "Monster", ColorPair.MONSTER),
         LegendEntry("E", "Entrance", ColorPair.ENTRANCE),
         LegendEntry("S", "Exit", ColorPair.EXIT),
-        LegendEntry("@", "Hero", ColorPair.HERO),
+        LegendEntry("H", "Hero", ColorPair.MONSTER),
     ]
 
     @classmethod
@@ -158,7 +158,7 @@ def _get_cell_display(
 ) -> tuple[str, int]:
     """Détermine le symbole et la couleur pour une cellule."""
     if pos in hero_set:
-        return Legend.get_symbol_for("HERO"), ColorPair.HERO.value
+        return "H", ColorPair.MONSTER.value
     if pos == dungeon.entry:
         return Legend.get_symbol_for("ENTRANCE"), ColorPair.ENTRANCE.value
     if pos == dungeon.exit:
@@ -350,6 +350,17 @@ def draw_status(
     for i, (key, value) in enumerate(status_info.items()):
         _draw_str(stdscr, start_y + 1 + i, start_x, f"{key}: {value}")
 
+def draw_log(
+    stdscr,
+    start_y: int,
+    start_x: int,
+    log: str,
+) -> None:
+    """Affiche les informations de status."""
+    _draw_str(stdscr, start_y, start_x, "=== Log ===", curses.A_BOLD)
+
+    _draw_str(stdscr, start_y + 1, start_x, f"{log}")
+
 
 def display_simulation(
     hero_positions: list[tuple[int, int]],
@@ -456,6 +467,7 @@ class TUIView:
         self.hero_positions = heros_positions
         self.dungeon = dungeon
         self.simulation = simulation
+        self.log = self.simulation.heroes[0].coord
 
         self.TITLE_Y = 0
         self.TITLE_X = 1
@@ -466,6 +478,8 @@ class TUIView:
         self.LEGEND_X = self.DUNGEON_START_X
         self.STATUS_START_Y = self.DUNGEON_START_Y
         self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
+        self.LOG_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
+        self.LOG_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 4
         self.FOOTER_Y = self.LEGEND_START_Y + 10
         self.FOOTER_X = self.DUNGEON_START_X
         self.HELP_START_Y = self.DUNGEON_START_Y
@@ -604,18 +618,18 @@ class TUIView:
 >>>>>>> 41c8c4e (refactor(commands): update execute method to accept game_controller parameter)
     def _place_trap(self) -> None:
         trap = EntityFactory.create_trap(damage=10)
-        command = placeEntity(self.dungeon, trap, self.cursor_pos)
+        command = placeEntity(self.dungeon, trap, self.cursor_pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
     def _place_wall(self) -> None:
         wall = EntityFactory.create_wall()
-        command = placeEntity(self.dungeon, wall, self.cursor_pos)
+        command = placeEntity(self.dungeon, wall, self.cursor_pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
     def _remove_entity(self) -> None:
-        command = removeEntity(self.dungeon, self.cursor_pos)
+        command = removeEntity(self.dungeon, self.cursor_pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
@@ -651,8 +665,20 @@ class TUIView:
     def update_status_info(self, info: dict[str, Any]) -> None:
         self.status_info = info
 
+    def update_hero_positions_from_simulation(self) -> None:
+        """Met à jour les positions des héros et les infos de statut depuis la simulation."""
+        if self.simulation and hasattr(self.simulation, "level"):
+            # Utilise get_all_hero_positions pour afficher tous les héros, même non réveillés
+            self.hero_positions = self.simulation.get_all_hero_positions()
+            # Met à jour aussi les infos de statut
+            if (
+                self.invoker
+                and hasattr(self.invoker, "game_controller")
+                and self.invoker.game_controller
+            ):
+                self.status_info = self.invoker.game_controller.get_status_info()
+
     def render(self, stdscr) -> None:
-        print("render called")
         stdscr.clear()
 
         rows, cols = self.dimension
@@ -681,6 +707,8 @@ class TUIView:
                 stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info
             )
 
+        draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.log)
+
         self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
 
         _draw_str(
@@ -690,7 +718,6 @@ class TUIView:
             f"Curseur: {self.cursor_pos}",
             curses.A_DIM,
         )
-        print("oui")
 
         stdscr.refresh()
 
@@ -704,6 +731,9 @@ class TUIView:
             stdscr.timeout(100)
             self.running = True
             while self.running:
+                # Met à jour les positions des héros depuis la simulation
+                self.update_hero_positions_from_simulation()
+                self.log = self.simulation.heroes[0].path
                 self.render(stdscr)
                 key = stdscr.getch()
                 if key in self.key_bindings:

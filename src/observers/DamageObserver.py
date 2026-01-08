@@ -7,7 +7,7 @@ class DamageObserver(Observer) :
 
     def update(self, damage : int) : 
         self.lastdamage = damage
-        print(f"Hero took {damage} damage")
+        #print(f"Hero took {damage} damage")
         self.totaldamage += damage
 
     def getTotalDmg(self) :
