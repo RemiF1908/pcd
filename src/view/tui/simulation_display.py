@@ -563,7 +563,7 @@ class TUIView:
             stdscr,
             self.hero_positions,
             self.dimension,
-            self.dungeon,
+            self.simulation.dungeon,
             self.entry_pos,
             self.exit_pos,
             self.DUNGEON_START_Y,

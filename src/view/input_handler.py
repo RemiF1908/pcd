@@ -45,9 +45,13 @@ class InputHandler:
 
     def import_dungeon(self) -> None:
         print("in importDungeon execute")
-        command = importDungeon("dungeon", self.dungeon)
+        command = importDungeon("dungeon")
         self.invoker.push_command(command)
         self.invoker.execute()
+        res = command.result
+        if res:
+            self.simulation.dungeon = res
+        
 
     def place_trap(self, pos) -> None:
         trap = EntityFactory.create_trap(damage=10)

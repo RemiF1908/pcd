@@ -42,7 +42,7 @@ class Dungeon:
             for cell in row:
                 cell.entity = FloorCreator().build()
 
-    def blank_grid(self, rows, cols) -> None:
+    def blank_grid(self, rows, cols) -> list:
         """Crée une grille vide de cellules."""
         return [[Cell((r, c), Floor()) for c in range(cols)] for r in range(rows)]
 
