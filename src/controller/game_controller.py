@@ -93,3 +93,64 @@ class GameController:
         self.invoker.push_command(command)
         self.invoker.execute()
         return command.result
+    
+    def get_status_info(self) -> dict[str, Any]:
+        """Retourne les informations de statut actuelles de la simulation."""
+        return {
+            "Niveau": self.simulation.level.difficulty,
+            "Temps": self.simulation.ticks,
+            "Score": self.simulation.score,
+            "Héros Vivants": len(self.simulation.level.get_alive_heroes()),
+            "Budget Actuel": self.simulation.current_budget,
+        }
+        
+    def get_hero_positions(self) -> list[tuple[int, int]]:
+        """Retourne les positions des héros vivants dans la simulation."""
+        return self.simulation.level.get_hero_positions()
+        
+    
+    def render(self) -> None:
+        """Rendu de l'interface avec l'état actuel de la simulation."""
+        self.view.render()
+
+    def grid_str(self) -> str:
+        """Retourne un tableau de str qui représente la grille du donjon avec les couleurs"""
+        rows = []
+        for row in self.dungeon.grid:
+            str_row = []
+            for cell in row:
+                if cell.entity is not None:
+                    str_row.append((cell.entity.get_display_char(), cell.entity.get_color_id()))
+                else:
+                    str_row.append(("+", 0))
+            rows.append(str_row)
+        return rows
+    
+    def grid_str_to_grid_cell(self,grid: list[list[tuple[str,int]]]) -> list[list[Any]]:
+        """Convertit un tableau de str en une grille de cellules du donjon."""
+        dungeon_grid = []
+        for row in grid:
+            dungeon_row = []
+            for char, color_id in row:
+                cell_entity = EntityFactory.create_entity_from_display(char, color_id)
+                dungeon_row.append(cell_entity)
+            dungeon_grid.append(dungeon_row)
+        return dungeon_grid
+    
+    
+    def dimension(self) -> tuple[int, int]:
+        """Retourne les dimensions du donjon."""
+        return self.dungeon.dimension
+    
+    def entry(self) -> tuple[int, int]:
+        """Retourne la position d'entrée du donjon."""
+        return self.dungeon.entry
+    
+    def exit(self) -> tuple[int, int]:
+        """Retourne la position de sortie du donjon."""
+        return self.dungeon.exit
+    
+    def get_budget(self) -> int:
+        """Retourne le budget total du niveau."""
+        return self.simulation.level.budget_tot
+    
