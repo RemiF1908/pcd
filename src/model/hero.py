@@ -1,9 +1,10 @@
 from typing import List, Optional
+from src.config import TOURBOUCLE_REVEIl_HERO
 from .path_strategies import PathStrategyFactory
 
 
 class Hero:
-    def __init__(self, pv_total, strategy: str, coord=None):
+    def __init__(self, pv_total, strategy: str, coord=None, hero_number = 1):
         self.pv_total = pv_total
         self.pv_cur = pv_total
         self.coord = coord
@@ -12,6 +13,8 @@ class Hero:
         self.stepsTaken = 0
         self.path: Optional[List[tuple]] = None
         self.strategy = strategy
+        self.hero_number = hero_number
+        self.ticktoAwake = self.hero_number * TOURBOUCLE_REVEIl_HERO
 
     def awake(self):
         self.isAlive = True
@@ -38,7 +41,6 @@ class Hero:
 
     def compute_path(self, dungeon, start, goal):
         """Compute path using the assigned strategy."""
-        print("path being computed")
         path_strategy = PathStrategyFactory.create(self.strategy)
         self.path = path_strategy.find_path(dungeon, start, goal)
 

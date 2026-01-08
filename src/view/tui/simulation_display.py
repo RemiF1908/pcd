@@ -21,15 +21,7 @@ from src.commands.removeEntity import removeEntity
 from src.commands.exportDungeon import exportDungeon
 from src.commands.importDungeon import importDungeon
 from src.model.entity_factory import EntityFactory
-from src.commands.startWave import startWave
-from src.commands.stopWave import stopWave
-from src.commands.resetDungeon import resetDungeon
-from src.commands.placeEntity import placeEntity
-from src.commands.removeEntity import removeEntity
-from src.commands.exportDungeon import exportDungeon
-from src.commands.importDungeon import importDungeon
-from src.model.entity_factory import EntityFactory
-from src.model.entity import Entity
+from src.view.tui.input_handler import InputHandler
 
 
 class ColorPair(Enum):
@@ -464,102 +456,26 @@ class TUIView:
         self.HELP_START_X = self.STATUS_START_X + 23
 
         self.invoker = invoker
+        self.input_handler = InputHandler(self, self.invoker)
 
         # Mapping des touches vers les commandes
         self.key_bindings: dict[int, Callable[[], None]] = {
-            ord("q"): self._quit,
-            ord("s"): self._start_wave,
-            ord("x"): self._stop_wave,
-            ord("r"): self._reset_dungeon,
-            ord("e"): self._export_dungeon,
-            ord("i"): self._import_dungeon,
-            curses.KEY_UP: self._move_cursor_up,
-            curses.KEY_DOWN: self._move_cursor_down,
-            curses.KEY_LEFT: self._move_cursor_left,
-            curses.KEY_RIGHT: self._move_cursor_right,
-            ord("t"): self._place_trap,
-            ord("w"): self._place_wall,
-            ord("z"): self._place_dragon,
-            ord("b"): self._place_bombe,
-            ord("d"): self._remove_entity,
+            ord("q"): self.input_handler.quit,
+            ord("s"): self.input_handler.start_wave,
+            ord("x"): self.input_handler.stop_wave,
+            ord("r"): self.input_handler.reset_dungeon,
+            ord("e"): self.input_handler.export_dungeon,
+            ord("i"): self.input_handler.import_dungeon,
+            curses.KEY_UP: self.input_handler.move_cursor_up,
+            curses.KEY_DOWN: self.input_handler.move_cursor_down,
+            curses.KEY_LEFT: self.input_handler.move_cursor_left,
+            curses.KEY_RIGHT: self.input_handler.move_cursor_right,
+            ord("t"): self.input_handler.place_trap,
+            ord("w"): self.input_handler.place_wall,
+            ord("z"): self.input_handler.place_dragon,
+            ord("b"): self.input_handler.place_bombe,
+            ord("d"): self.input_handler.remove_entity,
         }
-
-    def _move_cursor(self, delta_row: int, delta_col: int) -> None:
-        "Déplace le curseur selon les deltas fournis."
-        row, col = self.cursor_pos
-        max_row, max_col = self.dimension[0] - 1, self.dimension[1] - 1
-        new_row = max(0, min(max_row, row + delta_row))
-        new_col = max(0, min(max_col, col + delta_col))
-        self.cursor_pos = (new_row, new_col)
-
-    def _move_cursor_up(self) -> None:
-        self._move_cursor(-1, 0)
-
-    def _move_cursor_down(self) -> None:
-        self._move_cursor(1, 0)
-
-    def _move_cursor_left(self) -> None:
-        self._move_cursor(0, -1)
-
-    def _move_cursor_right(self) -> None:
-        self._move_cursor(0, 1)
-
-    def _quit(self) -> None:
-        self.running = False
-
-    def _start_wave(self) -> None:
-        command = startWave(self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _stop_wave(self) -> None:
-        command = stopWave(self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _reset_dungeon(self) -> None:
-        command = resetDungeon(self.dungeon)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _export_dungeon(self) -> None:
-        command = exportDungeon(self.dungeon, "dungeon.json")
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _import_dungeon(self) -> None:
-        command = importDungeon("dungeon.json")
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _place_trap(self) -> None:
-        trap = EntityFactory.create_trap(damage=10)
-        command = placeEntity(self.dungeon, trap, self.cursor_pos, self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _place_wall(self) -> None:
-        wall = EntityFactory.create_wall()
-        command = placeEntity(self.dungeon, wall, self.cursor_pos, self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-    
-    def _place_dragon(self) -> None:
-        dragon = EntityFactory.create_dragon()
-        command = placeEntity(self.dungeon, dragon, self.cursor_pos, self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-        
-    def _place_bombe(self) -> None:
-        bombe = EntityFactory.create_bombe()
-        command = placeEntity(self.dungeon, bombe, self.cursor_pos, self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
-
-    def _remove_entity(self) -> None:
-        command = removeEntity(self.dungeon, self.cursor_pos, self.simulation)
-        self.invoker.push_command(command)
-        self.invoker.execute()
 
     def _draw_cursor(self, stdscr, start_y: int, start_x: int) -> None:
         row, col = self.cursor_pos
@@ -666,7 +582,7 @@ class TUIView:
                 if self.simulation.heroes and hasattr(
                     self.simulation.heroes[0], "path"
                 ):
-                    self.log = True if self.simulation.heroes[0] is not None else False
+                    self.log = [h.ticktoAwake for h in self.simulation.heroes].__str__()
                 self.render(stdscr)
                 key = stdscr.getch()
                 if key in self.key_bindings:

@@ -15,6 +15,10 @@ class Bombe(Entity):
         return "BOMBE"
 
     @property
+    def cost(self) -> int :
+        return 80
+
+    @property
     def passable(self) -> bool:
         return True
 

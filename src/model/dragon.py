@@ -16,6 +16,10 @@ class Dragon(Entity):
         return "DRAGON"
 
     @property
+    def const(self) -> int :
+        return 80
+
+    @property
     def passable(self) -> bool:
         return True
 

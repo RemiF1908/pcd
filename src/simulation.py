@@ -80,13 +80,10 @@ class Simulation:
         if (self.dungeon )  :
             self.dungeon.update()
         
- 
-        if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1):
-            if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
-                self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
-            count_awake_hero += 1
         # Let heroes act
         for h in list(self.heroes):
+            if self.ticks == h.ticktoAwake:
+                h.awake()
             if h.isAlive:
                 try:
                     nextMove = h.getMove()

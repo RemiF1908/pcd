@@ -18,6 +18,10 @@ class Trap(Entity):
         return "TRAP"
 
     @property
+    def cost(self) -> int :
+        return 30
+
+    @property
     def passable(self) -> bool:
         # Un piège est placé sur une case franchissable (on peut marcher dessus)
         return True

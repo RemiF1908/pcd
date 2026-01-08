@@ -10,4 +10,6 @@ class placeEntity(Command):
 
     def execute(self, game_controller):
         if not(self.simulation.isSimStarted):
-            self.dungeon.place_entity(self.entity, self.position)
+            if self.entity.cost <= self.simulation.current_budget:
+                self.simulation.current_budget -= self.entity.cost
+                self.dungeon.place_entity(self.entity, self.position)
