@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from src.model.wall_creator import WallCreator
+
 from .entity import Entity
 
 
@@ -60,7 +62,7 @@ class Cell:
         return int(getattr(self.entity, "damage", 0) or getattr(self.entity, "attack_power", 0))
     
     def return_damage_if_CD(self) :
-        if self.entity.current_cooldown == 0:
+        if self.entity.current_cooldown == 0 and not self.entity.triggered :
             self.entity.triggered = True
             return self.get_damage()
         else:
@@ -71,9 +73,10 @@ class Cell:
         Retire le monstre de cette case, en le remplaçant par un floor.
         """
         from .floor_creator import FloorCreator
+        
 
-        if self.entity is not None and getattr(self.entity, "type", None) == "monster":
-            self.entity = FloorCreator().build()
+
+        self.entity = FloorCreator().build()
 
     def update(self) -> None : 
         """Met à jour l'état de la cellule en mettant à jour son entité."""

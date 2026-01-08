@@ -80,7 +80,9 @@ class Dungeon:
         """Met à jour l'état du donjon (placeholder pour logique future)."""
         for row in self.grid:
             for cell in row:
+
                 cell.entity.update(cell) # Placeholder for future update logic
+
 
     def __repr__(self) -> str:
         return (

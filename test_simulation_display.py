@@ -35,7 +35,7 @@ def test_simulation_display_basic():
     )
 
     # Création de la simulation
-    simulation = Simulation(level, dungeon)
+    simulation = Simulation(level, level.dungeon)
     gamecontroller.simulation = simulation
 
     view = TUIView(

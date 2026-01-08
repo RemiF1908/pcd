@@ -12,7 +12,7 @@ class Bombe(Entity):
 
     @property
     def type(self) -> str:
-        return "Bombe"
+        return "BOMBE"
 
     @property
     def passable(self) -> bool:
@@ -35,7 +35,8 @@ class Bombe(Entity):
     def update(self, cell) -> None:
         """Met à jour l'état de la bombe (placeholder pour logique future)."""
         if self.triggered :
-            cell.remove_monster()
+                cell.remove_monster()
+            
 
     def get_display_char(self) -> str:
         """Retourne 'B' pour représenter une bombe."""

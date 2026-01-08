@@ -29,6 +29,7 @@ from src.commands.removeEntity import removeEntity
 from src.commands.exportDungeon import exportDungeon
 from src.commands.importDungeon import importDungeon
 from src.model.entity_factory import EntityFactory
+from src.model.entity import Entity
 
 
 class ColorPair(Enum):
@@ -403,14 +404,19 @@ def display_simulation(
 
 def draw_log(
     stdscr,
-    start_y: int,
+    start_y: int,   
     start_x: int,
-    log: str,
+    simulation: Simulation,
 ) -> None:
     """Affiche les informations de status."""
     _draw_str(stdscr, start_y, start_x, "=== Log ===", curses.A_BOLD)
-
-    _draw_str(stdscr, start_y + 1, start_x, f"{log}")
+    for i, hero in enumerate(simulation.heroes):
+        _draw_str(stdscr, start_y + 1 + i * 3, start_x, f"{hero.pv_cur}/{hero.pv_total} HP")
+        if simulation.dungeon.get_cell((0,2)).entity.type == "BOMBE":
+            if (simulation.dungeon.get_cell((0,2)).entity.triggered):
+                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"la bombe a explosé!")
+            else:
+                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"la bombe n'a pas encore explosé.")
 
 
 class TUIView:
@@ -631,7 +637,7 @@ class TUIView:
                 stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info
             )
 
-        draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.log)
+        draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.simulation)
 
         self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
 
@@ -666,4 +672,4 @@ class TUIView:
                 if key in self.key_bindings:
                     self.key_bindings[key]()
 
-        curses.wrapper(_main)
+        curses.wrapper(_main)   

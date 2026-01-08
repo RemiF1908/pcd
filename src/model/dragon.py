@@ -13,7 +13,7 @@ class Dragon(Entity):
         self.triggered = False
     @property
     def type(self) -> str:
-        return "Dragon"
+        return "DRAGON"
 
     @property
     def passable(self) -> bool:

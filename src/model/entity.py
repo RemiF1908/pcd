@@ -31,7 +31,7 @@ class Entity(ABC):
 	@property
 	@abstractmethod
 	def type(self) -> str:
-		"""Type de l'entité (ex: 'FLOOR', 'WALL', 'TRAP', 'MONSTER')."""
+		"""Type de l'entité (ex: 'FLOOR', 'WALL', 'TRAP', 'Bombe')."""
 
 	@property
 	def passable(self) -> bool:

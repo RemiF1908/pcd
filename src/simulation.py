@@ -1,4 +1,6 @@
 import os, time
+
+from src.model.floor_creator import FloorCreator
 from .config import *
 from .model.hero import Hero
 from .model.waveResult import waveResult
@@ -71,14 +73,14 @@ class Simulation:
         `score` or `current_budget` if the provided objects expose the
         corresponding information.
         """
+
         self.ticks += 1
         count_awake_hero = 0
         # Let dungeon perform an update if available
-        try:
-            if self.dungeon and hasattr(self.dungeon, "update"):
-                self.dungeon.update(self)
-        except Exception:
-            pass
+        if (self.dungeon )  :
+            self.dungeon.update()
+        
+ 
         if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1):
             if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
                 self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
@@ -106,6 +108,8 @@ class Simulation:
                 self.score = int(getattr(self.dungeon, "score"))
         except Exception:
             pass
+
+
 
     def check_on_treasure(self, hero: Hero) -> bool:
         if hero.coord == self.dungeon.exit:
