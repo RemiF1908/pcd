@@ -26,9 +26,13 @@ from .entity import Entity
 from .floor import Floor
 from .wall import Wall
 from .trap import Trap
+from .dragon import Dragon
+from .bombe import Bombe
 from .floor_creator import FloorCreator
 from .wall_creator import WallCreator
 from .trap_creator import TrapCreator
+from .dragon_creator import DragonCreator
+from .bombe_creator import BombeCreator
 
 
 class EntityFactory:
@@ -63,3 +67,22 @@ class EntityFactory:
             Instance de Trap créée via TrapCreator.
         """
         return TrapCreator(damage=damage).factory_method()
+    
+    @staticmethod
+    def create_dragon(orientation : str = "U") -> Entity:
+        """Créer une entité Dragon (monstre).
+
+        Returns:
+            Instance de Dragon créée via DragonCreator.
+        """
+
+        return DragonCreator().factory_method(orientation)
+
+    def create_bombe() -> Bombe:
+        """Créer une entité Bombe.
+
+        Returns:
+            Instance de Bombe créée via BombeCreator.
+        """
+
+        return BombeCreator().factory_method()

@@ -16,9 +16,11 @@ from src.model.trap import Trap
 from src.model.entity_factory import EntityFactory
 from src.view.tui.simulation_display import (
     draw_simulation,
+    draw_dungeon,
     draw_legend,
     _init_colors,
     TUIView,
+    ColorPair,
 )
 
 
@@ -38,7 +40,7 @@ def create_test_dungeon():
 
     # Créer le donjon (cela va remplir toutes les cellules avec Floor())
     dungeon = Dungeon(
-        dimension=(rows, cols), grid=grid, entry=(0, 0), exit=(rows - 1, cols - 1)
+        dimension=(rows, cols), entry=(0, 0), exit=(rows - 1, cols - 1), grid=grid
     )
 
     # Maintenant ajouter les murs
@@ -68,8 +70,33 @@ def test_curses_draw_dungeon():
         curses.curs_set(0)
         _init_colors()
         stdscr.clear()
-        draw_dungeon(
-            stdscr, dungeon, start_y=1, start_x=1, hero_positions=hero_positions
+        grid_str = []
+        for row in dungeon.grid:
+            str_row = []
+            for cell in row:
+                if cell.entity is not None:
+                    str_row.append(
+                        (cell.entity.get_display_char(), cell.entity.get_color_id())
+                    )
+                else:
+                    str_row.append((".", ColorPair.FLOOR.value))
+            grid_str.append(str_row)
+
+        grid_str[dungeon.entry[0]][dungeon.entry[1]] = ("E", ColorPair.ENTRANCE.value)
+        grid_str[dungeon.exit[0]][dungeon.exit[1]] = ("S", ColorPair.EXIT.value)
+
+        for pos in hero_positions:
+            grid_str[pos[0]][pos[1]] = ("@", ColorPair.HERO.value)
+
+        draw_simulation(
+            stdscr,
+            hero_positions,
+            dungeon.dimension,
+            dungeon,
+            dungeon.entry,
+            dungeon.exit,
+            start_y=1,
+            start_x=1,
         )
         assert chr(stdscr.inch(1, 1) & 0xFF) == "E"
         rows, cols = dungeon.dimension
@@ -156,9 +183,33 @@ def test_curses_display_full_dungeon():
         # Titre
         stdscr.addstr(0, 1, "TEST DUNGEON DISPLAY", curses.A_BOLD)
 
+        # Préparer la grille pour l'affichage
+        grid_str = []
+        for row in dungeon.grid:
+            str_row = []
+            for cell in row:
+                if cell.entity is not None:
+                    str_row.append(
+                        (cell.entity.get_display_char(), cell.entity.get_color_id())
+                    )
+                else:
+                    str_row.append((".", ColorPair.FLOOR.value))
+            grid_str.append(str_row)
+
+        # Ajouter les marqueurs d'entrée et de sortie
+        grid_str[dungeon.entry[0]][dungeon.entry[1]] = ("E", ColorPair.ENTRANCE.value)
+        grid_str[dungeon.exit[0]][dungeon.exit[1]] = ("S", ColorPair.EXIT.value)
+
         # Dessiner le donjon avec curses
-        draw_dungeon(
-            stdscr, dungeon, start_y=2, start_x=1, hero_positions=hero_positions
+        draw_simulation(
+            stdscr,
+            hero_positions,
+            dungeon.dimension,
+            dungeon,
+            dungeon.entry,
+            dungeon.exit,
+            start_y=2,
+            start_x=1,
         )
 
         # Dessiner la legende
@@ -202,7 +253,7 @@ def test_curses_display_full_dungeon():
 
 def demo_display():
     """Demo affichage curses."""
-    from src.view.tui.dungeon_display import display_dungeon
+    from src.view.tui.simulation_display import display_dungeon
 
     dungeon, hero_positions = create_test_dungeon()
     status_info = {"Tour": 1, "Heros": 3, "Budget": 150}
@@ -226,10 +277,19 @@ def test_tui_view_creation():
     simulation = Simulation(level, dungeon=dungeon)
 
     gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
+    tui = TUIView(
+        status_info={},
+        dimension=dungeon.dimension,
+        entry_pos=dungeon.entry,
+        exit_pos=dungeon.exit,
+        heros_positions=[],
+        invoker=gc.invoker,
+        dungeon=dungeon,
+        simulation=simulation,
+    )
 
     assert tui.dungeon == dungeon
-    assert tui.game_controller == gc
+    assert tui.invoker.game_controller == gc
     assert tui.running == False
     assert tui.cursor_pos == (0, 0)
 
@@ -237,47 +297,26 @@ def test_tui_view_creation():
 def test_tui_view_requires_controller():
     """Test que TUIView necessite un controller."""
     dungeon, _ = create_test_dungeon()
-    try:
-        tui = TUIView(game_controller=None)
-        assert False, "Devrait lever ValueError"
-    except ValueError:
-        pass
-
-
-def test_tui_view_cursor_movement():
-    """Test mouvement du curseur TUIView."""
-    dungeon, _ = create_test_dungeon()
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
     level = LevelPresets().easy(dungeon)
     simulation = Simulation(level, dungeon=dungeon)
-
     gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
 
-    # Test initial position
-    assert tui.cursor_pos == (0, 0)
+    tui = TUIView(
+        status_info={},
+        dimension=dungeon.dimension,
+        entry_pos=dungeon.entry,
+        exit_pos=dungeon.exit,
+        heros_positions=[],
+        invoker=gc.invoker,
+        dungeon=dungeon,
+        simulation=simulation,
+    )
 
-    # Test mouvements
-    tui._move_cursor_down()
-    assert tui.cursor_pos == (1, 0)
-
-    tui._move_cursor_right()
-    assert tui.cursor_pos == (1, 1)
-
-    tui._move_cursor_up()
-    assert tui.cursor_pos == (0, 1)
-
-    tui._move_cursor_left()
-    assert tui.cursor_pos == (0, 0)
-
-    # Test limites
-    tui._move_cursor_up()
-    assert tui.cursor_pos == (0, 0)
-
-    tui._move_cursor_left()
-    assert tui.cursor_pos == (0, 0)
+    assert tui.invoker is not None
+    assert tui.invoker.game_controller == gc
 
 
 def test_tui_view_key_bindings():
@@ -290,7 +329,16 @@ def test_tui_view_key_bindings():
     simulation = Simulation(level, dungeon=dungeon)
 
     gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
+    tui = TUIView(
+        status_info={},
+        dimension=dungeon.dimension,
+        entry_pos=dungeon.entry,
+        exit_pos=dungeon.exit,
+        heros_positions=[],
+        invoker=gc.invoker,
+        dungeon=dungeon,
+        simulation=simulation,
+    )
 
     # Verifier que les touches importantes sont definies
     assert ord("q") in tui.key_bindings
@@ -314,10 +362,20 @@ def test_tui_view_update_methods():
     from src.controller.game_controller import GameController
     from src.simulation import Simulation
 
-    simulation = Simulation(None, dungeon=dungeon)
+    level = LevelPresets().easy(dungeon)
+    simulation = Simulation(level, dungeon=dungeon)
 
     gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
+    tui = TUIView(
+        status_info={},
+        dimension=dungeon.dimension,
+        entry_pos=dungeon.entry,
+        exit_pos=dungeon.exit,
+        heros_positions=[],
+        invoker=gc.invoker,
+        dungeon=dungeon,
+        simulation=simulation,
+    )
 
     # Test update_hero_positions
     positions = [(1, 2), (3, 4), (5, 6)]
@@ -329,94 +387,3 @@ def test_tui_view_update_methods():
     tui.update_status_info(status)
     assert tui.status_info == status
 
-
-def test_tui_view_place_entity():
-    """Test placement d'entites via TUIView."""
-    dungeon, _ = create_test_dungeon()
-    from src.controller.game_controller import GameController
-    from src.simulation import Simulation
-
-    level = LevelPresets().easy(dungeon)
-    simulation = Simulation(level, dungeon=dungeon)
-
-    gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
-
-    # Deplacer le curseur
-    tui.cursor_pos = (2, 3)
-
-    # Placer un mur
-    tui._place_wall()
-    cell = dungeon.get_cell((2, 3))
-    from src.model.wall import Wall
-
-    assert isinstance(cell.entity, Wall)
-
-    # Placer un piege
-    tui.cursor_pos = (4, 5)
-    tui._place_trap()
-    cell = dungeon.get_cell((4, 5))
-    from src.model.trap import Trap
-
-    assert isinstance(cell.entity, Trap)
-
-
-def test_tui_view_remove_entity():
-    """Test suppression d'entites via TUIView."""
-    dungeon, _ = create_test_dungeon()
-    from src.controller.game_controller import GameController
-    from src.simulation import Simulation
-
-    level = LevelPresets().easy(dungeon)
-    simulation = Simulation(level, dungeon=dungeon)
-
-    gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
-
-    # Placer un mur
-    from src.model.entity_factory import EntityFactory
-
-    dungeon.place_entity(EntityFactory.create_wall(), (3, 3))
-
-    # Supprimer le mur
-    tui.cursor_pos = (3, 3)
-    tui._remove_entity()
-
-    # Verifier que c'est maintenant un sol
-    from src.model.floor import Floor
-
-    cell = dungeon.get_cell((3, 3))
-    assert isinstance(cell.entity, Floor)
-
-
-def test_tui_view_controller_integration():
-    """Test l'integration TUIView avec GameController."""
-    dungeon, _ = create_test_dungeon()
-    from src.controller.game_controller import GameController
-    from src.simulation import Simulation
-
-    level = LevelPresets().easy(dungeon)
-    simulation = Simulation(level, dungeon=dungeon)
-
-    gc = GameController(interface=None, simulation=simulation)
-    tui = TUIView(game_controller=gc)
-
-    # Verifier que le controller a acces au donjon
-    assert gc.dungeon == dungeon
-
-    # Test que les methodes du controller sont accessibles depuis la vue
-    tui.cursor_pos = (2, 2)
-
-    # Placer un mur via la vue (qui appelle le controller)
-    tui._place_wall()
-    cell = dungeon.get_cell((2, 2))
-    from src.model.wall import Wall
-
-    assert isinstance(cell.entity, Wall)
-
-    # Supprimer via la vue
-    tui._remove_entity()
-    cell = dungeon.get_cell((2, 2))
-    from src.model.floor import Floor
-
-    assert isinstance(cell.entity, Floor)

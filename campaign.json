@@ -1,0 +1,29 @@
+{
+  "campaign": {
+    "name": "Campagne Principale",
+    "description": "Défendez votre donjon contre les vagues de héros"
+  },
+  "levels": [
+    {
+      "id": 1,
+      "name": "Niveau 1 - Introduction",
+      "difficulty": 1,
+      "budget": 200,
+      "dungeon_file": "level1_dungeon",
+      "heroes": [
+        {"pv": 50, "strategy": "random"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Niveau 2 - Premiers Défis",
+      "difficulty": 2,
+      "budget": 150,
+      "dungeon_file": "level2_dungeon",
+      "heroes": [
+        {"pv": 80, "strategy": "safest"},
+        {"pv": 80, "strategy": "shortest"}
+      ]
+    }
+  ]
+}

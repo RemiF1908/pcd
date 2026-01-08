@@ -18,6 +18,10 @@ class Trap(Entity):
         return "TRAP"
 
     @property
+    def cost(self) -> int :
+        return 30
+
+    @property
     def passable(self) -> bool:
         # Un piège est placé sur une case franchissable (on peut marcher dessus)
         return True
@@ -25,6 +29,10 @@ class Trap(Entity):
     @property
     def damage(self) -> int:
         return self._damage
+
+    def update(self, cell) -> None:
+        """Met à jour l'état du piège (placeholder pour logique future)."""
+        pass   
 
     def get_display_char(self) -> str:
         return "^"

@@ -1,4 +1,3 @@
-import curses
 from src.model.level import LevelBuilder
 from src.simulation import Simulation
 from src.controller.game_controller import GameController
@@ -6,55 +5,57 @@ from src.model.hero import Hero
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.floor import Floor
+from src.model.wall import Wall
+from src.model.trap import Trap
 from src.view.tui.simulation_display import TUIView, ColorPair
+from src.commands.GameInvoker import GameInvoker
 
-def test_simulation_display_basic(stdscr):
-    # Initialisation de curses
-    curses.curs_set(0)  # Cache le curseur
-    ColorPair.init_curses_colors()  # Initialise les couleurs
-    
+
+def test_simulation_display_basic():
     gamecontroller = GameController(None, None)
-    
+    invoker = GameInvoker(gamecontroller)
+
     # Création d'un niveau de test
-    hero = Hero(pv_total=100, strategy="random")
-    hero.awake()
+    hero = Hero(pv_total=100, strategy="safest")
+    hero2 = Hero(pv_total=100, strategy="shortest", hero_number=2)
     rows, cols = 10, 10
     dungeon = Dungeon(
-        dimension=(rows, cols), 
+        dimension=(rows, cols),
         grid=[[Cell((r, c), Floor()) for c in range(cols)] for r in range(rows)],
         entry=(0, 0),
-        exit=(rows-1, cols-1)
+        exit=(rows - 1, cols - 1),
     )
-    
-    level = (LevelBuilder()
+
+    level = (
+        LevelBuilder()
         .set_dungeon(dungeon=dungeon)
         .set_difficulty(4)
-        .set_budget(300)
+        .set_budget(2000)
         .add_hero_instance(hero)
-        .build())
-    
+        .add_hero_instance(hero2)
+        .build()
+    )
+
     # Création de la simulation
-    simulation = Simulation(level, dungeon)
+    simulation = Simulation(level, level.dungeon)
     gamecontroller.simulation = simulation
-    
+
     view = TUIView(
         status_info=gamecontroller.get_status_info(),
         dimension=gamecontroller.dimension(),
-        dungeon_grid=gamecontroller.grid_str(),
         entry_pos=gamecontroller.entry(),
         exit_pos=gamecontroller.exit(),
-        heros_positions=gamecontroller.get_hero_positions(),    
+        heros_positions=gamecontroller.get_hero_positions(),
+        invoker=invoker,
+        dungeon=gamecontroller.dungeon,
+        simulation=gamecontroller.simulation,
     )
-    
+
     # Création du GameController
     gamecontroller.interface = view
-    
-    # Rendu de l'interface
-    view.render(stdscr)
-    
-    # AJOUT : Attendre une touche pour quitter
-    stdscr.refresh()
-    stdscr.getch()  # Cette ligne est essentielle pour voir l'affichage
+
+    view.run()
+
 
 if __name__ == "__main__":
-    curses.wrapper(test_simulation_display_basic)
+    test_simulation_display_basic()

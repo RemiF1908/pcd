@@ -25,10 +25,13 @@ class Entity(ABC):
 	Exemples d'implémentations : Floor, Wall, Trap, Monster.
 	"""
 
+	current_cooldown = 0
+
+
 	@property
 	@abstractmethod
 	def type(self) -> str:
-		"""Type de l'entité (ex: 'FLOOR', 'WALL', 'TRAP', 'MONSTER')."""
+		"""Type de l'entité (ex: 'FLOOR', 'WALL', 'TRAP', 'Bombe')."""
 
 	@property
 	def passable(self) -> bool:
@@ -38,6 +41,14 @@ class Entity(ABC):
 		ou obstacles doivent redéfinir cette propriété en False.
 		"""
 		return True
+
+	@property
+	def cost(self) -> int :
+		"""Coût en budget pour placer cette entité.
+
+		Valeur par défaut 0 pour les entités gratuites (floor, wall).
+		"""
+		return 0
 
 	@property
 	def damage(self) -> int:
@@ -51,6 +62,31 @@ class Entity(ABC):
 	def attack_power(self) -> int:
 		"""Puissance d'attaque (pour les monstres)."""
 		return 0
+	
+
+	def init_range(self, coord : tuple[int, int]) -> None:
+		"""Initialise la portée de l'entité (pour les monstres)."""
+		pass
+
+	@property
+	def max_cooldown(self) -> int:
+		"""Cooldown maximum (pour les monstres)."""
+		return 0
+	
+	def reset_cooldown(self) -> None:
+		"""Réinitialise le cooldown (pour les monstres)."""
+		self.current_cooldown = self.max_cooldown
+
+	def decrease_cooldown(self) -> None:
+		"""Diminue le cooldown de 1 (pour les monstres)."""
+		pass
+		
+	def getrange(self) :
+		return []
+	
+	@abstractmethod
+	def update(self, cell) -> None:
+		pass
 
 	@abstractmethod
 	def get_display_char(self) -> str:

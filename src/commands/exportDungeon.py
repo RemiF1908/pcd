@@ -3,11 +3,12 @@ import json
 
 
 class exportDungeon(Command):
-    def __init__(self, dungeon, filepath):
+    def __init__(self, dungeon, filename: str):
         self.dungeon = dungeon
-        self.filepath = filepath
+        self.filename = filename
+        self.filepath="./save/"+filename + ".json"
 
-    def execute(self):
+    def execute(self, game_controller):
         dungeon_data = {
             "dimension": self.dungeon.dimension,
             "entry": self.dungeon.entry,

@@ -10,11 +10,12 @@ from ..model.trap import Trap
 class importDungeon(Command):
     """Command to import a dungeon from a JSON file."""
 
-    def __init__(self, filepath: str):
-        self.filepath = filepath
+    def __init__(self, filename: str):
+        self.filename = filename
+        self.filepath = f"./save/{filename}.json"
         self.result = None
 
-    def execute(self) -> None:
+    def execute(self, game_controller) -> None:
         with open(self.filepath, "r") as f:
             data = json.load(f)
 
