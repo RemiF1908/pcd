@@ -1,10 +1,14 @@
 const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
     backgroundColor: '#1a1a1a',
-    parent: 'game-container',
+    parent: 'game-container', // Cible le div de gauche
     pixelArt: true,
+    // Configuration de l'échelle pour s'adapter au div parent
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        width: '100%',
+        height: '100%'
+    },
     scene: {
         preload: preload,
         create: create,
@@ -14,12 +18,12 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-const TILE_WIDTH = 64;  
-const TILE_HEIGHT = 32; 
+const TILE_WIDTH = 64;
+const TILE_HEIGHT = 32;
 
-// Garder une référence aux objets de la grille pour les supprimer facilement
+// Références globales
 let gridObjects = [];
-let selectedEntityType = 'trap'; // Placeholder for the entity to place on click
+let selectedEntityType = 'trap';
 
 function preload() {
     this.load.image('floor', 'assets/floor.png');
@@ -34,10 +38,10 @@ function preload() {
 
 function create() {
     const scene = this;
-    
+
     // Initial load
     refreshDungeon(scene);
-        
+
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // Connexion WebSocket
@@ -55,13 +59,44 @@ function create() {
         }
     };
 
-    ws.onclose = () => {
-        console.log("WebSocket connection closed.");
-    };
+    // Gestion de la sélection dans la sidebar
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
 
-    ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-    };
+    // Sélection par défaut visuelle
+    const defaultSelectedItem = document.getElementById(selectedEntityType);
+    if (defaultSelectedItem) {
+        defaultSelectedItem.classList.add('selected');
+    }
+
+    sidebarItems.forEach(item => {
+        item.addEventListener('click', () => {
+            sidebarItems.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            selectedEntityType = item.id;
+            console.log(`Selected entity type: ${selectedEntityType}`);
+        });
+    });
+
+    // Écouteur pour redimensionnement de la fenêtre (optionnel avec RESIZE mais utile pour recentrer)
+    scene.scale.on('resize', () => {
+        refreshDungeon(scene);
+    });
+}
+
+function updateSidebar(data) {
+    const moneyElement = document.getElementById('money');
+    if (moneyElement) {
+        moneyElement.innerText = data.money;
+    }
+
+    if (data.prices) {
+        for (const item in data.prices) {
+            const priceElement = document.querySelector(`#${item} .price`);
+            if (priceElement) {
+                priceElement.innerText = `${data.prices[item]} €`;
+            }
+        }
+    }
 }
 
 function refreshDungeon(scene) {
@@ -69,13 +104,21 @@ function refreshDungeon(scene) {
     gridObjects.forEach(obj => obj.destroy());
     gridObjects = [];
 
-    // Récupérer les nouvelles données
+    // Récupérer les nouvelles données du donjon
     fetch('/api/dungeon')
         .then(res => res.json())
         .then(data => {
             buildIsoGrid(scene, data);
         })
         .catch(err => console.error("Erreur chargement donjon:", err));
+
+    // Récupérer les données de la sidebar (argent, prix)
+    fetch('/api/dungeon_data')
+        .then(res => res.json())
+        .then(data => {
+            updateSidebar(data);
+        })
+        .catch(err => console.error("Erreur chargement données sidebar:", err));
 }
 
 function buildIsoGrid(scene, data) {
@@ -90,8 +133,11 @@ function buildIsoGrid(scene, data) {
     const dungeonTotalWidth = (gridWidth + gridHeight) * (TILE_WIDTH / 2);
     const dungeonTotalHeight = (gridWidth + gridHeight) * (TILE_HEIGHT / 2);
 
-    const originX = (scene.sys.game.config.width - dungeonTotalWidth) / 2 + (dungeonTotalWidth/2);
-    const originY = (scene.sys.game.config.height - dungeonTotalHeight) / 2;
+    // --- CORRECTION MAJEURE ICI ---
+    // On utilise scene.scale.width/height pour obtenir la taille réelle du Canvas
+    // et non la config qui est à "100%"
+    const originX = (scene.scale.width - dungeonTotalWidth) / 2 + (dungeonTotalWidth/2);
+    const originY = (scene.scale.height - dungeonTotalHeight) / 2;
 
     let minIsoX = Infinity, maxIsoX = -Infinity, minIsoY = Infinity, maxIsoY = -Infinity;
 
@@ -108,7 +154,7 @@ function buildIsoGrid(scene, data) {
             let floor = scene.add.image(isoX, isoY, 'floor').setOrigin(0.5, 1.0).setDepth(isoY);
             gridObjects.push(floor);
 
-            // 2. Entités par dessus le sol
+            // Entités
             let entityImage;
             switch(cell.type) {
                 case 'WALL': entityImage = scene.add.image(isoX, isoY, 'wall'); break;
@@ -122,71 +168,67 @@ function buildIsoGrid(scene, data) {
             if (entityImage) {
                 entityImage.setOrigin(0.5, 1.0).setDepth(isoY + 1);
                 gridObjects.push(entityImage);
-                floor.entityImage = entityImage; // Link entity to floor
+                floor.entityImage = entityImage;
             }
 
-            // --- Hover and Click ---
+            // Interaction
             const hitArea = new Phaser.Geom.Polygon([
-                32, 32,
-                64, 48,
-                32, 64,
-                0, 48
+                32, 32, 64, 48, 32, 64, 0, 48
             ]);
             floor.setInteractive(hitArea, Phaser.Geom.Polygon.Contains);
+
             floor.on('pointerover', () => {
                 floor.setTint(0x868e96);
-                if (floor.entityImage) {
-                    floor.entityImage.setTint(0x868e96);
-                }
+                if (floor.entityImage) floor.entityImage.setTint(0x868e96);
             });
+
             floor.on('pointerout', () => {
                 floor.clearTint();
-                if (floor.entityImage) {
-                    floor.entityImage.clearTint();
-                }
+                if (floor.entityImage) floor.entityImage.clearTint();
             });
-            floor.on('pointerdown', () => handleTileClick(cell));
+
+            floor.on('pointerdown', () => handleTileClick(scene, cell));
         });
     });
 
-    // --- Render Heroes ---
+    // Heros
     heroes.forEach(hero => {
         const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
         const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
-        
+
         let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
         gridObjects.push(heroImage);
     });
-    
-    // --- Center Camera ---
-    const dungeonCenterX = minIsoX + (maxIsoX - minIsoX) / 2;
-    const dungeonCenterY = minIsoY + (maxIsoY - minIsoY) / 2 - (TILE_HEIGHT * (gridHeight/2));
-    
-    scene.cameras.main.centerOn(dungeonCenterX, dungeonCenterY);
 }
 
-function handleTileClick(cell) {
-    console.log(`Tile clicked at: (${cell.x}, ${cell.y})`);
-    
-    fetch('/api/command/placeEntity', {
+function handleTileClick(scene, cell) {
+    console.log(`Tile clicked at: (${cell.x}, ${cell.y}) with entity ${selectedEntityType}`);
+
+    // On ne peut pas placer sur les cases de départ et de fin
+    if (cell.type === 'START' || cell.type === 'EXIT') {
+        console.log("Cannot place entity on start or exit tile.");
+        return;
+    }
+
+    fetch(`/api/place_entity/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-            entity: selectedEntityType,
+            type_entity: selectedEntityType,
             x: cell.x,
             y: cell.y
         })
     })
     .then(response => {
         if (!response.ok) {
-            return response.text().then(text => { throw new Error('Failed to place entity: ' + text) });
+            return response.text().then(text => { throw new Error(text) });
         }
-        console.log("Placement command sent successfully.");
-        // The WebSocket 'dungeon_updated' message should trigger a refresh
+        // Si le placement est réussi, on rafraîchit l'affichage
+        refreshDungeon(scene);
     })
-    .catch(error => {
-        console.error('Error placing entity:', error);
-    });
+    .catch(error => console.error('Error placing entity:', error));
 }
 
 function update() {
