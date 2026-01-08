@@ -9,6 +9,8 @@ class GameInvoker:
             command.execute(self.game_controller)
             self.history.append(command)
         self.commandstack = []
+        if self.game_controller and self.game_controller.simulation:
+            self.game_controller.simulation.notify()
 
     def push_command(self, command):
         self.commandstack.append(command)

@@ -41,6 +41,22 @@ class Simulation:
         self.allHeroesDead = False
         self.isSimStarted = False
         self.dmgobserver = DamageObserver()
+        self.observers: List[Observer] = []
+
+    def attach(self, observer: Observer) -> None:
+        """Attach an observer to the simulation."""
+        if observer not in self.observers:
+            self.observers.append(observer)
+
+    def detach(self, observer: Observer) -> None:
+        """Detach an observer from the simulation."""
+        if observer in self.observers:
+            self.observers.remove(observer)
+
+    def notify(self) -> None:
+        """Notify all observers about a change."""
+        for observer in self.observers:
+            observer.update()
 
     def launch(self) -> Dict[str, Any]:
         """Launch the simulation loop.
@@ -105,6 +121,8 @@ class Simulation:
                 self.score = int(getattr(self.dungeon, "score"))
         except Exception:
             pass
+        
+        self.notify()
 
 
 
