@@ -536,7 +536,7 @@ class TUIView:
         """Met à jour les positions des héros et les infos de statut depuis la simulation."""
         if self.simulation and hasattr(self.simulation, "level"):
             # Utilise get_all_hero_positions pour afficher tous les héros, même non réveillés
-            self.hero_positions = self.simulation.get_all_hero_positions()
+            self.hero_positions = self.simulation.get_all_alive_hero_positions()
             # Met à jour aussi les infos de statut
             if (
                 self.invoker

@@ -191,6 +191,14 @@ class Simulation:
             a.append(hero.coord)
         return a
 
+    
+    def get_all_alive_hero_positions(self):
+        a = []
+        for hero in self.heroes:
+            if hero.isAlive:
+                a.append(hero.coord)
+        return a
+
     def __repr__(self) -> str:
         return (
             f"Simulation(level={self.level.difficulty}, ticks={self.ticks}, score={self.score}, "

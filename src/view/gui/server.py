@@ -102,7 +102,7 @@ async def get_dungeon():
 
     hero_positions = []
     if context.simulation:
-        hero_positions = [{"x": pos[1], "y": pos[0]} for pos in context.simulation.get_all_hero_positions()]
+        hero_positions = [{"x": pos[1], "y": pos[0]} for pos in context.simulation.get_all_alive_hero_positions()]
 
     return JSONResponse({
         "rows": dng.dimension[0],
