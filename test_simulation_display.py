@@ -16,7 +16,7 @@ def test_simulation_display_basic():
     invoker = GameInvoker(gamecontroller)
 
     # Création d'un niveau de test
-    hero = Hero(pv_total=100, strategy="random")
+    hero = Hero(pv_total=100, strategy="shortest")
     rows, cols = 10, 10
     dungeon = Dungeon(
         dimension=(rows, cols),

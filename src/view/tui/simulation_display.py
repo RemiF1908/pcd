@@ -640,7 +640,7 @@ class TUIView:
                 if self.simulation.heroes and hasattr(
                     self.simulation.heroes[0], "path"
                 ):
-                    self.log = str(self.simulation.heroes[0].path)
+                    self.log = True if self.simulation.heroes[0] is not None else False
                 self.render(stdscr)
                 key = stdscr.getch()
                 if key in self.key_bindings:

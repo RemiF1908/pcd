@@ -38,6 +38,7 @@ class Hero:
 
     def compute_path(self, dungeon, start, goal):
         """Compute path using the assigned strategy."""
+        print("path being computed")
         path_strategy = PathStrategyFactory.create(self.strategy)
         self.path = path_strategy.find_path(dungeon, start, goal)
 
