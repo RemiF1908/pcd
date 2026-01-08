@@ -1,7 +1,7 @@
 
 import unittest
 from unittest.mock import MagicMock, patch
-from src.view.tui.input_handler import InputHandler
+from src.view.input_handler import InputHandler
 
 class TestInputHandler(unittest.TestCase):
 

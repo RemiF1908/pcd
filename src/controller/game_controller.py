@@ -40,18 +40,21 @@ class GameController:
         command = startWave(self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def stop(self) -> None:
         """Arrête la boucle principale."""
         command = stopWave(self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def reset_dungeon(self) -> None:
         """Réinitialise le donjon."""
         command = resetDungeon(self.dungeon)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def place_trap(self, position: tuple[int, int], damage: int = 10) -> None:
         """Place un piège à la position donnée."""
@@ -59,6 +62,7 @@ class GameController:
         command = placeEntity(self.dungeon, trap, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def place_wall(self, position: tuple[int, int]) -> None:
         """Place un mur à la position donnée."""
@@ -66,6 +70,7 @@ class GameController:
         command = placeEntity(self.dungeon, wall, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
         
     def place_dragon(self, position: tuple[int, int]) -> None:
         """Place un dragon à la position donnée."""
@@ -75,6 +80,7 @@ class GameController:
         command = placeEntity(self.dungeon, dragon, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
         
     def place_bombe(self, position: tuple[int, int]) -> None:
         """Place une bombe à la position donnée."""
@@ -84,12 +90,14 @@ class GameController:
         command = placeEntity(self.dungeon, bombe, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def remove_entity(self, position: tuple[int, int]) -> None:
         """Supprime l'entité à la position donnée."""
         command = removeEntity(self.dungeon, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        self.simulation.notify()
 
     def export_dungeon(self, filename: str = "dungeon") -> None:
         """Exporte le donjon dans un nom"""
@@ -105,6 +113,7 @@ class GameController:
         imported_dungeon = command.result
         if imported_dungeon:
             self.simulation.dungeon = imported_dungeon
+        self.simulation.notify()
         return imported_dungeon
 
     def getDungeonList(self):
@@ -177,3 +186,4 @@ class GameController:
         self.simulation.heroes = level.heroes
         self.simulation.current_budget = level.budget_tot
         self.simulation.reset()
+        self.simulation.notify()
