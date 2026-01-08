@@ -125,8 +125,7 @@ class Simulation:
                         dmg = cell.return_damage_if_CD()
                         hero.take_damage(dmg)
                         totaldmg += dmg
-                        if cell.entity.type == "Bombe" :
-                            cell.remove_monster()
+
         return totaldmg
 
     def notifyDamageObserver(self, dmg : int) :

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from .floor import Floor
 from .wall import Wall
+from .dragon import Dragon
 from .entity import Entity
 from .floor_creator import FloorCreator
 
@@ -57,7 +58,7 @@ class Dungeon:
 
     def is_Walkable(self, coord: tuple[int, int]) -> bool:
         cell = self.get_cell(coord)
-        return not isinstance(cell.entity, Wall)
+        return not isinstance(cell.entity, Wall) and not isinstance(cell.entity, Dragon)
 
     def validMove(self, coord):
         return self.is_within_bounds(coord) and self.is_Walkable(coord)
@@ -74,6 +75,12 @@ class Dungeon:
         for row in self.grid:
             for cell in row:
                 cell.entity = FloorCreator().build()
+
+    def update(self) -> None:  
+        """Met à jour l'état du donjon (placeholder pour logique future)."""
+        for row in self.grid:
+            for cell in row:
+                cell.entity.update(cell) # Placeholder for future update logic
 
     def __repr__(self) -> str:
         return (

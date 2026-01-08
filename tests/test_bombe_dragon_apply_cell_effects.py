@@ -23,7 +23,7 @@ def test_bombe_apply_cell_effects():
     # Place a bombe at (1,2) and initialise sa portée
     bomb = Bombe(damage=40)
     dungeon.place_entity(bomb, (1, 2))
-
+    dungeon.place_entity(Bombe(damage=40), (2,3)) #hors de portée
     # Hero se trouve à (1,1) — dans la portée de la bombe
     hero = Hero(pv_total=100, strategy="random", coord=(1, 1))
     hero.awake()

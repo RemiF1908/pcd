@@ -58,7 +58,7 @@ class Entity(ABC):
 
 	def init_range(self, coord : tuple[int, int]) -> None:
 		"""Initialise la portée de l'entité (pour les monstres)."""
-		self.range = []
+		pass
 
 	@property
 	def max_cooldown(self) -> int:
@@ -76,6 +76,10 @@ class Entity(ABC):
 	def getrange(self) :
 		return []
 	
+	@abstractmethod
+	def update(self, cell) -> None:
+		pass
+
 	@abstractmethod
 	def get_display_char(self) -> str:
 		"""Retourne le caractère à afficher pour cette entité dans le TUI.

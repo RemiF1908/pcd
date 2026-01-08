@@ -8,7 +8,7 @@ class Bombe(Entity):
     def __init__(self, damage: int = 50) -> None:
         self._damage = int(damage)
         self.range = []
-        #self.current_cooldown = 0
+        self.triggered = False
 
     @property
     def type(self) -> str:
@@ -31,6 +31,11 @@ class Bombe(Entity):
 
         row, col = coord
         self.range = [(row,col), (row+1,col), (row-1,col), (row,col+1), (row,col-1), (row+1,col+1), (row-1,col-1), (row+1,col-1), (row-1,col+1)]
+
+    def update(self, cell) -> None:
+        """Met à jour l'état de la bombe (placeholder pour logique future)."""
+        if self.triggered :
+            cell.remove_monster()
 
     def get_display_char(self) -> str:
         """Retourne 'B' pour représenter une bombe."""

@@ -61,10 +61,9 @@ class Cell:
     
     def return_damage_if_CD(self) :
         if self.entity.current_cooldown == 0:
-            self.entity.reset_cooldown()
+            self.entity.triggered = True
             return self.get_damage()
         else:
-            self.entity.decrease_cooldown()
             return 0
 
     def remove_monster(self) -> None:
@@ -75,6 +74,11 @@ class Cell:
 
         if self.entity is not None and getattr(self.entity, "type", None) == "monster":
             self.entity = FloorCreator().build()
+
+    def update(self) -> None : 
+        """Met à jour l'état de la cellule en mettant à jour son entité."""
+        self.entity.update()
+            
 
     def __repr__(self) -> str:
         ent = getattr(self.entity, "type", None)

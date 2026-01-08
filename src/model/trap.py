@@ -26,6 +26,10 @@ class Trap(Entity):
     def damage(self) -> int:
         return self._damage
 
+    def update(self, cell) -> None:
+        """Met à jour l'état du piège (placeholder pour logique future)."""
+        pass   
+
     def get_display_char(self) -> str:
         return "^"
 

@@ -10,7 +10,7 @@ class Dragon(Entity):
         self.orientation = orientation
         self.current_cooldown = 0
         self.range = []
-
+        self.triggered = False
     @property
     def type(self) -> str:
         return "Dragon"
@@ -22,6 +22,14 @@ class Dragon(Entity):
     @property
     def damage(self) -> int:
         return self._damage
+
+    def update(self, cell) -> None :
+        if self.current_cooldown == 0 :
+            if self.triggered :
+                self.triggered = False
+                self.reset_cooldown()
+        else : 
+            self.decrease_cooldown()
 
     def init_range(self, coord):
         """Initialise la portée du dragon."""

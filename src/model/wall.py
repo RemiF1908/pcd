@@ -21,6 +21,10 @@ class Wall(Entity):
     def damage(self) -> int:
         return 0
 
+    def update(self, cell) -> None:
+        """Met à jour l'état du mur (placeholder pour logique future)."""
+        pass
+
     def get_display_char(self) -> str:
         """Retourne '#' pour représenter un mur."""
         return "#"

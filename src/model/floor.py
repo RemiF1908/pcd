@@ -21,6 +21,10 @@ class Floor(Entity):
     def damage(self) -> int:
         return self._damage
 
+    def update(self) -> None:
+        """Met à jour l'état du sol (placeholder pour logique future)."""
+        pass
+
     def get_display_char(self) -> str:
         """Retourne '.' pour représenter un sol."""
         return "."
