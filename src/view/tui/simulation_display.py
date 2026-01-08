@@ -296,11 +296,11 @@ def draw_legend(stdscr, start_y: int, start_x: int) -> None:
 
     entries_per_line = 3
     column_width = 2  # Largeur de chaque colonne pour espacer les entrées
-    
+
     for i, entry in enumerate(Legend.ENTRIES):
         row = i // entries_per_line  # Calcule le numéro de ligne
-        col = i % entries_per_line   # Calcule le numéro de colonne (0, 1 ou 2)
-        
+        col = i % entries_per_line  # Calcule le numéro de colonne (0, 1 ou 2)
+
         # Position x de la colonne
         x_offset = start_x + col * column_width * 7
         
