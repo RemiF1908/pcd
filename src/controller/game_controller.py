@@ -21,6 +21,8 @@ class GameController:
       optionnellement `get_input()` / `handle_command(cmd, simulation)`.
     - `simulation` est une instance de `Simulation` (src/simulation.py)
       qui expose `step()` / `launch()` / `stop_condition()`.
+
+    Note: La gestion des niveaux/campagnes est déléguée à LevelController.
     """
 
     def __init__(self, interface: Any, simulation: Any) -> None:
@@ -146,3 +148,14 @@ class GameController:
     def get_dungeon(self) -> Any:
         """Retourne le donjon actuel."""
         return self.simulation.dungeon
+    def setup_level(self, level: Any) -> None:
+        """Configure la simulation avec un niveau donné.
+
+        Args:
+            level: Instance de Level avec dungeon, budget, heroes, etc.
+        """
+        self.simulation.level = level
+        self.simulation.dungeon = level.dungeon
+        self.simulation.heroes = level.heroes
+        self.simulation.current_budget = level.budget_tot
+        self.simulation.reset()
