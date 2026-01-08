@@ -17,6 +17,7 @@ def test_simulation_display_basic():
 
     # Création d'un niveau de test
     hero = Hero(pv_total=100, strategy="shortest")
+    hero2 = Hero(pv_total=100, strategy="safest", hero_number=2)
     rows, cols = 10, 10
     dungeon = Dungeon(
         dimension=(rows, cols),
@@ -31,6 +32,7 @@ def test_simulation_display_basic():
         .set_difficulty(4)
         .set_budget(300)
         .add_hero_instance(hero)
+        .add_hero_instance(hero2)
         .build()
     )
 
