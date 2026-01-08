@@ -1,218 +1,32 @@
-"""Tests pour le système de campagne."""
+"""Tests pour le système de campagne simplifié."""
 
 import pytest
 import tempfile
 import os
-from src.model.campaign_manager import CampaignManager
+from src.model.campaign_manager import Campaign
+from src.model.level import LevelBuilder
 
 
-def test_campaign_manager_init():
-    """Test l'initialisation du CampaignManager."""
+def test_campaign_init():
+    """Test l'initialisation de Campaign."""
     with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
         f.write('{"campaign": {"name": "Test"}, "levels": []}')
         filepath = f.name
 
     try:
-        manager = CampaignManager(filepath)
-        assert manager.campaign_json_path == filepath
-        assert manager.current_level_index == 0
-        assert manager.completed_levels == []
+        campaign = Campaign(filepath)
+        assert campaign.campaign_json_path == filepath
+        assert campaign._current_level_num == 0
+        assert campaign._completed_levels == []
     finally:
         os.unlink(filepath)
 
 
-def test_campaign_load_success():
-    """Test le chargement réussi d'une campagne."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test Campaign"},
-            "levels": [{"id": 1, "name": "Level 1"}]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        success = manager.load_campaign()
-        assert success is True
-        assert manager.campaign_data is not None
-        assert len(manager.get_levels()) == 1
-    finally:
-        os.unlink(filepath)
-
-
-def test_campaign_load_failure():
-    """Test le chargement d'un fichier inexistant."""
-    manager = CampaignManager("nonexistent.json")
-    success = manager.load_campaign()
-    assert success is False
-    assert manager.campaign_data is None
-
-
-def test_get_current_level():
-    """Test la récupération du niveau actuel."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test"},
-            "levels": [
-                {"id": 1, "name": "Level 1"},
-                {"id": 2, "name": "Level 2"}
-            ]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        level = manager.get_current_level()
-        assert level is not None
-        assert level["id"] == 1
-
-        manager.current_level_index = 1
-        level = manager.get_current_level()
-        assert level["id"] == 2
-
-        manager.current_level_index = 2
-        level = manager.get_current_level()
-        assert level is None
-    finally:
-        os.unlink(filepath)
-
-
-def test_get_level_by_id():
-    """Test la récupération d'un niveau par ID."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test"},
-            "levels": [
-                {"id": 1, "name": "Level 1"},
-                {"id": 2, "name": "Level 2"}
-            ]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        level = manager.get_level_by_id(1)
-        assert level is not None
-        assert level["name"] == "Level 1"
-
-        level = manager.get_level_by_id(99)
-        assert level is None
-    finally:
-        os.unlink(filepath)
-
-
-def test_complete_level():
-    """Test la complétion d'un niveau."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('{"campaign": {"name": "Test"}, "levels": [{"id": 1}]}')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        assert 1 not in manager.completed_levels
-        manager.complete_level(1)
-        assert 1 in manager.completed_levels
-        manager.complete_level(1)
-        assert len(manager.completed_levels) == 1
-    finally:
-        os.unlink(filepath)
-
-
-def test_advance_to_next_level():
-    """Test l'avancement au niveau suivant."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test"},
-            "levels": [
-                {"id": 1, "name": "Level 1"},
-                {"id": 2, "name": "Level 2"}
-            ]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        assert manager.current_level_index == 0
-        next_level = manager.advance_to_next_level()
-        assert next_level is not None
-        assert next_level["id"] == 2
-        assert manager.current_level_index == 1
-
-        next_level = manager.advance_to_next_level()
-        assert next_level is None
-    finally:
-        os.unlink(filepath)
-
-
-def test_check_win_condition():
-    """Test la vérification de condition de victoire."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test"},
-            "levels": [{"id": 1, "name": "Level 1"}]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-        level_config = manager.get_current_level()
-
-        wave_result_win = {"heroesSurvived": 0}
-        assert manager.check_win_condition(wave_result_win, level_config) is True
-
-        wave_result_lose = {"heroesSurvived": 2}
-        assert manager.check_win_condition(wave_result_lose, level_config) is False
-    finally:
-        os.unlink(filepath)
-
-
-def test_has_more_levels():
-    """Test la vérification de niveaux restants."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('''{
-            "campaign": {"name": "Test"},
-            "levels": [{"id": 1}, {"id": 2}]
-        }''')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        assert manager.has_more_levels() is True
-
-        manager.current_level_index = 1
-        assert manager.has_more_levels() is False
-    finally:
-        os.unlink(filepath)
-
-
-def test_reset_progress():
-    """Test la réinitialisation de progression."""
-    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
-        f.write('{"campaign": {"name": "Test"}, "levels": [{"id": 1}]}')
-        filepath = f.name
-
-    try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-        manager.complete_level(1)
-        manager.current_level_index = 5
-
-        manager.reset_progress()
-        assert manager.current_level_index == 0
-        assert manager.completed_levels == []
-    finally:
-        os.unlink(filepath)
+def test_campaign_init_nonexistent_file():
+    """Test l'initialisation avec un fichier inexistant."""
+    campaign = Campaign("nonexistent.json")
+    assert campaign._data is None
+    assert campaign._completed_levels == []
 
 
 def test_get_campaign_info():
@@ -228,11 +42,203 @@ def test_get_campaign_info():
         filepath = f.name
 
     try:
-        manager = CampaignManager(filepath)
-        manager.load_campaign()
-
-        info = manager.get_campaign_info()
+        campaign = Campaign(filepath)
+        info = campaign.get_campaign_info()
         assert info["name"] == "Test Campaign"
         assert info["description"] == "Test Description"
     finally:
         os.unlink(filepath)
+
+
+def test_complete_level():
+    """Test la complétion d'un niveau."""
+    campaign = Campaign("nonexistent.json")
+    
+    assert campaign.is_completed(1) is False
+    campaign.complete_level(1)
+    assert campaign.is_completed(1) is True
+    assert 1 in campaign.get_completed_levels()
+
+
+def test_complete_level_no_duplicate():
+    """Test qu'on ne peut pas compléter un niveau deux fois."""
+    campaign = Campaign("nonexistent.json")
+    
+    campaign.complete_level(1)
+    campaign.complete_level(1)
+    
+    assert len(campaign._completed_levels) == 1
+    assert len(campaign.get_completed_levels()) == 1
+
+
+def test_get_completed_levels():
+    """Test la récupération des niveaux complétés."""
+    campaign = Campaign("nonexistent.json")
+    
+    campaign.complete_level(1)
+    campaign.complete_level(2)
+    campaign.complete_level(3)
+    
+    completed = campaign.get_completed_levels()
+    assert completed == [1, 2, 3]
+    assert len(completed) == 3
+
+
+def test_reset():
+    """Test la réinitialisation de la campagne."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        f.write('{"campaign": {"name": "Test"}, "levels": [{"id": 1}]}')
+        filepath = f.name
+
+    try:
+        campaign = Campaign(filepath)
+        campaign._current_level_num = 5
+        campaign.complete_level(1)
+        campaign.complete_level(2)
+        
+        campaign.reset()
+        
+        assert campaign._current_level_num == 0
+        assert campaign._completed_levels == []
+        assert campaign.is_completed(1) is False
+    finally:
+        os.unlink(filepath)
+
+
+def test_load_level_nonexistent():
+    """Test le chargement d'un niveau inexistant."""
+    campaign = Campaign("nonexistent.json")
+    level = campaign.load_level(999)
+    assert level is None
+
+
+def test_load_level_no_dungeon_file():
+    """Test le chargement d'un niveau sans fichier de donjon."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        f.write('''{
+            "campaign": {"name": "Test"},
+            "levels": [{"id": 1, "name": "Level 1", "budget": 100, "difficulty": 1}]
+        }''')
+        filepath = f.name
+
+    try:
+        campaign = Campaign(filepath)
+        level = campaign.load_level(1)
+        assert level is None
+    finally:
+        os.unlink(filepath)
+
+
+def test_load_level_dungeon_file_not_exists():
+    """Test le chargement d'un niveau avec un fichier de donjon inexistant."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        f.write('''{
+            "campaign": {"name": "Test"},
+            "levels": [{"id": 1, "dungeon_file": "nonexistent", "budget": 100, "difficulty": 1, "heroes": []}]
+        }''')
+        filepath = f.name
+
+    try:
+        campaign = Campaign(filepath)
+        level = campaign.load_level(1)
+        assert level is None
+    finally:
+        os.unlink(filepath)
+
+
+def test_load_level_success():
+    """Test le chargement réussi d'un niveau."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        f.write('''{
+            "campaign": {"name": "Test"},
+            "levels": [{
+                "id": 1,
+                "dungeon_file": "level1_dungeon",
+                "budget": 200,
+                "difficulty": 2,
+                "heroes": [{"pv": 50, "strategy": "random"}]
+            }]
+        }''')
+        campaign_file = f.name
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json", dir="./save") as f:
+        f.write('''{
+            "dimension": [5, 5],
+            "entry": [0, 0],
+            "exit": [4, 4],
+            "grid": []
+        }''')
+        dungeon_file = f.name.split("/")[-1].replace(".json", "")
+
+    try:
+        campaign = Campaign(campaign_file)
+        level = campaign.load_level(1)
+        
+        assert level is not None
+        assert level.budget_tot == 200
+        assert level.difficulty == 2
+        assert level.nb_heroes == 1
+        assert campaign._current_level_num == 1
+    finally:
+        os.unlink(campaign_file)
+        os.unlink(f"./save/{dungeon_file}.json")
+
+
+def test_load_next_level():
+    """Test le chargement du niveau suivant."""
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
+        f.write('''{
+            "campaign": {"name": "Test"},
+            "levels": [
+                {
+                    "id": 1,
+                    "dungeon_file": "level1_dungeon",
+                    "budget": 100,
+                    "difficulty": 1,
+                    "heroes": [{"pv": 50, "strategy": "random"}]
+                },
+                {
+                    "id": 2,
+                    "dungeon_file": "level2_dungeon",
+                    "budget": 200,
+                    "difficulty": 2,
+                    "heroes": [{"pv": 80, "strategy": "shortest"}]
+                }
+            ]
+        }''')
+        campaign_file = f.name
+
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json", dir="./save") as f:
+        f.write('''{
+            "dimension": [5, 5],
+            "entry": [0, 0],
+            "exit": [4, 4],
+            "grid": []
+        }''')
+        dungeon_file = f.name.split("/")[-1].replace(".json", "")
+
+    try:
+        campaign = Campaign(campaign_file)
+        
+        level1 = campaign.load_level(1)
+        assert level1 is not None
+        assert level1.budget_tot == 100
+        assert campaign._current_level_num == 1
+        
+        level2 = campaign.load_next_level()
+        assert level2 is not None
+        assert level2.budget_tot == 200
+        assert campaign._current_level_num == 2
+    finally:
+        os.unlink(campaign_file)
+        os.unlink(f"./save/{dungeon_file}.json")
+
+
+def test_is_completed():
+    """Test la vérification de complétion d'un niveau."""
+    campaign = Campaign("nonexistent.json")
+    
+    assert campaign.is_completed(5) is False
+    
+    campaign.complete_level(5)
+    assert campaign.is_completed(5) is True

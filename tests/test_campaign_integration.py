@@ -1,16 +1,14 @@
 """
-Test d'intégration complet du système de campagne avec LevelController.
+Test d'intégration complet du système de campagne avec Campaign.
 """
 
 import os
 import tempfile
 import json
-from src.model.campaign_manager import CampaignManager
-from src.model.dungeon import Dungeon
-from src.model.level import Level, LevelBuilder
+from src.model.campaign_manager import Campaign
 from src.simulation import Simulation
+from src.model.level import Level
 from src.controller.game_controller import GameController
-from src.controller.level_controller import LevelController
 from unittest.mock import MagicMock
 
 
@@ -34,16 +32,12 @@ def create_test_dungeon_file(rows=5, cols=5, filepath="test_dungeon.json"):
         json.dump(dungeon_data, f)
 
 
-# AJOUT de l'argument monkeypatch
 def test_campaign_integration(monkeypatch):
-    """Test l'intégration complète de la campagne avec LevelController."""
+    """Test l'intégration complète de la campagne avec Campaign."""
 
-    # On n'a plus besoin de sauvegarder original_cwd manuellement
     save_dir = "./save"
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        # CORRECTION : On utilise monkeypatch au lieu de os.chdir
-        # Cela change le dossier courant ET le restaure à la fin du test
         monkeypatch.chdir(tmpdir)
         
         os.makedirs(save_dir, exist_ok=True)
@@ -83,50 +77,24 @@ def test_campaign_integration(monkeypatch):
         with open(campaign_path, "w") as f:
             json.dump(campaign_data, f)
 
-        # Test LevelController
-        level_controller = LevelController(campaign_path)
-        assert level_controller.campaign_manager is not None
+        campaign = Campaign(campaign_path)
 
-        campaign_info = level_controller.get_campaign_info()
+        campaign_info = campaign.get_campaign_info()
         assert campaign_info["name"] == "Test Campaign"
 
-        level1_info = level_controller.get_current_level()
-        assert level1_info is not None
-        assert level1_info["id"] == 1
-        assert level_controller.get_level_budget() == 200
+        level1 = campaign.load_level(1)
+        assert level1 is not None
+        assert level1.difficulty == 1
+        assert level1.budget_tot == 200
+        assert level1.dungeon is not None
 
-        # Test GameController avec LevelController
-        simulation = Simulation(level=Level())
+        simulation = Simulation(level=level1, dungeon=level1.dungeon)
         game_controller = GameController(MagicMock(), simulation)
-
-        # Charger le niveau via LevelController + GameController
-        dungeon_file = level_controller.get_level_dungeon_file()
-        assert dungeon_file is not None
-        assert dungeon_file == "level1"
-
-        imported_dungeon = game_controller.import_dungeon(dungeon_file)
-        assert imported_dungeon is not None
-        assert imported_dungeon.dimension == (5, 5)
-
-        # Créer le niveau avec LevelBuilder
-        builder = LevelBuilder()
-        builder.set_dungeon(imported_dungeon)
-        builder.set_budget(level_controller.get_level_budget())
-        builder.set_difficulty(level_controller.get_level_difficulty())
-
-        for hero_config in level_controller.get_level_heroes_config():
-            pv = hero_config.get("pv", 100)
-            strategy = hero_config.get("strategy", "random")
-            builder.add_hero(pv=pv, strategy=strategy, coord=imported_dungeon.entry)
-
-        level = builder.build()
-        game_controller.setup_level(level)
 
         assert simulation.dungeon.dimension == (5, 5)
         assert len(simulation.heroes) == 1
         assert simulation.heroes[0].pv_total == 50
 
-        # Test victoire
         wave_result = {
             "heroesKilled": 1,
             "heroesSurvived": 0,
@@ -135,43 +103,32 @@ def test_campaign_integration(monkeypatch):
             "turns": 10
         }
 
-        assert level_controller.check_win_condition(wave_result) is True
-        assert 1 in level_controller.get_completed_levels()
+        campaign.complete_level(1)
+        assert campaign.is_completed(1) is True
 
-        # Test niveau suivant
-        next_level = level_controller.advance_to_next_level()
-        assert next_level is not None
-        assert next_level["id"] == 2
+        level2 = campaign.load_next_level()
+        assert level2 is not None
+        assert level2.difficulty == 2
+        assert level2.budget_tot == 150
+        assert level2.dungeon is not None
 
-        assert level_controller.has_more_levels() is False
+        simulation2 = Simulation(level=level2, dungeon=level2.dungeon)
+        game_controller2 = GameController(MagicMock(), simulation2)
 
-        # Configurer niveau 2
-        dungeon_file = level_controller.get_level_dungeon_file()
-        imported_dungeon = game_controller.import_dungeon(dungeon_file)
+        assert simulation2.dungeon.dimension == (6, 6)
+        assert len(simulation2.heroes) == 1
+        assert simulation2.heroes[0].pv_total == 80
 
-        builder = LevelBuilder()
-        builder.set_dungeon(imported_dungeon)
-        builder.set_budget(level_controller.get_level_budget())
-        builder.set_difficulty(level_controller.get_level_difficulty())
+        campaign.complete_level(2)
+        assert campaign.is_completed(2) is True
 
-        for hero_config in level_controller.get_level_heroes_config():
-            pv = hero_config.get("pv", 100)
-            strategy = hero_config.get("strategy", "random")
-            builder.add_hero(pv=pv, strategy=strategy, coord=imported_dungeon.entry)
+        completed = campaign.get_completed_levels()
+        assert 1 in completed
+        assert 2 in completed
 
-        level = builder.build()
-        game_controller.setup_level(level)
 
-        assert simulation.dungeon.dimension == (6, 6)
-        assert len(simulation.heroes) == 1
-        assert simulation.heroes[0].pv_total == 80
 
-        print("✅ Test d'intégration de campagne avec LevelController réussi")
-
-# Note : Si vous lancez le fichier directement (sans pytest), monkeypatch ne sera pas défini.
-# L'usage recommandé est via 'pytest tests/test_campaign_integration.py'
 if __name__ == "__main__":
-    # Petit hack pour permettre l'exécution directe sans pytest si nécessaire
     class MockMonkeyPatch:
         def chdir(self, path): os.chdir(path)
     test_campaign_integration(MockMonkeyPatch())
