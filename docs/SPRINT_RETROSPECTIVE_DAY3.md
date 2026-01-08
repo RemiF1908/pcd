@@ -1,7 +1,7 @@
 # 🌀 Rétrospective de Backlog – Fin de Sprint
 
-**Sprint n° :** 2  
-**Jour :** Mardi
+**Sprint n° :** 3
+**Jour :** Mercredi
 
 ---
 
@@ -45,6 +45,7 @@
 - Fonction de scoring partiellement définie, reste à implémenter
 - L'édition du donjon en TUI n'est pas encore implémentée
 - Mise en lien TUI (View) et GameController partiellement implémenté
+- Diviser le travail encore plus
 
 **Décisions prises :**
 - Critères de scoring définis : héros morts, trésor protégé, budget dépensé, temps
