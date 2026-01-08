@@ -42,8 +42,6 @@
 | US8  | Croquis de l'UI                                                                                 | DAY3         | Moyenne  | TODO  |
 | US9  | En tant que joueur sur le TUI je dois pouvoir placer/retirer des objets sur la map              | DAY2         | Haute    | DOING  |
 | US10 | En tant que joueur sur le WEB je dois pouvoir placer/retier des objets sur la map               | DAY4         | Haute    | TODO  |
-| US11 | En tant que joueur sur le TUI je dois pouvoir choisir l'algorithme de pathfinding               | DAY3         | Moyenne  | TODO  |
-| US12 | En tant que joueur sur le WEB je dois pouvoir choisir l'algorithme de pathfinding               | DAY4         | Moyenne  | TODO  |
 | US13 | Exportation de la configuration du donjon                                                       | DAY4         | Faible   | TODO  |
 | US14 | gestion des niveaux avec 3 modes (facile choix libre, normal avec checkpoint, expert sans mort) | DAY5         | Faible   | TODO  |
 | US15 | Choix des boutons pour l'utilisateur (réinitialiser vague, quitter etc)                         | DAY2         | Haute    | DONE  |
