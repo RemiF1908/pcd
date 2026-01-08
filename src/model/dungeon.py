@@ -67,6 +67,7 @@ class Dungeon:
         if self.is_within_bounds(position):
             cell = self.get_cell(position)
             cell.entity = entity
+            cell.entity.init_range(position)
     
     def reset(self) -> None:
         """Réinitialise le donjon en vidant toutes les cellules de leurs entités."""

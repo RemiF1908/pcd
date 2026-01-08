@@ -25,6 +25,9 @@ class Entity(ABC):
 	Exemples d'implémentations : Floor, Wall, Trap, Monster.
 	"""
 
+	current_cooldown = 0
+
+
 	@property
 	@abstractmethod
 	def type(self) -> str:
@@ -51,7 +54,28 @@ class Entity(ABC):
 	def attack_power(self) -> int:
 		"""Puissance d'attaque (pour les monstres)."""
 		return 0
+	
 
+	def init_range(self, coord : tuple[int, int]) -> None:
+		"""Initialise la portée de l'entité (pour les monstres)."""
+		self.range = []
+
+	@property
+	def max_cooldown(self) -> int:
+		"""Cooldown maximum (pour les monstres)."""
+		return 0
+	
+	def reset_cooldown(self) -> None:
+		"""Réinitialise le cooldown (pour les monstres)."""
+		self.current_cooldown = self.max_cooldown
+
+	def decrease_cooldown(self) -> None:
+		"""Diminue le cooldown de 1 (pour les monstres)."""
+		pass
+		
+	def getrange(self) :
+		return []
+	
 	@abstractmethod
 	def get_display_char(self) -> str:
 		"""Retourne le caractère à afficher pour cette entité dans le TUI.

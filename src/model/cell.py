@@ -59,6 +59,22 @@ class Cell:
         
         return int(getattr(self.entity, "damage", 0) or getattr(self.entity, "attack_power", 0))
     
+    def return_damage_if_CD(self) :
+        if self.entity.current_cooldown == 0:
+            self.entity.reset_cooldown()
+            return self.get_damage()
+        else:
+            self.entity.decrease_cooldown()
+            return 0
+
+    def remove_monster(self) -> None:
+        """
+        Retire le monstre de cette case, en le remplaçant par un floor.
+        """
+        from .floor_creator import FloorCreator
+
+        if self.entity is not None and getattr(self.entity, "type", None) == "monster":
+            self.entity = FloorCreator().build()
 
     def __repr__(self) -> str:
         ent = getattr(self.entity, "type", None)

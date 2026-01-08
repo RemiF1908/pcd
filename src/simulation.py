@@ -112,10 +112,22 @@ class Simulation:
         return False
 
     def apply_cell_effects(self, hero: Hero):
+        totaldmg = 0
         coord = hero.getHero_coord()
         cell = self.dungeon.get_cell(coord)
         hero.take_damage(cell.get_damage())
-        return cell.get_damage()
+        totaldmg += cell.get_damage()
+
+        if hero.isAlive : 
+            for row in self.dungeon.grid :
+                for cell in row :
+                    if coord in cell.entity.getrange() :
+                        dmg = cell.return_damage_if_CD()
+                        hero.take_damage(dmg)
+                        totaldmg += dmg
+                        if cell.entity.type == "Bombe" :
+                            cell.remove_monster()
+        return totaldmg
 
     def notifyDamageObserver(self, dmg : int) :
         self.dmgobserver.update(dmg)
