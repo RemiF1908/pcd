@@ -172,7 +172,7 @@ def draw_simulation(
 
 def draw_legend(stdscr, start_y: int, start_x: int) -> None:
     """Affiche la légende des symboles."""
-    _draw_str(stdscr, start_y, start_x, "=== Légende ===", curses.A_BOLD)
+    _draw_str(stdscr, start_y, start_x, "============= Légende =============", curses.A_BOLD)
 
     entries_per_line = 3
     column_width = 2  # Largeur de chaque colonne pour espacer les entrées
@@ -182,7 +182,7 @@ def draw_legend(stdscr, start_y: int, start_x: int) -> None:
         col = i % entries_per_line   # Calcule le numéro de colonne (0, 1 ou 2)
         
         # Position x de la colonne
-        x_offset = start_x + col * column_width
+        x_offset = start_x + col * column_width*7
         
         # Dessine le symbole
         _draw_str(
@@ -293,7 +293,7 @@ class TUIView:
         self.FOOTER_Y = self.LEGEND_START_Y + 10
         self.FOOTER_X = self.DUNGEON_START_X
         self.HELP_START_Y = self.DUNGEON_START_Y
-        self.HELP_START_X = self.STATUS_START_X +30
+        self.HELP_START_X = self.STATUS_START_X +23
         
         # # Mapping des touches vers les commandes
         # self.key_bindings: dict[int, Callable[[], None]] = {
