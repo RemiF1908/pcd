@@ -34,16 +34,18 @@ def create_test_dungeon_file(rows=5, cols=5, filepath="test_dungeon.json"):
         json.dump(dungeon_data, f)
 
 
-def test_campaign_integration():
+# AJOUT de l'argument monkeypatch
+def test_campaign_integration(monkeypatch):
     """Test l'intégration complète de la campagne avec LevelController."""
 
-    import shutil
-
-    original_cwd = os.getcwd()
+    # On n'a plus besoin de sauvegarder original_cwd manuellement
     save_dir = "./save"
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        os.chdir(tmpdir)
+        # CORRECTION : On utilise monkeypatch au lieu de os.chdir
+        # Cela change le dossier courant ET le restaure à la fin du test
+        monkeypatch.chdir(tmpdir)
+        
         os.makedirs(save_dir, exist_ok=True)
 
         dungeon1_path = os.path.join(save_dir, "level1.json")
@@ -166,6 +168,10 @@ def test_campaign_integration():
 
         print("✅ Test d'intégration de campagne avec LevelController réussi")
 
-
+# Note : Si vous lancez le fichier directement (sans pytest), monkeypatch ne sera pas défini.
+# L'usage recommandé est via 'pytest tests/test_campaign_integration.py'
 if __name__ == "__main__":
-    test_campaign_integration()
+    # Petit hack pour permettre l'exécution directe sans pytest si nécessaire
+    class MockMonkeyPatch:
+        def chdir(self, path): os.chdir(path)
+    test_campaign_integration(MockMonkeyPatch())
