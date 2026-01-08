@@ -107,9 +107,8 @@ class Simulation:
                         h.move(nextMove)
                         damage = self.apply_cell_effects(h)
                         self.notifyDamageObserver(damage)
-
-                        if self.check_on_treasure(h):
-                            print("Treasure reached!")
+                        if self.check_on_treasure(h) and h.isAlive:
+                            self.tresorReached = True
                 except Exception:
                     print("illegal move")   
 
@@ -189,6 +188,14 @@ class Simulation:
         a = []
         for hero in self.heroes:
             a.append(hero.coord)
+        return a
+
+    
+    def get_all_alive_hero_positions(self):
+        a = []
+        for hero in self.heroes:
+            if hero.isAlive:
+                a.append(hero.coord)
         return a
 
     def __repr__(self) -> str:

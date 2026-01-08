@@ -16,7 +16,7 @@ class Dragon(Entity):
         return "DRAGON"
 
     @property
-    def const(self) -> int :
+    def cost(self) -> int :
         return 80
 
     @property

@@ -5,13 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dungeon Crawler</title>
     <style>
-        body { margin: 0; background-color: #1a1a1a; overflow: hidden; }
-        canvas { display: block; margin: 0 auto; }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+        }
+
+        #game-container {
+            flex-grow: 1;
+            flex-basis: 0;
+            min-width: 0;
+            height: 100%;
+            position: relative;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 180px;
+            min-width: 180px;
+            height: 100%;
+            flex-shrink: 0;
+            position: relative;
+
+            background-color: #2a2a2a;
+            color: #fff;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            border-left: 1px solid #444;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        #sidebar h3 {
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        #money-container {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
+            background-color: #333;
+        }
+
+        .sidebar-item:hover {
+            background-color: #3a3a3a;
+        }
+
+        .sidebar-item.selected {
+            border-color: #007bff;
+            background-color: #0056b3;
+        }
+
+        .sidebar-item img {
+            width: 32px;
+            height: 32px;
+            margin-right: 15px;
+        }
+
+        .sidebar-item span {
+            font-size: 1.0em;
+        }
+
+        .price {
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #a0a0a0;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 </head>
 <body>
     <div id="game-container"></div>
+    
+    <div id="sidebar">
+        <h3>Outils</h3>
+        <div id="money-container">
+            Argent: <span id="money">--</span>
+        </div>
+        <div id="sidebar-items">
+            <div class="sidebar-item" id="trap">
+                <img src="assets/trap.png" alt="Trap">
+                <span>Piège</span>
+                <span class="price">--</span>
+            </div>
+            <div class="sidebar-item" id="dragon">
+                <img src="assets/dragon.png" alt="Dragon">
+                <span>Dragon</span>
+                <span class="price">--</span>
+            </div>
+            <div class="sidebar-item" id="bombe">
+                <img src="assets/bomb.png" alt="Bomb">
+                <span>Bombe</span>
+                <span class="price">--</span>
+            </div>
+             <div class="sidebar-item" id="wall">
+                <img src="assets/wall.png" alt="Wall">
+                <span>Mur</span>
+                <span class="price">--</span>
+            </div>
+            <div class="sidebar-item" id="floor">
+                <img src="assets/floor.png" alt="Floor">
+                <span>Sol</span>
+                <span class="price">--</span>
+            </div>
+        </div>
+    </div>
 
     <script src="game/game.js"></script>
 </body>

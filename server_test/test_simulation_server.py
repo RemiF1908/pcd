@@ -6,7 +6,12 @@ from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.floor import Floor
 from src.model.wall import Wall
+from src.model.wall_creator import WallCreator
+from src.model.bombe_creator import BombeCreator
+from src.model.dragon_creator import DragonCreator
+from src.model.trap_creator import TrapCreator
 from src.model.trap import Trap
+from src.model.dragon import Dragon
 from src.view.tui.simulation_display import TUIView, ColorPair
 from src.view.gui.gui import GuiView
 
@@ -26,6 +31,19 @@ def test_simulation_display_basic():
         entry=(0, 0),
         exit=(rows - 1, cols - 1),
     )
+    # 2. Ajout d'obstacles (Le L de murs)
+    walls = [(2,0),(2,3)]
+    for r, c in walls:
+        dungeon.place_entity(WallCreator().build(), (r, c))
+    
+    # 3. Ajout de pièges (sur le chemin direct)
+    traps = [(2,1),(2,2),(3,2)]
+    for r, c in traps:
+        dungeon.place_entity(TrapCreator().build(), (r, c))
+    
+    # 4. Ajout d'une bombe et d'un dragon
+    dungeon.place_entity(BombeCreator().build(), (0, 1))
+    dungeon.place_entity(Dragon('R'), (3, 4))
 
     level = (
         LevelBuilder()

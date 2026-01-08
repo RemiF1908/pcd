@@ -78,6 +78,7 @@ class EntityFactory:
 
         return DragonCreator().factory_method(orientation)
 
+    @staticmethod
     def create_bombe() -> Bombe:
         """Créer une entité Bombe.
 

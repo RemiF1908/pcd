@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from typing import List
 import asyncio
+from pydantic import BaseModel
+from src.model.entity_factory import EntityFactory
 
 # --- GESTION DES IMPORTS ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,6 +61,11 @@ class GuiContext:
 context = GuiContext()
 app = FastAPI()
 
+class PlaceEntityRequest(BaseModel):
+    type_entity: str
+    x: int
+    y: int
+
 # --- ENDPOINTS ---
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -102,7 +109,7 @@ async def get_dungeon():
 
     hero_positions = []
     if context.simulation:
-        hero_positions = [{"x": pos[1], "y": pos[0]} for pos in context.simulation.get_all_hero_positions()]
+        hero_positions = [{"x": pos[1], "y": pos[0]} for pos in context.simulation.get_all_alive_hero_positions()]
 
     return JSONResponse({
         "rows": dng.dimension[0],
@@ -111,23 +118,44 @@ async def get_dungeon():
         "heros": hero_positions
     })
 
-@app.get("/api/place_entity/")
-async def place_entity(type_entity: str, x: int, y: int):
+@app.post("/api/place_entity/")
+async def place_entity(request: PlaceEntityRequest):
     if not context.input_handler:
         return JSONResponse({"entity_placed": "true"})
 
-    match type_entity:
+    # Le modèle attend les coordonnées en (row, col), ce qui correspond à (y, x)
+    # venant du front-end.
+    match request.type_entity:
         case "trap":
-            context.input_handler.place_trap((x, y))
+            context.input_handler.place_trap((request.y, request.x))
         case "wall":
-            context.input_handler.place_wall((x, y))
+            context.input_handler.place_wall((request.y, request.x))
         case "dragon":
-            context.input_handler.place_dragon((x, y))
+            context.input_handler.place_dragon((request.y, request.x))
         case "bombe":
-            context.input_handler.place_bombe((x, y))
+            context.input_handler.place_bombe((request.y, request.x))
+        case "floor":
+            context.input_handler.remove_entity((request.y, request.x))
 
     return JSONResponse({"entity_placed": "true"})
 
+@app.get("/api/dungeon_data")
+async def get_dungeon_data():
+    if not context.simulation:
+        return JSONResponse({"error": "Aucune simulation chargée"}, status_code=500)
+
+    prices = {
+        "trap": EntityFactory.create_trap().cost,
+        "dragon": EntityFactory.create_dragon().cost,
+        "bombe": EntityFactory.create_bombe().cost,
+        "wall": EntityFactory.create_wall().cost,
+        "floor": 0
+    }
+
+    return JSONResponse({
+        "money": context.simulation.current_budget,
+        "prices": prices
+    })
 
 
 @app.get("/api/start_simulation/")
@@ -138,9 +166,6 @@ async def start_simulation():
     context.input_handler.start_wave()
     
     return JSONResponse({"simulation_started": "true"})
-
-
-
 
 # --- FICHIERS STATIQUES ---
 static_path = os.path.join(current_dir, "static")
