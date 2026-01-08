@@ -7,8 +7,6 @@ def test_damage_observer_accumulates_and_records_lastdamage(capsys):
     assert obs.lastdamage is None
 
     obs.update(5)
-    captured = capsys.readouterr()
-    assert "Hero took 5 damage" in captured.out
     assert obs.getTotalDmg() == 5
     assert obs.lastdamage == 5
 

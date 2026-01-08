@@ -9,12 +9,12 @@ from ..model.trap import Trap
 
 class getDungeonList(Command):
     """Command to get the names of saved dungeons from the save directory."""
-    
+
     def __init__(self):
         self.save_directory = "./save/"
         self.result = []
 
-    def execute(self) -> None:
+    def execute(self, game_controller) -> None:
         import os
 
         try:
@@ -27,4 +27,3 @@ class getDungeonList(Command):
         except FileNotFoundError:
             print(f"Save directory {self.save_directory} not found.")
             self.result = []
-        

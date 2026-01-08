@@ -35,11 +35,12 @@ def test_game_controller_start_wave():
     """Test de la méthode start_wave."""
     interface = MagicMock()
     simulation = MagicMock()
+    simulation.isSimStarted = False
 
     controller = GameController(interface, simulation)
     controller.start_wave()
 
-    simulation.launch.assert_called_once()
+    simulation.step.assert_called_once()
 
 
 def test_game_controller_stop():
@@ -83,7 +84,7 @@ def test_game_controller_start_wave_launches_simulation():
     controller.start_wave()
 
     time.sleep = original_sleep
-    assert simulation.ticks == 0
+    assert simulation.ticks == 1
 
 
 def test_game_controller_stop_stops_simulation():

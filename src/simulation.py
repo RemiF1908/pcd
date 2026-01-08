@@ -26,8 +26,7 @@ class Simulation:
     def __init__(
         self,
         level: Level,
-        dungeon: Dungeon = None,    
-
+        dungeon: Dungeon = None,
     ) -> None:
         self.dungeon = dungeon
         self.score = 0
@@ -38,7 +37,7 @@ class Simulation:
         self.running = False
         self.tresorReached = False
         self.allHeroesDead = False
-
+        self.isSimStarted = False
         self.dmgobserver = DamageObserver()
 
     def launch(self) -> Dict[str, Any]:
@@ -48,14 +47,14 @@ class Simulation:
         """
         self.running = True
         count_awake_hero = 0
-        while not(self.tresorReached or self.allHeroesDead or not(self.running)):
-            if (count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1)):
+        while not (self.tresorReached or self.allHeroesDead or not (self.running)):
+            if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1):
                 if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
-                    self.heroes[count_awake_hero//TOURBOUCLE_REVEIl_HERO].awake()
+                    self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
                 count_awake_hero += 1
 
             self.step()
-    
+
             time.sleep(0.5)
         return waveResult.from_simulation(self).to_dict()
 
@@ -73,27 +72,31 @@ class Simulation:
         corresponding information.
         """
         self.ticks += 1
+        count_awake_hero = 0
         # Let dungeon perform an update if available
         try:
             if self.dungeon and hasattr(self.dungeon, "update"):
                 self.dungeon.update(self)
         except Exception:
             pass
-
+        if count_awake_hero <= TOURBOUCLE_REVEIl_HERO * (self.level.nb_heroes - 1):
+            if count_awake_hero % TOURBOUCLE_REVEIl_HERO == 0:
+                self.heroes[count_awake_hero // TOURBOUCLE_REVEIl_HERO].awake()
+            count_awake_hero += 1
         # Let heroes act
         for h in list(self.heroes):
-            if h.isAlive :
+            if h.isAlive:
                 try:
                     nextMove = h.getMove()
                     if self.dungeon.validMove(nextMove):
                         h.move(nextMove)
                         damage = self.apply_cell_effects(h)
                         self.notifyDamageObserver(damage)
-    
-                        if self.check_on_treasure(h) :
+
+                        if self.check_on_treasure(h):
                             print("Treasure reached!")
                 except Exception:
-                    print("illegal move")
+                    print("illegal move")   
 
         # Conservative bookkeeping: if dungeon exposes a score or budget
         # aggregator, prefer it. Otherwise little changes are performed
@@ -104,9 +107,8 @@ class Simulation:
         except Exception:
             pass
 
-
-    def check_on_treasure(self, hero : Hero) -> bool :
-        if hero.coord == self.dungeon.treasure_coord :
+    def check_on_treasure(self, hero: Hero) -> bool:
+        if hero.coord == self.dungeon.exit:
             self.tresorReached = True
             return True
         return False
@@ -128,20 +130,20 @@ class Simulation:
 
         return totaldmg
 
-    def notifyDamageObserver(self, dmg : int) :
+    def notifyDamageObserver(self, dmg: int):
         self.dmgobserver.update(dmg)
 
-    def score(self) : 
+    def score(self):
         """
         Fonction de calcul de score
-        
+
         Plus la wave dure longtemps, moins le score sera élevé. Des héros tués rapportent beaucoup de points.
         Le budget dépensé fait office de coefficient
         En moyenne on fera maximum Width*Height ticks pour une wave
         """
 
         timescore = self.ticks / (WIDTH * HEIGHT)
-        killscore = self.level.get_nb_killed_heroes() / self.level.get_nb_heroes() 
+        killscore = self.level.get_nb_killed_heroes() / self.level.get_nb_heroes()
         damagescore = self.dmgobserver.getTotalDmg() / self.level.get_sum_HP()
         treasurePenalty = int(self.tresorReached)
         alpha = 0.30
@@ -152,7 +154,6 @@ class Simulation:
         score = (alpha * timescore + beta * killscore + gamma * damagescore ) * (1 - eta * treasurePenalty) #entre 0 et 1
         MAX_SCORE = 10000
         return round(score * MAX_SCORE)
-
 
     def reset(self) -> None:
         self.ticks = 0
@@ -165,7 +166,11 @@ class Simulation:
         except Exception:
             pass
 
-    
+    def get_all_hero_positions(self):
+        a = []
+        for hero in self.heroes:
+            a.append(hero.coord)
+        return a
 
     def __repr__(self) -> str:
         return (

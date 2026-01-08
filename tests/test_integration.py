@@ -1,7 +1,7 @@
 """Tests d'intégration sans curses - simulation complète."""
 
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from src.model.dungeon import Dungeon
 from src.model.cell import Cell
 from src.model.hero import Hero
@@ -97,20 +97,19 @@ def test_integration_simulation_trap_damage():
     dungeon = create_test_dungeon()
     dungeon.place_entity(Trap(damage=25), (0, 1))
 
-
     lvl = LevelPresets.easy(dungeon)
-    hero = lvl.heroes[0] # hero has 50hp
+    hero = lvl.heroes[0]  # hero has 50hp
     hero.awake()
     hero.path = [(0, 0), (0, 1), (1, 1)]
     simulation = Simulation(level=lvl, dungeon=dungeon)
-    
-    assert(hero.stepsTaken == 0)
-    assert(hero.coord == (0, 0))
+
+    assert hero.stepsTaken == 0
+    assert hero.coord == (0, 0)
 
     simulation.step()
 
-    assert(hero.stepsTaken == 1)
-    assert(hero.coord == (0, 1))
+    assert hero.stepsTaken == 1
+    assert hero.coord == (0, 1)
 
     simulation.step()
 
@@ -175,14 +174,19 @@ def test_integration_level_get_alive_heroes():
 def test_integration_command_place_and_remove():
     """Test d'intégration: placeEntity + removeEntity."""
     dungeon = create_test_dungeon()
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
+    mock_controller = MagicMock()
 
-    place_command = placeEntity(dungeon, EntityFactory.create_wall(), (2, 2))
-    place_command.execute()
+    place_command = placeEntity(
+        dungeon, EntityFactory.create_wall(), (2, 2), mock_simulation
+    )
+    place_command.execute(mock_controller)
 
     assert not dungeon.is_Walkable((2, 2))
 
-    remove_command = removeEntity(dungeon, (2, 2))
-    remove_command.execute()
+    remove_command = removeEntity(dungeon, (2, 2), mock_simulation)
+    remove_command.execute(mock_controller)
 
     assert dungeon.is_Walkable((2, 2))
 
@@ -191,7 +195,8 @@ def test_integration_game_invoker_workflow():
     """Test d'intégration: GameInvoker workflow complet."""
     from unittest.mock import MagicMock
 
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command1 = MagicMock()
     command2 = MagicMock()
 
@@ -287,7 +292,6 @@ def test_integration_game_controller_simulation():
 
     controller.stop()
     assert simulation.running is False
-
 
 
 def test_integration_complex_dungeon_layout():
