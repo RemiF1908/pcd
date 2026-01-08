@@ -176,6 +176,7 @@ def test_integration_command_place_and_remove():
     dungeon = create_test_dungeon()
     mock_simulation = MagicMock()
     mock_simulation.isSimStarted = False
+    mock_simulation.current_budget = 100
     mock_controller = MagicMock()
 
     place_command = placeEntity(

@@ -43,6 +43,14 @@ class Entity(ABC):
 		return True
 
 	@property
+	def cost(self) -> int :
+		"""Coût en budget pour placer cette entité.
+
+		Valeur par défaut 0 pour les entités gratuites (floor, wall).
+		"""
+		return 0
+
+	@property
 	def damage(self) -> int:
 		"""Dégâts infligés par l'entité si applicable (pièges/monstres).
 

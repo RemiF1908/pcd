@@ -45,7 +45,7 @@ def test_place_entity_command():
     position = (2, 3)
     mock_simulation = MagicMock()
     mock_simulation.isSimStarted = False
-
+    mock_simulation.current_budget = 100
     command = placeEntity(dungeon, wall, position, mock_simulation)
     command.execute(MagicMock())
 
@@ -60,6 +60,7 @@ def test_place_entity_trap():
     trap = EntityFactory.create_trap(damage=20)
     position = (1, 1)
     mock_simulation = MagicMock()
+    mock_simulation.current_budget = 100
     mock_simulation.isSimStarted = False
 
     command = placeEntity(dungeon, trap, position, mock_simulation)
@@ -78,6 +79,7 @@ def test_place_entity_floor():
     floor = EntityFactory.create_floor()
     mock_simulation = MagicMock()
     mock_simulation.isSimStarted = False
+    mock_simulation.current_budget = 100
     command = placeEntity(dungeon, floor, (2, 2), mock_simulation)
     command.execute(MagicMock())
 
@@ -90,7 +92,7 @@ def test_remove_entity_command():
     dungeon.place_entity(EntityFactory.create_wall(), (1, 1))
     mock_simulation = MagicMock()
     mock_simulation.isSimStarted = False
-
+    mock_simulation.current_budget = 100
     command = removeEntity(dungeon, (1, 1), mock_simulation)
     command.execute(MagicMock())
 
@@ -102,7 +104,7 @@ def test_remove_entity_from_floor():
     dungeon = create_test_dungeon()
     mock_simulation = MagicMock()
     mock_simulation.isSimStarted = False
-
+    
     command = removeEntity(dungeon, (1, 1), mock_simulation)
     command.execute(MagicMock())
 
@@ -355,6 +357,7 @@ def test_place_entity_then_remove():
     dungeon = create_test_dungeon()
     wall = EntityFactory.create_wall()
     mock_simulation = MagicMock()
+    mock_simulation.current_budget = 100
     mock_simulation.isSimStarted = False
     mock_controller = MagicMock()
 
@@ -373,6 +376,7 @@ def test_multiple_commands_with_invoker():
     """Test workflow complet avec GameInvoker."""
     dungeon = create_test_dungeon()
     mock_simulation = MagicMock()
+    mock_simulation.current_budget = 100
     mock_simulation.isSimStarted = False
     mock_controller = MagicMock()
     invoker = GameInvoker(mock_controller)

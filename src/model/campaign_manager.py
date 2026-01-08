@@ -45,7 +45,7 @@ class Campaign:
         from ..commands.importDungeon import importDungeon
         
         cmd = importDungeon(dungeon_file)
-        cmd.execute()
+        cmd.execute(None)
         return cmd.result
 
     def load_level(self, level_num: int) -> Optional[Level]:

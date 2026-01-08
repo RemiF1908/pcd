@@ -14,6 +14,10 @@ class Wall(Entity):
         return "WALL"
 
     @property
+    def cost(self) -> int :
+        return 20
+
+    @property
     def passable(self) -> bool:
         return False
 
