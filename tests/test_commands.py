@@ -43,9 +43,11 @@ def test_place_entity_command():
     dungeon = create_test_dungeon()
     wall = EntityFactory.create_wall()
     position = (2, 3)
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
 
-    command = placeEntity(dungeon, wall, position)
-    command.execute()
+    command = placeEntity(dungeon, wall, position, mock_simulation)
+    command.execute(MagicMock())
 
     cell = dungeon.get_cell(position)
     assert cell.entity is wall
@@ -57,9 +59,11 @@ def test_place_entity_trap():
     dungeon = create_test_dungeon()
     trap = EntityFactory.create_trap(damage=20)
     position = (1, 1)
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
 
-    command = placeEntity(dungeon, trap, position)
-    command.execute()
+    command = placeEntity(dungeon, trap, position, mock_simulation)
+    command.execute(MagicMock())
 
     cell = dungeon.get_cell(position)
     assert cell.entity is trap
@@ -72,8 +76,10 @@ def test_place_entity_floor():
     dungeon.place_entity(EntityFactory.create_wall(), (2, 2))
 
     floor = EntityFactory.create_floor()
-    command = placeEntity(dungeon, floor, (2, 2))
-    command.execute()
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
+    command = placeEntity(dungeon, floor, (2, 2), mock_simulation)
+    command.execute(MagicMock())
 
     assert dungeon.is_Walkable((2, 2))
 
@@ -82,9 +88,11 @@ def test_remove_entity_command():
     """Test la commande removeEntity."""
     dungeon = create_test_dungeon()
     dungeon.place_entity(EntityFactory.create_wall(), (1, 1))
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
 
-    command = removeEntity(dungeon, (1, 1))
-    command.execute()
+    command = removeEntity(dungeon, (1, 1), mock_simulation)
+    command.execute(MagicMock())
 
     assert dungeon.is_Walkable((1, 1))
 
@@ -92,9 +100,11 @@ def test_remove_entity_command():
 def test_remove_entity_from_floor():
     """Test removeEntity quand on supprime un sol (doit rester un sol)."""
     dungeon = create_test_dungeon()
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
 
-    command = removeEntity(dungeon, (1, 1))
-    command.execute()
+    command = removeEntity(dungeon, (1, 1), mock_simulation)
+    command.execute(MagicMock())
 
     cell = dungeon.get_cell((1, 1))
     assert isinstance(cell.entity, Floor)
@@ -103,12 +113,13 @@ def test_remove_entity_from_floor():
 def test_start_wave_command():
     """Test la commande startWave."""
     mock_simulation = MagicMock()
-    mock_simulation.launch.return_value = None
+    mock_simulation.isSimStarted = False
+    mock_simulation.step.return_value = None
 
     command = startWave(mock_simulation)
-    command.execute()
+    command.execute(MagicMock())
 
-    mock_simulation.launch.assert_called_once()
+    mock_simulation.step.assert_called_once()
 
 
 def test_stop_wave_command():
@@ -116,7 +127,7 @@ def test_stop_wave_command():
     mock_simulation = MagicMock()
 
     command = stopWave(mock_simulation)
-    command.execute()
+    command.execute(MagicMock())
 
     mock_simulation.stop.assert_called_once()
 
@@ -129,7 +140,7 @@ def test_stop_wave_command_with_exception():
 
     command = stopWave(mock_simulation)
     try:
-        command.execute()
+        command.execute(MagicMock())
     except Exception:
         pass
 
@@ -141,7 +152,7 @@ def test_reset_dungeon_command():
     dungeon.place_entity(EntityFactory.create_trap(damage=15), (1, 1))
 
     command = resetDungeon(dungeon)
-    command.execute()
+    command.execute(MagicMock())
 
     assert dungeon.is_Walkable((0, 1))
     assert not dungeon.get_cell((1, 1)).is_dangerous()
@@ -149,24 +160,28 @@ def test_reset_dungeon_command():
 
 def test_export_dungeon_command():
     """Test la commande exportDungeon."""
-    dungeon = create_test_dungeon() 
+    dungeon = create_test_dungeon()
 
     filename = "test_dungeon_export"
-    
+
     expected_filepath = f"./save/{filename}.json"
 
     try:
         command = exportDungeon(dungeon, filename)
-        command.execute()
+        command.execute(MagicMock())
 
-        assert os.path.exists(expected_filepath), f"Le fichier {expected_filepath} n'a pas été créé"
+        assert os.path.exists(expected_filepath), (
+            f"Le fichier {expected_filepath} n'a pas été créé"
+        )
 
         with open(expected_filepath, "r") as f:
             content = json.load(f)
 
         assert content is not None
         assert "dimension" in content
-        assert content["dimension"] == list(dungeon.dimension) # Convert tuple to list for JSON comparison
+        assert content["dimension"] == list(
+            dungeon.dimension
+        )  # Convert tuple to list for JSON comparison
 
     finally:
         # Nettoyage
@@ -190,7 +205,7 @@ def test_import_dungeon_command():
     controller.place_wall((3, 3))
 
     filename = "test_dungeon_export"
-    
+
     expected_filepath = f"./save/{filename}.json"
 
     try:
@@ -212,34 +227,39 @@ def test_import_dungeon_command():
         if os.path.exists(expected_filepath):
             os.unlink(expected_filepath)
 
+
 def test_getDungeonList_command():
     """Test la commande getDungeonList."""
 
     with tempfile.TemporaryDirectory() as tempdir:
-        filenames = ["dungeon1.json", "dungeon2.json"] 
-        
+        filenames = ["dungeon1.json", "dungeon2.json"]
+
         for fname in filenames:
             with open(os.path.join(tempdir, fname), "w") as f:
                 f.write("{}")
 
         command = getDungeonList()
         command.save_directory = tempdir
-        command.execute()
+        command.execute(MagicMock())
 
         expected_dungeons = ["dungeon1", "dungeon2"]
         assert sorted(command.result) == sorted(expected_dungeons)
 
+
 def test_game_invoker_initialization():
     """Test l'initialisation de GameInvoker."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
 
+    assert invoker.game_controller is mock_controller
     assert invoker.history == []
     assert invoker.commandstack == []
 
 
 def test_game_invoker_push_command():
     """Test push_command de GameInvoker."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command = MagicMock()
 
     invoker.push_command(command)
@@ -250,7 +270,8 @@ def test_game_invoker_push_command():
 
 def test_game_invoker_push_multiple_commands():
     """Test push_command avec plusieurs commandes."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command1 = MagicMock()
     command2 = MagicMock()
     command3 = MagicMock()
@@ -264,13 +285,14 @@ def test_game_invoker_push_multiple_commands():
 
 def test_game_invoker_execute_single():
     """Test execute avec une seule commande."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command = MagicMock()
 
     invoker.push_command(command)
     invoker.execute()
 
-    command.execute.assert_called_once()
+    command.execute.assert_called_once_with(mock_controller)
     assert len(invoker.history) == 1
     assert invoker.history[0] is command
     assert len(invoker.commandstack) == 0
@@ -278,7 +300,8 @@ def test_game_invoker_execute_single():
 
 def test_game_invoker_execute_multiple():
     """Test execute avec plusieurs commandes."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command1 = MagicMock()
     command2 = MagicMock()
     command3 = MagicMock()
@@ -288,9 +311,9 @@ def test_game_invoker_execute_multiple():
     invoker.push_command(command3)
     invoker.execute()
 
-    command1.execute.assert_called_once()
-    command2.execute.assert_called_once()
-    command3.execute.assert_called_once()
+    command1.execute.assert_called_once_with(mock_controller)
+    command2.execute.assert_called_once_with(mock_controller)
+    command3.execute.assert_called_once_with(mock_controller)
 
     assert len(invoker.history) == 3
     assert len(invoker.commandstack) == 0
@@ -298,7 +321,8 @@ def test_game_invoker_execute_multiple():
 
 def test_game_invoker_execute_clears_stack():
     """Test que execute vide la stack après exécution."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command = MagicMock()
 
     invoker.push_command(command)
@@ -310,7 +334,8 @@ def test_game_invoker_execute_clears_stack():
 
 def test_game_invoker_history_preserved():
     """Test que l'historique est préservé entre les executes."""
-    invoker = GameInvoker()
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
     command1 = MagicMock()
     command2 = MagicMock()
 
@@ -329,14 +354,17 @@ def test_place_entity_then_remove():
     """Test workflow complet: place puis remove."""
     dungeon = create_test_dungeon()
     wall = EntityFactory.create_wall()
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
+    mock_controller = MagicMock()
 
-    place_command = placeEntity(dungeon, wall, (2, 2))
-    place_command.execute()
+    place_command = placeEntity(dungeon, wall, (2, 2), mock_simulation)
+    place_command.execute(mock_controller)
 
     assert not dungeon.is_Walkable((2, 2))
 
-    remove_command = removeEntity(dungeon, (2, 2))
-    remove_command.execute()
+    remove_command = removeEntity(dungeon, (2, 2), mock_simulation)
+    remove_command.execute(mock_controller)
 
     assert dungeon.is_Walkable((2, 2))
 
@@ -344,12 +372,19 @@ def test_place_entity_then_remove():
 def test_multiple_commands_with_invoker():
     """Test workflow complet avec GameInvoker."""
     dungeon = create_test_dungeon()
-    invoker = GameInvoker()
-
-    invoker.push_command(placeEntity(dungeon, EntityFactory.create_wall(), (1, 1)))
+    mock_simulation = MagicMock()
+    mock_simulation.isSimStarted = False
+    mock_controller = MagicMock()
+    invoker = GameInvoker(mock_controller)
 
     invoker.push_command(
-        placeEntity(dungeon, EntityFactory.create_trap(damage=10), (2, 2))
+        placeEntity(dungeon, EntityFactory.create_wall(), (1, 1), mock_simulation)
+    )
+
+    invoker.push_command(
+        placeEntity(
+            dungeon, EntityFactory.create_trap(damage=10), (2, 2), mock_simulation
+        )
     )
 
     invoker.push_command(resetDungeon(dungeon))

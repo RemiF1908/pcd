@@ -54,20 +54,20 @@ class GameController:
     def place_trap(self, position: tuple[int, int], damage: int = 10) -> None:
         """Place un piège à la position donnée."""
         trap = EntityFactory.create_trap(damage=damage)
-        command = placeEntity(self.dungeon, trap, position)
+        command = placeEntity(self.dungeon, trap, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
     def place_wall(self, position: tuple[int, int]) -> None:
         """Place un mur à la position donnée."""
         wall = EntityFactory.create_wall()
-        command = placeEntity(self.dungeon, wall, position)
+        command = placeEntity(self.dungeon, wall, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
     def remove_entity(self, position: tuple[int, int]) -> None:
         """Supprime l'entité à la position donnée."""
-        command = removeEntity(self.dungeon, position)
+        command = removeEntity(self.dungeon, position, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 
@@ -86,14 +86,14 @@ class GameController:
         if imported_dungeon:
             self.simulation.dungeon = imported_dungeon
         return imported_dungeon
-    
+
     def getDungeonList(self):
         """donne la liste des donjons sauvegardés"""
         command = getDungeonList()
         self.invoker.push_command(command)
         self.invoker.execute()
         return command.result
-    
+
     def get_status_info(self) -> dict[str, Any]:
         """Retourne les informations de statut actuelles de la simulation."""
         return {
