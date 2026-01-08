@@ -156,6 +156,7 @@ def draw_simulation(
     exit_pos: tuple[int, int],
     start_y: int = 1,
     start_x: int = 1,
+    hasreachedtreasure: bool = False,
 ) -> None:
     """Dessine le donjon sur la fenêtre curses.
 
@@ -168,43 +169,52 @@ def draw_simulation(
         exit_pos: Position de sortie.
         start_y: Ligne de départ pour l'affichage.
         start_x: Colonne de départ pour l'affichage.
+        hasreachedtreasure: Indique si le trésor a été atteint.
     """
+    if hasreachedtreasure:
+        _draw_str(
+            stdscr,
+            0,
+            start_x,
+            "🏆 Trésor atteint ! Continuez à protéger le donjon ! 🏆",
+            curses.A_BOLD,
+        )
+    else : 
+        rows, cols = dimension
+        hero_set = set(hero_positions) if hero_positions else set()
 
-    rows, cols = dimension
-    hero_set = set(hero_positions) if hero_positions else set()
+        grid_str = []
+        for row in dungeon.grid:
+            str_row = []
+            for cell in row:
+                if cell.entity is not None:
+                    str_row.append(
+                        (cell.entity.get_display_char(), cell.entity.get_color_id())
+                    )
+                else:
+                    str_row.append(("+", 0))
+            grid_str.append(str_row)
 
-    grid_str = []
-    for row in dungeon.grid:
-        str_row = []
-        for cell in row:
-            if cell.entity is not None:
-                str_row.append(
-                    (cell.entity.get_display_char(), cell.entity.get_color_id())
+        for row in range(rows):
+            for col in range(cols):
+                pos = (row, col)
+                symbol, color_pair = grid_str[row][col]
+                if pos in hero_set:
+                    symbol, color_pair = Legend.get_symbol_for("HERO"), ColorPair.HERO.value
+                elif pos == entry_pos:
+                    symbol, color_pair = (
+                        Legend.get_symbol_for("ENTRANCE"),
+                        ColorPair.ENTRANCE.value,
+                    )
+                elif pos == exit_pos:
+                    symbol, color_pair = Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
+                _draw_str(
+                    stdscr,
+                    start_y + row,
+                    start_x + col * 2,
+                    symbol,
+                    curses.color_pair(color_pair),
                 )
-            else:
-                str_row.append(("+", 0))
-        grid_str.append(str_row)
-
-    for row in range(rows):
-        for col in range(cols):
-            pos = (row, col)
-            symbol, color_pair = grid_str[row][col]
-            if pos in hero_set:
-                symbol, color_pair = Legend.get_symbol_for("HERO"), ColorPair.HERO.value
-            elif pos == entry_pos:
-                symbol, color_pair = (
-                    Legend.get_symbol_for("ENTRANCE"),
-                    ColorPair.ENTRANCE.value,
-                )
-            elif pos == exit_pos:
-                symbol, color_pair = Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
-            _draw_str(
-                stdscr,
-                start_y + row,
-                start_x + col * 2,
-                symbol,
-                curses.color_pair(color_pair),
-            )
 
 
 def draw_dungeon(
@@ -566,28 +576,29 @@ class TUIView:
             self.exit_pos,
             self.DUNGEON_START_Y,
             self.DUNGEON_START_X,
+            self.simulation.tresorReached,
         )
+        if not self.simulation.tresorReached:
+            self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
 
-        self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
+            draw_legend(stdscr, self.LEGEND_START_Y, self.LEGEND_START_X)
 
-        draw_legend(stdscr, self.LEGEND_START_Y, self.LEGEND_START_X)
+            if self.status_info:
+                draw_status(
+                    stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info
+                )
 
-        if self.status_info:
-            draw_status(
-                stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info
+            draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.simulation)
+
+            self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
+
+            _draw_str(
+                stdscr,
+                self.HELP_START_Y - 1,
+                self.HELP_START_X,
+                f"Curseur: {self.cursor_pos}",
+                curses.A_DIM,
             )
-
-        draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.simulation)
-
-        self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
-
-        _draw_str(
-            stdscr,
-            self.HELP_START_Y - 1,
-            self.HELP_START_X,
-            f"Curseur: {self.cursor_pos}",
-            curses.A_DIM,
-        )
 
         stdscr.refresh()
     

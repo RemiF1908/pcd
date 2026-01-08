@@ -107,9 +107,8 @@ class Simulation:
                         h.move(nextMove)
                         damage = self.apply_cell_effects(h)
                         self.notifyDamageObserver(damage)
-
-                        if self.check_on_treasure(h):
-                            print("Treasure reached!")
+                        if self.check_on_treasure(h) and h.isAlive:
+                            self.tresorReached = True
                 except Exception:
                     print("illegal move")   
 
