@@ -10,10 +10,11 @@ from ..model.trap import Trap
 class importDungeon(Command):
     """Command to import a dungeon from a JSON file."""
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, dungeon: Dungeon):
         self.filename = filename
         self.filepath = f"./save/{filename}.json"
         self.result = None
+        self.dungeon = dungeon
 
     def execute(self, game_controller) -> None:
         with open(self.filepath, "r") as f:
@@ -45,7 +46,7 @@ class importDungeon(Command):
                 grid_row.append(cell)
             grid.append(grid_row)
 
-        dungeon = Dungeon(dimension=dimension, entry=entry, exit=exit)
-        dungeon.grid = grid
-        self.result = dungeon
+        result = Dungeon(dimension=dimension, entry=entry, exit=exit)
+        result.grid = grid
+        self.dungeon = result
         print(f"Dungeon imported from {self.filepath}")

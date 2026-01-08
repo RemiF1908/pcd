@@ -39,12 +39,13 @@ class InputHandler:
         self.invoker.execute()
 
     def export_dungeon(self) -> None:
-        command = exportDungeon(self.dungeon, "dungeon.json")
+        command = exportDungeon(self.dungeon, "dungeon")
         self.invoker.push_command(command)
         self.invoker.execute()
 
     def import_dungeon(self) -> None:
-        command = importDungeon("dungeon.json")
+        print("in importDungeon execute")
+        command = importDungeon("dungeon", self.dungeon)
         self.invoker.push_command(command)
         self.invoker.execute()
 

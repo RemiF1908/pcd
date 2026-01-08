@@ -477,6 +477,8 @@ class TUIView:
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
         }
 
+    def _import_dungeon(self) -> None:
+        pass
 
     def move_cursor_up(self) -> None:                                                                                                               
         self._move_cursor(-1, 0)                                                                                                                 
