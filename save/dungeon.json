@@ -38,7 +38,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           0,
           3
@@ -46,7 +46,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           0,
           4
@@ -54,7 +54,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           0,
           5
@@ -62,7 +62,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           0,
           6
@@ -70,7 +70,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           0,
           7
@@ -194,7 +194,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           2,
           2
@@ -268,7 +268,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           3,
           1
@@ -350,7 +350,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           4,
           1
@@ -506,26 +506,18 @@
     ],
     [
       {
-        "type": "Floor",
+        "type": "Dragon",
         "position": [
           6,
           0
         ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          1
-        ],
-        "damage": 0
+        "damage": 30
       },
       {
         "type": "Floor",
         "position": [
           6,
-          2
+          1
         ],
         "damage": 0
       },
@@ -533,9 +525,17 @@
         "type": "Floor",
         "position": [
           6,
-          3
+          2
         ],
         "damage": 0
+      },
+      {
+        "type": "Dragon",
+        "position": [
+          6,
+          3
+        ],
+        "damage": 30
       },
       {
         "type": "Floor",

@@ -5,6 +5,7 @@ from ..model.cell import Cell
 from ..model.floor import Floor
 from ..model.wall import Wall
 from ..model.trap import Trap
+from ..model.entity_factory import EntityFactory
 
 
 class importDungeon(Command):
@@ -32,15 +33,19 @@ class importDungeon(Command):
                 position = tuple(cell_data["position"])
 
                 if entity_type == "Floor":
-                    entity = Floor()
+                    entity = EntityFactory.create_floor()
                 elif entity_type == "Wall":
-                    entity = Wall()
+                    entity = EntityFactory.create_wall()
                 elif entity_type == "Trap":
                     damage = cell_data.get("damage", 10)
-                    entity = Trap(damage=damage)
+                    entity = EntityFactory.create_trap(damage=damage)
+                elif entity_type == "Dragon":
+                    entity = EntityFactory.create_dragon()
+                elif entity_type == "Bombe":
+                    entity = EntityFactory.create_bombe()
                 else:
                     entity = Floor()
-
+                entity.init_range(position)
                 cell = Cell(position, entity)
                 grid_row.append(cell)
             grid.append(grid_row)

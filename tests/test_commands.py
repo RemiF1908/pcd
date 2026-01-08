@@ -396,3 +396,32 @@ def test_multiple_commands_with_invoker():
 
     assert dungeon.is_Walkable((1, 1))
     assert not dungeon.get_cell((2, 2)).is_dangerous()
+
+
+def test_import_dungeon_elementary():
+    """Test la commande importDungeon avec un donjon élémentaire."""
+    # Créer un donjon vide pour le recevoir
+    dungeon = Dungeon(dimension=(3, 3), entry=(0, 0), exit=(2, 2))
+    
+    # Créer la commande d'import avec le fichier de test (sans extension)
+    command = importDungeon("dungeontest", dungeon)
+    mock_controller = MagicMock()
+    
+    # Exécuter la commande
+    command.execute(mock_controller)
+    
+    # Vérifier que le donjon a bien été importé
+    assert dungeon.dimension == (3, 3)
+    assert dungeon.entry == (0, 0)
+    assert dungeon.exit == (2, 2)
+    
+    # Vérifier les cellules
+    cell_floor = dungeon.get_cell((0, 0))
+    assert isinstance(cell_floor.entity, Floor)
+    
+    cell_trap = dungeon.get_cell((1, 1))
+    assert isinstance(cell_trap.entity, Trap)
+    assert cell_trap.entity.damage == 5
+    
+    cell_wall = dungeon.get_cell((2, 1))
+    assert isinstance(cell_wall.entity, Wall)
