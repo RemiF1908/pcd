@@ -293,7 +293,7 @@ class TUIView:
         self.FOOTER_Y = self.LEGEND_START_Y + 10
         self.FOOTER_X = self.DUNGEON_START_X
         self.HELP_START_Y = self.DUNGEON_START_Y
-        self.HELP_START_X = self.STATUS_START_X +30
+        self.HELP_START_X = self.STATUS_START_X +23
         
         # # Mapping des touches vers les commandes
         # self.key_bindings: dict[int, Callable[[], None]] = {
