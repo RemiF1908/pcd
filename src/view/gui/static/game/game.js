@@ -113,6 +113,11 @@ function updateSidebar(data) {
         moneyElement.innerText = data.money;
     }
 
+    const levelElement = document.getElementById('level');
+    if (levelElement && data.level !== undefined) {
+        levelElement.innerText = data.level;
+    }
+
     if (data.prices) {
         for (const item in data.prices) {
             const priceElement = document.querySelector(`#${item} .price`);
@@ -405,6 +410,9 @@ function moveHero(scene) {
         }
         // Rafraîchir l'affichage après le déplacement
         refreshDungeon(scene, false);
+        
+        // Vérifier si tous les héros sont morts
+        checkAllHeroesDead(scene);
     })
     .catch(error => console.error('Error moving hero:', error));
 }
@@ -439,6 +447,57 @@ function updateHeroesOnly(scene, data) {
         let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
         gridObjects.push(heroImage);
     });
+}
+
+function checkAllHeroesDead(scene) {
+    fetch('/api/dungeon')
+        .then(res => res.json())
+        .then(data => {
+            const heroes = data.heros || [];
+            if (heroes.length === 0) {
+                // Tous les héros sont morts, passer au niveau suivant
+                console.log("All heroes dead - moving to next level");
+                
+                // Arrêter le déplacement automatique
+                if (heroMoveInterval) {
+                    clearInterval(heroMoveInterval);
+                    heroMoveInterval = null;
+                }
+                
+                // Appeler la route next_level
+                fetch('/api/next_level/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Next level loaded:', data);
+                    // Réinitialiser le jeu et rafraîchir l'affichage
+                    gameStarted = false;
+                    refreshDungeon(scene, true);
+                    
+                    // Réactiver la sidebar et les boutons
+                    const sidebarItems = document.getElementById('sidebar-items');
+                    sidebarItems.classList.remove('disabled');
+                    
+                    const launchButton = document.getElementById('launch-button');
+                    launchButton.disabled = false;
+                    launchButton.textContent = 'Lancer';
+                    
+                    const resetButton = document.getElementById('reset-button');
+                    resetButton.disabled = false;
+                })
+                .catch(error => console.error('Error loading next level:', error));
+            }
+        })
+        .catch(error => console.error('Error checking heroes status:', error));
 }
 
 function update() {
