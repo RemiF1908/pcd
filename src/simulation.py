@@ -190,6 +190,8 @@ class Simulation:
         self.tresorReached = False
         self.allHeroesDead = False
         self.isSimStarted = False
+        if self.level:
+            self.level.reset()
         try:
             if self.dungeon and hasattr(self.dungeon, "reset"):
                 self.dungeon.reset()

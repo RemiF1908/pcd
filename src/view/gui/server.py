@@ -136,7 +136,9 @@ async def get_dungeon():
         "rows": dng.dimension[0],
         "cols": dng.dimension[1],
         "grid": serialized_grid,
-        "heros": hero_positions
+        "heros": hero_positions,
+        "tresorReached": context.simulation.tresorReached if context.simulation else False,
+        "allHeroesDead": context.simulation.allHeroesDead if context.simulation else False
     })
 
 @app.post("/api/place_entity/")
@@ -220,10 +222,11 @@ async def next_level():
 @app.get("/api/start_simulation/")
 async def start_simulation():
     if not context.input_handler:
-        return JSONResponse({"simulation_started": "false"})
+        return JSONResponse({"simulation_started": "false", "error": "No input handler."})
 
-    if not(context.input_handler.start_wave()):
-        return JSONResponse({"simulation_started": "false"})
+    # The start_wave method returns False if a path is blocked
+    if not context.input_handler.start_wave():
+        return JSONResponse({"simulation_started": "false", "error": "Un chemin est bloqué, la simulation ne peut pas commencer."})
     
     return JSONResponse({"simulation_started": "true"})
 
@@ -282,7 +285,12 @@ async def move_hero():
     
     try:
         result = context.simulation.step()
-        return JSONResponse({"hero_moved": "true", "result": result})
+        return JSONResponse({
+            "hero_moved": "true",
+            "result": result,
+            "tresorReached": context.simulation.tresorReached,
+            "allHeroesDead": context.simulation.allHeroesDead
+        })
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 

@@ -89,6 +89,18 @@ class Level:
         for hero in self.heroes:
             hero.awake()
 
+    def reset(self) -> None:
+        """Réinitialise l'état de tous les héros du niveau."""
+        from .path_strategies import PathStrategyFactory
+        for hero in self.heroes:
+            hero.reset()
+            hero.coord = self.entry
+            try:
+                PathStrategyFactory.create(hero.strategy)
+                hero.compute_path(self.dungeon, hero.coord, self.dungeon.exit)
+            except ValueError:
+                pass
+
     def __repr__(self) -> str:
         return (
             f"Level(difficulty={self.difficulty}, budget={self.budget_tot}, "
