@@ -34,6 +34,13 @@ class placeEntity(Command):
                         pass
 
             # Maintenant vérifier le budget pour la nouvelle entité
+            print(f"Placing entity: cost={self.entity.cost}, budget={self.simulation.current_budget}, position={self.position}")
             if self.entity.cost <= self.simulation.current_budget:
                 self.simulation.current_budget -= self.entity.cost
+                print(f"Entity placed at {self.position}, new budget: {self.simulation.current_budget}")
                 self.dungeon.place_entity(self.entity, self.position)
+                print(f"Entity placed in dungeon at {self.position}")
+                # Notifier les observers (WebSocket) pour rafraîchir l'affichage
+                self.simulation.notify()
+            else:
+                print(f"Cannot place entity: insufficient budget (cost={self.entity.cost}, budget={self.simulation.current_budget})")
