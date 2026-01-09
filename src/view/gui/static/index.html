@@ -140,6 +140,27 @@
             cursor: not-allowed;
         }
 
+        #save-button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        #save-button:hover {
+            background-color: #0056b3;
+        }
+
+        #save-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
         #sidebar-items.disabled {
             opacity: 0.5;
             pointer-events: none;
@@ -184,6 +205,7 @@
         </div>
         <button id="launch-button">Lancer</button>
         <button id="reset-button">Réinitialiser</button>
+        <button id="save-button">Sauvegarder</button>
     </div>
 
     <script src="game/game.js"></script>

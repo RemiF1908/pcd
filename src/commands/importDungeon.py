@@ -15,6 +15,7 @@ class importDungeon(Command):
         self.filename = filename
         self.filepath = f"./save/{filename}.json"
         self.result = None
+        self.campaign_progress = None
 
     def execute(self, game_controller) -> None:
         with open(self.filepath, "r") as f:
@@ -53,4 +54,9 @@ class importDungeon(Command):
         dungeon = Dungeon(dimension=dimension, entry=entry, exit=exit)
         dungeon.grid = grid
         self.result = dungeon
+        
+        # Récupérer la progression de campagne si disponible
+        if "campaign_progress" in data:
+            self.campaign_progress = data["campaign_progress"]
+        
         print(f"Dungeon imported from {self.filepath}")
