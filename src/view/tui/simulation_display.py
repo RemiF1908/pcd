@@ -206,7 +206,6 @@ def draw_simulation(
             )
 
 
-
 def draw_legend(stdscr, start_y: int, start_x: int) -> None:
     """Affiche la légende des symboles."""
     _draw_str(stdscr, start_y, start_x, "=== Légende ===", curses.A_BOLD)

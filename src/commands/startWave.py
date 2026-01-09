@@ -27,6 +27,6 @@ class startWave(Command):
                 self.simulation.isSimStarted = False
                 return False
 
-            # Tous les héros ont un chemin -> on peut démarrer
+            # Tous les héros ont un chemin donc on peut démarrer
             self.simulation.isSimStarted = True
         return self.simulation.step()
