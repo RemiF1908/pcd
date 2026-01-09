@@ -268,8 +268,8 @@ class TUIView:
         self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
         
         self.FOOTER_Y = self.LEGEND_START_Y + 10
-        self.HELP_START_X = self.STATUS_START_X + 30
-        self.LOG_START_X = self.HELP_START_X + 25
+        self.HELP_START_X = self.STATUS_START_X + 27
+        self.LOG_START_X = self.HELP_START_X + 31
 
     def __init__(
         self,
