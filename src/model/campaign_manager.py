@@ -5,7 +5,8 @@ import os
 from typing import Optional, List
 from .level import Level, LevelBuilder
 from .dungeon import Dungeon
-
+from .cell import Cell
+from .floor import Floor
 
 class Campaign:
     """Gère le chargement des niveaux depuis campaign.json et la progression."""
@@ -54,13 +55,17 @@ class Campaign:
         if not config:
             return None
 
-        dungeon_file = config.get("dungeon_file")
-        if not dungeon_file:
-            return None
+        dimension = (config.get("dimensions")["width"], config.get("dimensions")["height"])
+        entry = (config.get("entry")["row"], config.get("entry")["col"])
+        exit_ = (config.get("exit")["row"], config.get("exit")["col"])
 
-        dungeon = self._load_dungeon(dungeon_file)
-        if not dungeon:
-            return None
+        dungeon = Dungeon(
+            dimension=dimension,
+            grid=[[Cell((r, c), Floor()) for c in range(dimension[1])] for r in range(dimension[0])],
+            entry = entry,
+            exit = exit_,
+        )
+
 
         builder = LevelBuilder()
         builder.set_dungeon(dungeon)
@@ -69,7 +74,7 @@ class Campaign:
 
         for hero_config in config.get("heroes", []):
             pv = hero_config.get("pv", 100)
-            strategy = hero_config.get("strategy", "random")
+            strategy = hero_config.get("strategy", "shortest")
             builder.add_hero(pv=pv, strategy=strategy)
 
         self._current_level_num = level_num
