@@ -167,7 +167,8 @@ async def get_dungeon_data():
 
     return JSONResponse({
         "money": context.simulation.current_budget,
-        "prices": prices
+        "prices": prices,
+        "level": context.simulation.level.difficulty if context.simulation.level else 1
     })
 
 
@@ -177,7 +178,7 @@ async def next_level():
     if not context.input_handler:
         return JSONResponse({"next_level_change": "false"})
 
-    context.input_handler.next_level()
+    context.input_handler.load_next_level()
     
     return JSONResponse({"next_level_change": "true"})
 
