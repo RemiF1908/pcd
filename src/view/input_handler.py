@@ -84,5 +84,4 @@ class InputHandler:
         self.invoker.execute()
         
     def load_next_level(self) -> None:
-        # À implémenter selon ta logique
-        pass
+            pass

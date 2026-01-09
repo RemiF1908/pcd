@@ -199,18 +199,21 @@ def draw_simulation(
         )
 
         stdscr.refresh()
-        # Attend une seule touche de l'utilisateur (bloquant) puis remet la touche
-        # dans la file d'entrée pour que la boucle principale la traite.
+        # Attend uniquement la touche 'q' (bloquant). Les autres touches sont ignorées.
         try:
             stdscr.nodelay(False)
-            key = stdscr.getch()
+            while True:
+                key = stdscr.getch()
+                # Accept lower/upper case q
+                if key in (ord("q"), ord("Q")):
+                    curses.ungetch(key)
+                    break
+                # ignore other keys and continue waiting
         finally:
             stdscr.nodelay(True)
-
-        if key is not None and key != -1:
-            curses.ungetch(key)
         
     elif hero_positions == [] and is_simulation_running:
+        #féfense réussie
         _draw_str(
             stdscr,
             0,
@@ -234,15 +237,21 @@ def draw_simulation(
             curses.A_BOLD,
         )
         stdscr.refresh()
-        # Attend une seule touche (bloquant), puis remet la touche pour traitement
+        # Attend Entrée (pour passer au niveau suivant) ou 'q' pour quitter.
+        enter_keys = (10, 13, curses.KEY_ENTER)
         try:
             stdscr.nodelay(False)
-            key = stdscr.getch()
+            while True:
+                key = stdscr.getch()
+                if key in enter_keys:
+                    curses.ungetch(key)
+                    break
+                if key in (ord("q"), ord("Q")):
+                    curses.ungetch(key)
+                    break
+                # sinon on continue à attendre
         finally:
             stdscr.nodelay(True)
-
-        if key is not None and key != -1:
-            curses.ungetch(key)
     else : 
         rows, cols = dimension
         hero_set = set(hero_positions) if hero_positions else set()
@@ -406,7 +415,7 @@ class TUIView:
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
             # il faut ajouter le load next level qui est déclanché avec entrée ici pour lorsque le trésor est atteint
             #il faut donc aussi implémenter la fonction load level, il faudra utiliser self.simulation.level + 1
-            #ord("\n"): lambda: self.input_handler.load_next_level() if self.simulation.tresorReached else None,
+            curses.KEY_ENTER: lambda: self.input_handler.load_next_level(),
             #
             
         }
