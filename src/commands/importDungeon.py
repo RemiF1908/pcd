@@ -4,6 +4,8 @@ from ..model.dungeon import Dungeon
 from ..model.cell import Cell
 from ..model.hero import Hero
 from ..model.level import Level
+from ..model.campaign_manager import Campaign
+
 from ..model.entity_factory import EntityFactory
 
 
@@ -22,11 +24,11 @@ class importDungeon(Command):
 
         with open(self.filepath, "r") as f:
             data = json.load(f)
-
+        campaign = game_controller.campaign 
         # 1. Rebuild Dungeon
         dimension = tuple(data["dimension"])
         entry = tuple(data["entry"])
-        exit = tuple(data["exit"])
+        exit_ = tuple(data["exit"])
         grid_data = data["grid"]
         grid = []
         for row_idx, row in enumerate(grid_data):
@@ -56,38 +58,15 @@ class importDungeon(Command):
                 grid_row.append(cell)
             grid.append(grid_row)
 
-        dungeon = Dungeon(dimension=dimension, entry=entry, exit=exit)
+        dungeon = Dungeon(dimension=dimension, entry=entry, exit=exit_)
         dungeon.grid = grid
-
-        # 2. Rebuild Heroes
-        heroes_data = data.get("heroes", [])
-        new_heroes = []
-        for hero_data in heroes_data:
-            hero = Hero(
-                pv_total=hero_data["pv_total"],
-                strategy=hero_data["strategy"],
-                coord=tuple(hero_data["position"])
-            )
-            hero.pv_cur = hero_data["pv_current"]
-            new_heroes.append(hero)
-
-        # 3. Create new Level and update Simulation state
+      
         sim = game_controller.simulation
         level_id = data.get("level_id", sim.level.difficulty)
-
-        # Create a new Level object to ensure a clean state
-        new_level = Level(
-            dungeon=dungeon,
-            difficulty=level_id,
-            heroes=new_heroes,
-            budget_tot=sim.level.budget_tot  # Budget is not saved, so keep the current one
-        )
-
-        sim.level = new_level
-        sim.dungeon = new_level.dungeon
-        sim.heroes = new_level.heroes
-        sim.current_budget = new_level.budget_tot
-
+        level = game_controller.campaign.load_level(level_id)
+        sim.level = level
+        sim.dungeon = dungeon
+        sim.current_budget = data["current_budget"]
         
 
         print(f"Level and Dungeon state imported from {self.filepath}")
