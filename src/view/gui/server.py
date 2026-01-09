@@ -104,6 +104,14 @@ async def get_dungeon():
         for c, cell in enumerate(row):
             # Type par défaut
             entity_type = cell.entity.type if cell.entity else "FLOOR"
+            # Si l'entité est un dragon, inclure son orientation pour le frontend
+            try:
+                if cell.entity and getattr(cell.entity, 'type', None) == 'DRAGON' and hasattr(cell.entity, 'orientation'):
+                    # orientation est une lettre 'U','D','L' ou 'R'
+                    entity_type = f"DRAGON{cell.entity.orientation}"
+            except Exception:
+                # En cas d'entité malformée, conserver le type par défaut
+                pass
             
             # Surcharge pour l'affichage visuel (Départ / Arrivée)
             if (r, c) == dng.entry:

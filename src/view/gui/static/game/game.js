@@ -36,6 +36,7 @@ function preload() {
     this.load.image('start', 'assets/start.png');
     this.load.image('exit', 'assets/exit.png');
     this.load.image('dragon', 'assets/dragon.png');
+    this.load.image('dragonRight', 'assets/dragonRight.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.image('hero', 'assets/goblinRight.png');
 }
@@ -285,13 +286,23 @@ function buildIsoGrid(scene, data) {
 
             // Entités
             let entityImage;
-            switch(cell.type) {
-                case 'WALL': entityImage = scene.add.image(isoX, isoY, 'wall'); break;
-                case 'TRAP': entityImage = scene.add.image(isoX, isoY, 'trap'); break;
-                case 'START': entityImage = scene.add.image(isoX, isoY, 'start'); break;
-                case 'EXIT': entityImage = scene.add.image(isoX, isoY, 'exit'); break;
-                case 'DRAGON': entityImage = scene.add.image(isoX, isoY, 'dragon'); break;
-                case 'BOMBE': entityImage = scene.add.image(isoX, isoY, 'bomb'); break;
+            // Use a normalized uppercase type to detect orientation suffixes like U/R/D/L
+            const t = (cell.type || '').toString().toUpperCase();
+
+            // Handle dragons with orientation: dragonU / dragonR -> use dragonRight sprite
+            if (t.startsWith('DRAGON')) {
+                const lastChar = t.charAt(t.length - 1);
+                const useRight = (lastChar === 'U' || lastChar === 'R');
+                const spriteKey = useRight ? 'dragonRight' : 'dragon';
+                entityImage = scene.add.image(isoX, isoY, spriteKey);
+            } else {
+                switch(t) {
+                    case 'WALL': entityImage = scene.add.image(isoX, isoY, 'wall'); break;
+                    case 'TRAP': entityImage = scene.add.image(isoX, isoY, 'trap'); break;
+                    case 'START': entityImage = scene.add.image(isoX, isoY, 'start'); break;
+                    case 'EXIT': entityImage = scene.add.image(isoX, isoY, 'exit'); break;
+                    case 'BOMBE': entityImage = scene.add.image(isoX, isoY, 'bomb'); break;
+                }
             }
 
             if (entityImage) {
