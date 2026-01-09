@@ -17,14 +17,7 @@ class exportDungeon(Command):
 
         sim = game_controller.simulation
         
-        heroes_data = []
-        for hero in sim.heroes:
-            heroes_data.append({
-                "position": hero.coord,
-                "pv_current": hero.pv_cur,
-                "pv_total": hero.pv_total,
-                "strategy": hero.strategy,
-            })
+
 
         dungeon_data = {
             "level_id": sim.level.difficulty,
@@ -32,7 +25,8 @@ class exportDungeon(Command):
             "entry": self.dungeon.entry,
             "exit": self.dungeon.exit,
             "grid": [],
-            "heroes": heroes_data,
+            "current_budget": sim.current_budget
+
         }
         for row in self.dungeon.grid:
             row_data = []
