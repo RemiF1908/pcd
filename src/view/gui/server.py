@@ -154,8 +154,14 @@ async def place_entity(request: PlaceEntityRequest):
             context.input_handler.place_trap((request.y, request.x))
         case "wall":
             context.input_handler.place_wall((request.y, request.x))
-        case "dragon":
+        case "dragonU":
             context.input_handler.place_dragon((request.y, request.x), orientation="U")
+        case "dragonL":
+            context.input_handler.place_dragon((request.y, request.x), orientation="L")
+        case "dragonD":
+            context.input_handler.place_dragon((request.y, request.x), orientation="D")
+        case "dragonR":
+            context.input_handler.place_dragon((request.y, request.x), orientation="R")
         case "bombe":
             context.input_handler.place_bombe((request.y, request.x))
         case "floor":
@@ -170,7 +176,10 @@ async def get_dungeon_data():
 
     prices = {
         "trap": EntityFactory.create_trap().cost,
-        "dragon": EntityFactory.create_dragon().cost,
+        "dragonU": EntityFactory.create_dragon().cost,
+        "dragonL": EntityFactory.create_dragon().cost,
+        "dragonD": EntityFactory.create_dragon().cost,
+        "dragonR": EntityFactory.create_dragon().cost,
         "bombe": EntityFactory.create_bombe().cost,
         "wall": EntityFactory.create_wall().cost,
         "floor": 0
