@@ -31,7 +31,7 @@
       "id": 2,
       "name": "Niveau 2 - Premiers Défis",
       "difficulty": 2,
-      "budget": 150,
+      "budget": 220,
       "dungeon_file": "level2_dungeon",
       "dimensions": {
         "width": 6,
@@ -48,6 +48,86 @@
       "heroes": [
         {"pv": 80, "strategy": "safest"},
         {"pv": 80, "strategy": "shortest"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Niveau 3 - La Défense S'Échauffe",
+      "difficulty": 3,
+      "budget": 300,
+      "dungeon_file": "level3_dungeon",
+      "dimensions": {
+        "width": 8,
+        "height": 8
+      },
+      "entry": {
+        "row": 0,
+        "col": 7
+      },
+      "exit": {
+        "row": 7,
+        "col": 0
+      },
+      "heroes": [
+        {"pv": 100, "strategy": "shortest"},
+        {"pv": 100, "strategy": "safest"},
+        {"pv": 100, "strategy": "safest"},
+        {"pv": 100, "strategy": "shortest"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Niveau 4 - Le Grand Test",
+      "difficulty": 4,
+      "budget": 500,
+      "dungeon_file": "level4_dungeon",
+      "dimensions": {
+        "width": 12,
+        "height": 12
+      },
+      "entry": {
+        "row": 0,
+        "col": 0
+      },
+      "exit": {
+        "row": 11,
+        "col": 11
+      },
+      "heroes": [
+        {"pv": 150, "strategy": "safest"},
+        {"pv": 150, "strategy": "shortest"},
+        {"pv": 150, "strategy": "safest"},
+        {"pv": 150, "strategy": "shortest"},
+        {"pv": 150, "strategy": "safest"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Niveau 5 - Le Siège Final",
+      "difficulty": 5,
+      "budget": 1000,
+      "dungeon_file": "level5_dungeon",
+      "dimensions": {
+        "width": 15,
+        "height": 15
+      },
+      "entry": {
+        "row": 0,
+        "col": 14
+      },
+      "exit": {
+        "row": 14,
+        "col": 0
+      },
+      "heroes": [
+        {"pv": 200, "strategy": "shortest"},
+        {"pv": 200, "strategy": "safest"},
+        {"pv": 200, "strategy": "shortest"},
+        {"pv": 200, "strategy": "safest"},
+        {"pv": 200, "strategy": "shortest"},
+        {"pv": 200, "strategy": "safest"},
+        {"pv": 200, "strategy": "shortest"},
+        {"pv": 200, "strategy": "safest"}
       ]
     }
   ]

@@ -17,7 +17,7 @@ class Dragon(Entity):
 
     @property
     def cost(self) -> int :
-        return 80
+        return 68
 
     @property
     def passable(self) -> bool:

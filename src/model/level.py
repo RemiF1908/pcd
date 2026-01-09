@@ -143,7 +143,7 @@ class LevelBuilder:
             self pour le chaînage
         """
         # Hero signature: Hero(pv_total, strategy, coord=None)
-        hero = Hero(pv, strategy, coord=coord)
+        hero = Hero(pv, strategy, coord=coord, hero_number=self._nb_heroes + 1)
         self._heroes.append(hero)
         self._nb_heroes += 1
         return self

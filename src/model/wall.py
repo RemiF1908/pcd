@@ -15,7 +15,7 @@ class Wall(Entity):
 
     @property
     def cost(self) -> int :
-        return 20
+        return 8
 
     @property
     def passable(self) -> bool:
