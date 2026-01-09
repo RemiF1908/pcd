@@ -206,7 +206,6 @@ def draw_simulation(
             )
 
 
-
 def draw_legend(stdscr, start_y: int, start_x: int) -> None:
     """Affiche la légende des symboles."""
     _draw_str(stdscr, start_y, start_x, "=== Légende ===", curses.A_BOLD)
@@ -265,11 +264,12 @@ class TUIView:
 
     def _update_layout(self) -> None:
         """Met à jour la disposition de la TUI en fonction de la taille du donjon."""
-        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
+        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 3
         self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
-        self.LOG_START_X = self.DUNGEON_START_X + self.dimension[1] * 8
+        
         self.FOOTER_Y = self.LEGEND_START_Y + 10
-        self.HELP_START_X = self.STATUS_START_X + 23
+        self.HELP_START_X = self.STATUS_START_X + 30
+        self.LOG_START_X = self.HELP_START_X + 25
 
     def __init__(
         self,
@@ -315,6 +315,10 @@ class TUIView:
         self.invoker = invoker
         self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker, self.campaign)
 
+        # Debug message shown briefly (message + ttl in render loops)
+        self._debug_message = None
+        self._debug_ttl = 0
+
         # Mapping des touches vers les commandes
         self.key_bindings: dict[int, Callable[[], None]] = {
             ord("q"): self.quit,
@@ -329,7 +333,10 @@ class TUIView:
             curses.KEY_RIGHT: self.move_cursor_right,
             ord("t"): lambda: self.input_handler.place_trap(self.cursor_pos),
             ord("w"): lambda: self.input_handler.place_wall(self.cursor_pos),
-            ord("z"): lambda: self.input_handler.place_dragon(self.cursor_pos),
+            ord("u"): lambda: self.input_handler.place_dragon(self.cursor_pos, "U"),
+            ord("h"): lambda: self.input_handler.place_dragon(self.cursor_pos, "L"),
+            ord("j"): lambda: self.input_handler.place_dragon(self.cursor_pos, "D"),
+            ord("k"): lambda: self.input_handler.place_dragon(self.cursor_pos, "R"),
             ord("b"): lambda: self.input_handler.place_bombe(self.cursor_pos),
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
             ord("n"): lambda: self.input_handler.load_next_level(),
@@ -373,7 +380,10 @@ class TUIView:
             ("=== Placer entités ===", curses.A_BOLD),
             ("t: Trap (piège)", 0),
             ("w: Wall (mur)", 0),
-            ("z: Dragon", 0),
+            ("u: Dragon up", 0),
+            ("h: Dragon left", 0),
+            ("j: Dragon down", 0),
+            ("k: Dragon right", 0),
             ("b: Bombe", 0),
             ("d: Delete (supprimer)", 0),
         ]
@@ -495,6 +505,13 @@ class TUIView:
                 curses.A_DIM,
             )
 
+        # Affiche un message de debug temporaire si nécessaire
+        if getattr(self, "_debug_ttl", 0) > 0 and getattr(self, "_debug_message", None):
+            _draw_str(stdscr, self.FOOTER_Y, self.FOOTER_X, self._debug_message, curses.A_BOLD)
+            self._debug_ttl -= 1
+            if self._debug_ttl <= 0:
+                self._debug_message = None
+
         stdscr.refresh()
     
     def run(self) -> None:
@@ -525,8 +542,16 @@ class TUIView:
                 key = stdscr.getch()
                 if key in self.key_bindings:
                     if key == ord("s"):
-                        #pour récupérer le dictionnaire de résultats de la wave
-                        self.waveresult_dic = self.key_bindings[key]()
+                        # récupérer le résultat de la commande start_wave
+                        res = self.key_bindings[key]()
+                        # Si la commande a retourné False, cela signifie qu'un héros n'a pas de chemin
+                        if res is False:
+                            self._debug_message = "Impossible de lancer la simulation : un héros n'a pas de chemin"
+                            # afficher pendant ~3 secondes (30 cycles à timeout=100ms)
+                            self._debug_ttl = 30
+                        else:
+                            # stocker le dictionnaire de résultat si disponible
+                            self.waveresult_dic = res
                     else:
                         self.key_bindings[key]()
 
