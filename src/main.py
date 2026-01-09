@@ -8,6 +8,7 @@ from src.model.cell import Cell
 from src.model.floor import Floor
 from src.model.wall import Wall
 from src.model.trap import Trap
+from src.model.campaign_manager import Campaign
 from src.view.tui.simulation_display import TUIView, ColorPair
 from src.view.gui.gui import GuiView
 from src.commands.GameInvoker import GameInvoker
@@ -20,51 +21,17 @@ def main():
     args = parser.parse_args()
     print(args)
 
+    campaign = Campaign()
+    current_level = campaign.load_level(1)
+    if not current_level:
+        print("Error: Could not load the first level.")
+        return
 
-    gamecontroller = GameController(None, None)
+    simulation = Simulation(current_level, current_level.dungeon)
+    gamecontroller = GameController(None, simulation, campaign)
     invoker = GameInvoker(gamecontroller)
 
-    # Création d'un niveau de test
-    hero = Hero(pv_total=100, strategy="safest")
-    hero2 = Hero(pv_total=100, strategy="shortest", hero_number=2)
-    rows, cols = 10, 10
-    dungeon = Dungeon(
-        dimension=(rows, cols),
-        grid=[[Cell((r, c), Floor()) for c in range(cols)] for r in range(rows)],
-        entry=(0, 0),
-        exit=(rows - 1, cols - 1),
-    )
-
-    level = (
-        LevelBuilder()
-        .set_dungeon(dungeon=dungeon)
-        .set_difficulty(4)
-        .set_budget(2000)
-        .add_hero_instance(hero)
-        .add_hero_instance(hero2)
-        .build()
-    )
-
-    # Création de la simulation
-    simulation = Simulation(level, level.dungeon)
-    gamecontroller.simulation = simulation
-
-    view = TUIView(
-        status_info=gamecontroller.get_status_info(),
-        dimension=gamecontroller.dimension(),
-        entry_pos=gamecontroller.entry(),
-        exit_pos=gamecontroller.exit(),
-        heros_positions=gamecontroller.get_hero_positions(),
-        invoker=invoker,
-        dungeon=gamecontroller.dungeon,
-        simulation=gamecontroller.simulation,
-    )
-
-    
-
-
     if args.tui:
-        
         view = TUIView(
             status_info=gamecontroller.get_status_info(),
             dimension=gamecontroller.dimension(),

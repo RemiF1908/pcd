@@ -25,10 +25,11 @@ class GameController:
     Note: La gestion des niveaux/campagnes est déléguée à LevelController.
     """
 
-    def __init__(self, interface: Any, simulation: Any) -> None:
+    def __init__(self, interface: Any, simulation: Any, campaign: Any = None) -> None:
         self.interface = interface
         self.simulation = simulation
         self.invoker = GameInvoker(self)
+        self.campaign = campaign
 
     @property
     def dungeon(self) -> Any:
