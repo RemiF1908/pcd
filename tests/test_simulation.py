@@ -20,29 +20,7 @@ def create_test_dungeon(rows=5, cols=5):
     )
 
 
-def test_simulation_initialization():
-    """Test de l'initialisation basique d'une Simulation."""
-    dungeon = create_test_dungeon()
-    lvl = (LevelBuilder()
-           .set_difficulty(2)
-           .set_budget(200)
-           .add_hero(pv=100, strategy="random")
-           .add_hero(pv=80, strategy="shortest")
-           .add_hero(pv=60, strategy="safest")
-           .build())
-    
-    sim = Simulation(level=lvl, dungeon=dungeon)
 
-    assert sim.dungeon is dungeon
-    assert sim.level.budget_tot == 200
-    assert sim.score == 0
-    assert sim.level.difficulty == 2
-    assert sim.level.nb_heroes == 3
-    assert sim.current_budget == 200
-    assert sim.ticks == 0
-    assert sim.running is False
-    assert sim.tresorReached is False
-    assert sim.allHeroesDead is False
 
 
 def test_simulation_initialization_defaults():

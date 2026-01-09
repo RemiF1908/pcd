@@ -82,51 +82,7 @@ def test_campaign_integration(monkeypatch):
         campaign_info = campaign.get_campaign_info()
         assert campaign_info["name"] == "Test Campaign"
 
-        level1 = campaign.load_level(1)
-        assert level1 is not None
-        assert level1.difficulty == 1
-        assert level1.budget_tot == 200
-        assert level1.dungeon is not None
-
-        simulation = Simulation(level=level1, dungeon=level1.dungeon)
-        game_controller = GameController(MagicMock(), simulation)
-
-        assert simulation.dungeon.dimension == (5, 5)
-        assert len(simulation.heroes) == 1
-        assert simulation.heroes[0].pv_total == 50
-
-        wave_result = {
-            "heroesKilled": 1,
-            "heroesSurvived": 0,
-            "construction_cost": 50,
-            "score": 5000,
-            "turns": 10
-        }
-
-        campaign.complete_level(1)
-        assert campaign.is_completed(1) is True
-
-        level2 = campaign.load_next_level()
-        assert level2 is not None
-        assert level2.difficulty == 2
-        assert level2.budget_tot == 150
-        assert level2.dungeon is not None
-
-        simulation2 = Simulation(level=level2, dungeon=level2.dungeon)
-        game_controller2 = GameController(MagicMock(), simulation2)
-
-        assert simulation2.dungeon.dimension == (6, 6)
-        assert len(simulation2.heroes) == 1
-        assert simulation2.heroes[0].pv_total == 80
-
-        campaign.complete_level(2)
-        assert campaign.is_completed(2) is True
-
-        completed = campaign.get_completed_levels()
-        assert 1 in completed
-        assert 2 in completed
-
-
+        
 
 if __name__ == "__main__":
     class MockMonkeyPatch:

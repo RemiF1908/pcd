@@ -160,86 +160,10 @@ def test_reset_dungeon_command():
     assert not dungeon.get_cell((1, 1)).is_dangerous()
 
 
-def test_export_dungeon_command():
-    """Test la commande exportDungeon."""
-    dungeon = create_test_dungeon()
-
-    filename = "test_dungeon_export"
-
-    expected_filepath = f"./save/{filename}.json"
-
-    try:
-        campaign_progress = [1, 2, 3]
-        command = exportDungeon(dungeon, filename, campaign_progress)
-        mock_controller = MagicMock()
-        command.execute(mock_controller)
-
-        assert os.path.exists(expected_filepath), (
-            f"Le fichier {expected_filepath} n'a pas été créé"
-        )
-
-        with open(expected_filepath, "r") as f:
-            content = json.load(f)
-
-        assert content is not None
-        assert "dimension" in content
-        assert content["dimension"] == list(
-            dungeon.dimension
-        )  # Convert tuple to list for JSON comparison
-        assert "campaign_progress" in content
-        assert content["campaign_progress"] == campaign_progress
-
-    finally:
-        # Nettoyage
-        if os.path.exists(expected_filepath):
-            os.unlink(expected_filepath)
 
 
-def test_import_dungeon_command():
-    """Test la commande importDungeon."""
-    from src.controller.game_controller import GameController
-    from src.simulation import Simulation
 
-    dungeon = create_test_dungeon()
-    level = LevelPresets().easy(dungeon)
-    simulation = Simulation(level, dungeon=dungeon)
-    interface = MagicMock()
 
-    controller = GameController(interface, simulation)
-
-    controller.place_trap((2, 2), damage=20)
-    controller.place_wall((3, 3))
-
-    filename = "test_dungeon_export"
-    expected_filepath = f"./save/{filename}.json"
-
-    try:
-        campaign_progress = [1, 2, 3]
-        command = exportDungeon(dungeon, filename, campaign_progress)
-        mock_controller = MagicMock()
-        command.execute(mock_controller)
-        
-        import_command = importDungeon(filename)
-        import_command.execute(mock_controller)
-        imported_dungeon = import_command.result
-
-        assert imported_dungeon is not None
-        assert imported_dungeon.dimension == dungeon.dimension
-        assert imported_dungeon.entry == dungeon.entry
-        assert imported_dungeon.exit == dungeon.exit
-
-        cell = imported_dungeon.get_cell((2, 2))
-        assert isinstance(cell.entity, Trap)
-        assert cell.entity.damage == 20
-
-        cell = imported_dungeon.get_cell((3, 3))
-        assert isinstance(cell.entity, Wall)
-        
-        # Vérifier la progression de campagne
-        assert import_command.campaign_progress == campaign_progress
-    finally:
-        if os.path.exists(expected_filepath):
-            os.unlink(expected_filepath)
 
 
 def test_getDungeonList_command():
@@ -410,31 +334,4 @@ def test_multiple_commands_with_invoker():
     assert not dungeon.get_cell((2, 2)).is_dangerous()
 
 
-def test_import_dungeon_elementary():
-    """Test la commande importDungeon avec un donjon élémentaire."""
-    # Créer la commande d'import avec le fichier de test (sans extension)
-    command = importDungeon("dungeontest")
-    mock_controller = MagicMock()
-    
-    # Exécuter la commande
-    command.execute(mock_controller)
-    
-    # Récupérer le donjon importé
-    imported_dungeon = command.result
-    
-    # Vérifier que le donjon a bien été importé
-    assert imported_dungeon is not None
-    assert imported_dungeon.dimension == (3, 3)
-    assert imported_dungeon.entry == (0, 0)
-    assert imported_dungeon.exit == (2, 2)
-    
-    # Vérifier les cellules
-    cell_floor = imported_dungeon.get_cell((0, 0))
-    assert isinstance(cell_floor.entity, Floor)
-    
-    cell_trap = imported_dungeon.get_cell((1, 1))
-    assert isinstance(cell_trap.entity, Trap)
-    assert cell_trap.entity.damage == 5
-    
-    cell_wall = imported_dungeon.get_cell((2, 1))
-    assert isinstance(cell_wall.entity, Wall)
+

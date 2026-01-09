@@ -11,16 +11,16 @@
       "budget": 200000,
       "dungeon_file": "level1_dungeon",
       "dimensions": {
-        "width": 10,
-        "height": 10
+        "width": 5,
+        "height": 5
       },
       "entry": {
         "row": 0,
         "col": 0
       },
       "exit": {
-        "row": 9,
-        "col": 9
+        "row": 4,
+        "col": 4
       },
       
       "heroes": [
