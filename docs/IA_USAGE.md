@@ -11,4 +11,4 @@ Création des tests principalement initialisée avec l'IA puis modification/ajou
 
 Les classes abstraites sont décidées par nous, mais l'implémentations de toutes les fonctions qui implémentent les fontions de la classe abstraite est souvent dans un premier temps fait via l'IA dans un premier temps puis modifié pour être plus adapté par nos soin au code si besoin.  Ce sont souvent des fonctions bêtes.
 
-L'IA a permis de faciliter l'écriture du JS
+L'IA a beaucoup aidé pour le JS/front-end
