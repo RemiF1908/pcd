@@ -34,7 +34,8 @@ class InputHandler:
         self.invoker.execute()
 
     def reset_dungeon(self) -> None:
-        command = resetDungeon(self.dungeon)
+        # Passer la simulation afin que la commande puisse rembourser le budget
+        command = resetDungeon(self.dungeon, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
 

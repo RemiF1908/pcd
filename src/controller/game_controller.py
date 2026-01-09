@@ -53,7 +53,8 @@ class GameController:
 
     def reset_dungeon(self) -> None:
         """Réinitialise le donjon."""
-        command = resetDungeon(self.dungeon)
+        # Passer la simulation afin que la commande puisse rembourser le budget
+        command = resetDungeon(self.dungeon, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
         self.simulation.notify()
