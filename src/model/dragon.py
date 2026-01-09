@@ -1,7 +1,8 @@
 from __future__ import annotations
 from src.config import *
 from .entity import Entity
-
+WIDTH = 20
+HEIGHT = 20
 class Dragon(Entity):
     """Entité représentant un dragon."""
 
