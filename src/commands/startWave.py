@@ -13,4 +13,4 @@ class startWave(Command):
             for h in self.simulation.heroes:
                 h.compute_path(self.simulation.dungeon, self.simulation.dungeon.entry, self.simulation.dungeon.exit)
                 assert h.path is not None
-        return self.simulation.step() # waveResult sous forme de dict
+        return self.simulation.step()
