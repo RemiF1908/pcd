@@ -109,8 +109,11 @@ class Simulation:
                         self.notifyDamageObserver(damage)
                         if self.check_on_treasure(h) and h.isAlive:
                             self.tresorReached = True
+                            self.score = self.compute_score()
+                            return waveResult.from_simulation(self).to_dict()
                 except Exception:
                     print("illegal move")   
+            
 
         # Conservative bookkeeping: if dungeon exposes a score or budget
         # aggregator, prefer it. Otherwise little changes are performed
@@ -122,6 +125,8 @@ class Simulation:
             pass
         
         self.notify()
+        wave_res_dict = waveResult.from_simulation(self).to_dict()
+        return wave_res_dict
 
 
 
@@ -151,7 +156,7 @@ class Simulation:
     def notifyDamageObserver(self, dmg: int):
         self.dmgobserver.update(dmg)
 
-    def score(self):
+    def compute_score(self):
         """
         Fonction de calcul de score
 

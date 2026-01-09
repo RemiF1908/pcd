@@ -21,6 +21,7 @@ class waveResult :
             "score" : self.score,
             "turns" : self.turns
         }
+        
     def getResult(self) -> str :
         return f"Wave Result : {self.to_dict()}"
 

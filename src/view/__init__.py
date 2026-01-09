@@ -1,5 +1,5 @@
 # Package View
 
-from .tui.simulation_display import display_simulation, TUIView
+from .tui.simulation_display import  TUIView
 
-__all__ = ["display_simulation", "TUIView"]
+__all__ = ["TUIView"]

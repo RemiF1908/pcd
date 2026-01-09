@@ -1,5 +1,5 @@
 # Package TUI (Terminal User Interface)
 
-from .simulation_display import display_simulation, TUIView
+from .simulation_display import  TUIView
 
-__all__ = ["display_simulation", "TUIView"]
+__all__ = ["TUIView"]

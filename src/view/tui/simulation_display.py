@@ -157,6 +157,7 @@ def draw_simulation(
     start_y: int = 1,
     start_x: int = 1,
     hasreachedtreasure: bool = False,
+    waveresult_dic = None,
 ) -> None:
     """Dessine le donjon sur la fenêtre curses.
 
@@ -172,13 +173,43 @@ def draw_simulation(
         hasreachedtreasure: Indique si le trésor a été atteint.
     """
     if hasreachedtreasure:
+
         _draw_str(
             stdscr,
             0,
             start_x,
-            "🏆 Trésor atteint ! Continuez à protéger le donjon ! 🏆",
+            "🏆 Trésor atteint ! Appuyez sur Entrée pour passer au niveau suivant ! 🏆",
             curses.A_BOLD,
         )
+        
+        result_str = (
+        f"Score: {waveresult_dic.get('score', 'N/A')} | "
+        f"heroskilled: {waveresult_dic.get('heroesKilled', 'N/A')} | "
+        f"herossurvived: {waveresult_dic.get('heroesSurvived', 'N/A')} | "
+        f"construction_cost: {waveresult_dic.get('construction_cost', 'N/A')} | "
+        f"turns: {waveresult_dic.get('turns', 'N/A')}"
+    )
+        _draw_str(
+            stdscr,
+            1,
+            start_x,
+            result_str,
+            curses.A_BOLD,
+        )
+
+        stdscr.refresh()
+        # Attend que l'utilisateur appuie sur Entrée
+        while True:
+            key = stdscr.getch()
+            if key in (curses.KEY_ENTER, 10, 13):
+                #A implémenter self.input_handler.load_next_level()
+                #il se trouve dans view/input_handler.py
+                #il faudra mettre le int associé au niveau en paramètre de draw_simulation et donc aussi dans load_next_level
+                break
+            elif key == ord('q'):
+                break
+        
+
     else : 
         rows, cols = dimension
         hero_set = set(hero_positions) if hero_positions else set()
@@ -216,88 +247,6 @@ def draw_simulation(
                     curses.color_pair(color_pair),
                 )
 
-
-def draw_dungeon(
-    stdscr,
-    dungeon,
-    start_y: int = 1,
-    start_x: int = 1,
-    hero_positions: list[tuple[int, int]] | None = None,
-) -> None:
-    """Dessine le donjon sur la fenêtre curses (wrapper pour compatibilité avec les tests).
-
-    Args:
-        stdscr: Fenêtre curses standard.
-        dungeon: Instance de Dungeon à afficher.
-        start_y: Ligne de départ pour l'affichage.
-        start_x: Colonne de départ pour l'affichage.
-        hero_positions: Liste des positions des héros.
-    """
-    if hero_positions is None:
-        hero_positions = []
-
-    grid_str = []
-    for row in dungeon.grid:
-        str_row = []
-        for cell in row:
-            if cell.entity is not None:
-                str_row.append(
-                    (cell.entity.get_display_char(), cell.entity.get_color_id())
-                )
-            else:
-                str_row.append(("+", 0))
-        grid_str.append(str_row)
-
-    draw_simulation(
-        stdscr,
-        hero_positions,
-        dungeon.dimension,
-        grid_str,
-        dungeon.entry,
-        dungeon.exit,
-        start_y,
-        start_x,
-    )
-
-
-def display_dungeon(
-    dungeon,
-    hero_positions: list[tuple[int, int]] | None = None,
-    status_info: dict[str, Any] | None = None,
-) -> None:
-    """Affiche le donjon dans une fenêtre curses (wrapper pour compatibilité avec les tests).
-
-    Args:
-        dungeon: Instance de Dungeon à afficher.
-        hero_positions: Liste des positions des héros.
-        status_info: Informations de statut à afficher.
-    """
-    if hero_positions is None:
-        hero_positions = []
-
-    if status_info is None:
-        status_info = {}
-
-    grid_str = []
-    for row in dungeon.grid:
-        str_row = []
-        for cell in row:
-            if cell.entity is not None:
-                str_row.append(
-                    (cell.entity.get_display_char(), cell.entity.get_color_id())
-                )
-            else:
-                str_row.append(("+", 0))
-        grid_str.append(str_row)
-
-    display_simulation(
-        hero_positions,
-        dungeon.dimension,
-        grid_str,
-        dungeon.entry,
-        dungeon.exit,
-        status_info,
-    )
 
 
 def draw_legend(stdscr, start_y: int, start_x: int) -> None:
@@ -338,70 +287,6 @@ def draw_status(
     for i, (key, value) in enumerate(status_info.items()):
         _draw_str(stdscr, start_y + 1 + i, start_x, f"{key}: {value}")
 
-
-def display_simulation(
-    hero_positions: list[tuple[int, int]],
-    dimension: tuple[int, int],
-    grid: list[list[tuple[str, int]]],
-    entry_pos: tuple[int, int],
-    exit_pos: tuple[int, int],
-    status_info: dict[str, Any],
-) -> None:
-    """Affiche la simulation dans une fenêtre curses.
-    Args:
-        hero_positions: Positions des héros.
-        dimension: Dimensions du donjon.
-        grid: Grille du donjon.
-        entry_pos: Position d'entrée.
-        exit_pos: Position de sortie.
-        status_info: Informations de statut.
-    """
-    TITLE_Y = 0
-    TITLE_X = 1
-    DUNGEON_START_Y = 2
-    DUNGEON_START_X = 1
-    LEGEND_START_Y = DUNGEON_START_Y + dimension[0] + 2
-    LEGEND_START_X = DUNGEON_START_X
-    STATUS_START_Y = DUNGEON_START_Y
-    STATUS_START_X = DUNGEON_START_X + dimension[1] * 2 + 3
-    FOOTER_Y = LEGEND_START_Y + 10
-    FOOTER_X = DUNGEON_START_X
-
-    def _main(stdscr):
-        curses.curs_set(0)
-        ColorPair.init_curses_colors()
-        stdscr.clear()
-
-        rows, cols = dimension
-
-        _draw_str(stdscr, TITLE_Y, TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD)
-
-        draw_simulation(
-            stdscr,
-            hero_positions,
-            dimension,
-            grid,
-            entry_pos,
-            exit_pos,
-            DUNGEON_START_Y,
-            DUNGEON_START_X,
-        )
-
-        draw_legend(stdscr, LEGEND_START_Y, LEGEND_START_X)
-        draw_status(stdscr, STATUS_START_Y, STATUS_START_X, status_info)
-
-        _draw_str(
-            stdscr,
-            FOOTER_Y,
-            FOOTER_X,
-            "Appuyez sur une touche pour quitter...",
-            curses.A_DIM,
-        )
-
-        stdscr.refresh()
-        stdscr.getch()
-
-    curses.wrapper(_main)
 
 
 def draw_log(
@@ -449,6 +334,7 @@ class TUIView:
         self.simulation = simulation
         self.log = ""
 
+        self.waveresult_dic = None
         self.TITLE_Y = 0
         self.TITLE_X = 1
         self.DUNGEON_START_Y = 2
@@ -485,6 +371,7 @@ class TUIView:
             ord("z"): lambda: self.input_handler.place_dragon(self.cursor_pos),
             ord("b"): lambda: self.input_handler.place_bombe(self.cursor_pos),
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
+            
         }
 
 
@@ -562,11 +449,10 @@ class TUIView:
         stdscr.clear()
 
         rows, cols = self.dimension
-
         _draw_str(
             stdscr, self.TITLE_Y, self.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
         )
-
+        
         draw_simulation(
             stdscr,
             self.hero_positions,
@@ -577,6 +463,7 @@ class TUIView:
             self.DUNGEON_START_Y,
             self.DUNGEON_START_X,
             self.simulation.tresorReached,
+            self.waveresult_dic
         )
         if not self.simulation.tresorReached:
             self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
@@ -611,6 +498,7 @@ class TUIView:
             stdscr.nodelay(True)
             stdscr.timeout(100)
             self.running = True
+            
             while self.running:
                 # Met à jour les positions des héros depuis la simulation
                 self.update_hero_positions_from_simulation()
@@ -621,6 +509,10 @@ class TUIView:
                 self.render(stdscr)
                 key = stdscr.getch()
                 if key in self.key_bindings:
-                    self.key_bindings[key]()
+                    if key == ord("s"):
+                        #pour récupérer le dictionnaire de résultats de la wave
+                        self.waveresult_dic = self.key_bindings[key]()
+                    else:
+                        self.key_bindings[key]()
 
         curses.wrapper(_main)   

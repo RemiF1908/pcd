@@ -39,8 +39,10 @@ class GameController:
         print("Starting new wave...")
         command = startWave(self.simulation)
         self.invoker.push_command(command)
-        self.invoker.execute()
+        res = self.invoker.execute()
         self.simulation.notify()
+        return res
+        
 
     def stop(self) -> None:
         """Arrête la boucle principale."""

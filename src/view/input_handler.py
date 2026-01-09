@@ -26,7 +26,7 @@ class InputHandler:
     def start_wave(self) -> None:
         command = startWave(self.simulation)
         self.invoker.push_command(command)
-        self.invoker.execute()
+        return self.invoker.execute()
 
     def stop_wave(self) -> None:
         command = stopWave(self.simulation)
@@ -76,3 +76,7 @@ class InputHandler:
         command = removeEntity(self.dungeon, pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        
+    def load_next_level(self) -> None:
+        # À implémenter selon ta logique
+        pass
