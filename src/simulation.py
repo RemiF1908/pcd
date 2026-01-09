@@ -118,6 +118,7 @@ class Simulation:
         # Conservative bookkeeping: if dungeon exposes a score or budget
         # aggregator, prefer it. Otherwise little changes are performed
         # here to keep the simulation state consistent.
+        self.score = self.compute_score()
         try:
             if self.dungeon and hasattr(self.dungeon, "score"):
                 self.score = int(getattr(self.dungeon, "score"))

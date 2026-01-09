@@ -158,6 +158,7 @@ def draw_simulation(
     start_x: int = 1,
     hasreachedtreasure: bool = False,
     waveresult_dic = None,
+    is_simulation_running: bool = False,
 ) -> None:
     """Dessine le donjon sur la fenêtre curses.
 
@@ -173,7 +174,7 @@ def draw_simulation(
         hasreachedtreasure: Indique si le trésor a été atteint.
     """
     if hasreachedtreasure:
-
+        #on a atteint le tresor, affichage d'un message de victoire 
         _draw_str(
             stdscr,
             0,
@@ -188,7 +189,7 @@ def draw_simulation(
         f"herossurvived: {waveresult_dic.get('heroesSurvived', 'N/A')} | "
         f"construction_cost: {waveresult_dic.get('construction_cost', 'N/A')} | "
         f"turns: {waveresult_dic.get('turns', 'N/A')}"
-    )
+        )
         _draw_str(
             stdscr,
             1,
@@ -198,18 +199,50 @@ def draw_simulation(
         )
 
         stdscr.refresh()
-        # Attend que l'utilisateur appuie sur Entrée
-        while True:
+        # Attend une seule touche de l'utilisateur (bloquant) puis remet la touche
+        # dans la file d'entrée pour que la boucle principale la traite.
+        try:
+            stdscr.nodelay(False)
             key = stdscr.getch()
-            if key in (curses.KEY_ENTER, 10, 13):
-                #A implémenter self.input_handler.load_next_level()
-                #il se trouve dans view/input_handler.py
-                #il faudra mettre le int associé au niveau en paramètre de draw_simulation et donc aussi dans load_next_level
-                break
-            elif key == ord('q'):
-                break
-        
+        finally:
+            stdscr.nodelay(True)
 
+        if key is not None and key != -1:
+            curses.ungetch(key)
+        
+    elif hero_positions == [] and is_simulation_running:
+        _draw_str(
+            stdscr,
+            0,
+            start_x,
+            "💀 Tous les héros sont morts ! Appuyez sur 'r' pour réinitialiser le donjon. 💀",
+            curses.A_BOLD,
+            
+        )
+        result_str = (
+        f"Score: {waveresult_dic.get('score', 'N/A')} | "
+        f"heroskilled: {waveresult_dic.get('heroesKilled', 'N/A')} | "
+        f"herossurvived: {waveresult_dic.get('heroesSurvived', 'N/A')} | "
+        f"construction_cost: {waveresult_dic.get('construction_cost', 'N/A')} | "
+        f"turns: {waveresult_dic.get('turns', 'N/A')}"
+        )
+        _draw_str(
+            stdscr,
+            1,
+            start_x,
+            result_str,
+            curses.A_BOLD,
+        )
+        stdscr.refresh()
+        # Attend une seule touche (bloquant), puis remet la touche pour traitement
+        try:
+            stdscr.nodelay(False)
+            key = stdscr.getch()
+        finally:
+            stdscr.nodelay(True)
+
+        if key is not None and key != -1:
+            curses.ungetch(key)
     else : 
         rows, cols = dimension
         hero_set = set(hero_positions) if hero_positions else set()
@@ -371,6 +404,10 @@ class TUIView:
             ord("z"): lambda: self.input_handler.place_dragon(self.cursor_pos),
             ord("b"): lambda: self.input_handler.place_bombe(self.cursor_pos),
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
+            # il faut ajouter le load next level qui est déclanché avec entrée ici pour lorsque le trésor est atteint
+            #il faut donc aussi implémenter la fonction load level, il faudra utiliser self.simulation.level + 1
+            #ord("\n"): lambda: self.input_handler.load_next_level() if self.simulation.tresorReached else None,
+            #
             
         }
 
@@ -465,7 +502,8 @@ class TUIView:
             self.DUNGEON_START_Y,
             self.DUNGEON_START_X,
             self.simulation.tresorReached,
-            self.waveresult_dic
+            self.waveresult_dic,
+            self.simulation.isSimStarted,
         )
         if not self.simulation.tresorReached:
             self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
