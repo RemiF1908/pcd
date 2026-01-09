@@ -70,5 +70,4 @@ class importDungeon(Command):
         sim.current_budget = data["current_budget"]
         
 
-        print(f"Level and Dungeon state imported from {self.filepath}")
-        self.result = None
+        self.result = dungeon

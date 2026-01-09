@@ -113,6 +113,27 @@ function create() {
                     refreshDungeon(scene, true);
                     setImportStatus('Donjon importé avec succès.');
                     refreshDungeon(scene, true);
+                       gridObjects.forEach(obj => {
+                            if (obj && obj.destroy) {
+                                obj.destroy();
+                            }
+                        });
+                        gridObjects = [];
+                        
+                        // Réinitialiser le jeu et rafraîchir l'affichage
+                        gameStarted = false;
+                        refreshDungeon(scene, true);
+                        
+                        // Réactiver la sidebar et les boutons
+                        const sidebarItems = document.getElementById('sidebar-items');
+                        sidebarItems.classList.remove('disabled');
+                        
+                        const launchButton = document.getElementById('launch-button');
+                        launchButton.disabled = false;
+                        launchButton.textContent = 'Lancer';
+                        
+                        const resetButton = document.getElementById('reset-button');
+                        resetButton.disabled = false;
                 }else{
                     const txt = await resp.text();
                     setImportStatus('Erreur serveur: ' + (txt || resp.statusText), true);
