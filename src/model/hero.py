@@ -44,4 +44,11 @@ class Hero:
         path_strategy = PathStrategyFactory.create(self.strategy)
         self.path = path_strategy.find_path(dungeon, start, goal)
 
-    
+    def reset(self):
+        """Reset the hero's state."""
+        self.pv_cur = self.pv_total
+        self.coord = None
+        self.isAlive = False
+        self.reachedGoal = False
+        self.stepsTaken = 0
+        self.path = None

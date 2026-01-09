@@ -26,6 +26,8 @@ let gridObjects = [];
 let selectedEntityType = 'trap';
 let gameStarted = false;
 let heroMoveInterval = null;
+let gameEnded = false; // Nouvelle variable pour suivre la fin du jeu
+let isInitialLoad = true; // Pour la gestion du rafraîchissement en cas de défaite
 
 function preload() {
     this.load.image('floor', 'assets/floor.png');
@@ -72,7 +74,7 @@ function create() {
 
     sidebarItems.forEach(item => {
         item.addEventListener('click', () => {
-            if (gameStarted) return;
+            if (gameStarted || gameEnded) return; // Ne pas permettre la sélection si le jeu est démarré ou terminé
             sidebarItems.forEach(i => i.classList.remove('selected'));
             item.classList.add('selected');
             selectedEntityType = item.id;
@@ -83,7 +85,7 @@ function create() {
     // Gestion du bouton lancer
     const launchButton = document.getElementById('launch-button');
     launchButton.addEventListener('click', () => {
-        if (!gameStarted) {
+        if (!gameStarted && !gameEnded) { // Ne peut lancer que si le jeu n'est pas démarré ni terminé
             startGame(scene);
         }
     });
@@ -113,28 +115,30 @@ function create() {
                 const resp = await fetch('/api/import_dungeon', { method: 'POST' });
                 if(resp.ok){
                     setImportStatus('Donjon importé avec succès.');
+                    
+                    gridObjects.forEach(obj => {
+                        if (obj && obj.destroy) {
+                            obj.destroy();
+                        }
+                    });
+                    gridObjects = [];
+                    
+                    // Réinitialiser le jeu et rafraîchir l'affichage
+                    gameStarted = false;
+                    gameEnded = false;
+                    displayGameStatusMessage(''); // Cacher le message de statut
                     refreshDungeon(scene, true);
-                       gridObjects.forEach(obj => {
-                            if (obj && obj.destroy) {
-                                obj.destroy();
-                            }
-                        });
-                        gridObjects = [];
-                        
-                        // Réinitialiser le jeu et rafraîchir l'affichage
-                        gameStarted = false;
-                        refreshDungeon(scene, true);
-                        
-                        // Réactiver la sidebar et les boutons
-                        const sidebarItems = document.getElementById('sidebar-items');
-                        sidebarItems.classList.remove('disabled');
-                        
-                        const launchButton = document.getElementById('launch-button');
-                        launchButton.disabled = false;
-                        launchButton.textContent = 'Lancer';
-                        
-                        const resetButton = document.getElementById('reset-button');
-                        resetButton.disabled = false;
+                    
+                    // Réactiver la sidebar et les boutons
+                    const sidebarItems = document.getElementById('sidebar-items');
+                    sidebarItems.classList.remove('disabled');
+                    
+                    const launchButton = document.getElementById('launch-button');
+                    launchButton.disabled = false;
+                    launchButton.textContent = 'Lancer';
+                    
+                    const resetButton = document.getElementById('reset-button');
+                    resetButton.disabled = false;
                 }else{
                     const txt = await resp.text();
                     setImportStatus('Erreur serveur: ' + (txt || resp.statusText), true);
@@ -184,21 +188,55 @@ function updateSidebar(data) {
     }
 }
 
+function displayGameStatusMessage(message, isError = false) {
+    const statusMessageDiv = document.getElementById('game-status-message');
+    if (statusMessageDiv) {
+        statusMessageDiv.textContent = message;
+        statusMessageDiv.style.display = message ? 'block' : 'none';
+        statusMessageDiv.style.color = isError ? '#dc3545' : '#28a745'; // Rouge pour défaite, vert pour victoire
+    }
+}
+
 function refreshDungeon(scene, forceRebuild = false) {
     console.log("refreshDungeon called with forceRebuild:", forceRebuild, "gridObjects.length:", gridObjects.length);
-
-    // Récupérer les nouvelles données du donjon
-    fetch('/api/dungeon')
+    displayGameStatusMessage(''); // Cache le message de statut à chaque rafraîchissement
+    
+    // Récupérer les nouvelles données du donjon (avec cache-busting)
+    fetch('/api/dungeon?t=' + new Date().getTime())
         .then(res => res.json())
         .then(data => {
+            console.log("Dungeon data received:", data);
+
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                if (data.tresorReached || data.allHeroesDead) {
+                    console.log("Game ended state detected on initial load. Resetting game.");
+                    resetGame(scene);
+                    return; // resetGame will trigger a new refresh
+                }
+            }
             
-            if (gridObjects.length === 0 || forceRebuild) {
-                console.log("Building complete grid");
-                buildIsoGrid(scene, data);
+            if (data.tresorReached) {
+                gameEnded = true;
+                displayGameStatusMessage('Défaite ! Le trésor a été pillé.', true);
+                stopGame();
+            } else if (data.allHeroesDead) {
+                gameEnded = true;
+                displayGameStatusMessage('Victoire ! Tous les héros sont morts.');
+                stopGame();
+                // Passer au niveau suivant après un court délai
+                setTimeout(() => {
+                    loadNextLevel(scene);
+                }, 2000);
             } else {
-                // Juste mettre à jour les héros
-                console.log("Updating heroes only");
-                updateHeroesOnly(scene, data);
+                if (gridObjects.length === 0 || forceRebuild) {
+                    console.log("Building complete grid");
+                    buildIsoGrid(scene, data);
+                } else {
+                    // Juste mettre à jour les héros
+                    console.log("Updating heroes only");
+                    updateHeroesOnly(scene, data);
+                }
             }
         })
         .catch(err => console.error("Erreur chargement donjon:", err));
@@ -214,11 +252,7 @@ function refreshDungeon(scene, forceRebuild = false) {
 }
 
 function buildIsoGrid(scene, data) {
-    const grid = data.grid;
-    const heroes = data.heros || [];
-    if (!grid || grid.length === 0) return;
-
-    // Nettoyer les anciens objets graphiques avant de reconstruire
+    // Supprimer tous les objets de la grille existants avant de reconstruire
     gridObjects.forEach(obj => {
         if (obj.input) {
             obj.removeInteractive();
@@ -227,6 +261,10 @@ function buildIsoGrid(scene, data) {
     });
     gridObjects = [];
 
+    const grid = data.grid;
+    const heroes = data.heros || [];
+    if (!grid || grid.length === 0) return;
+
     // Calculer les dimensions pour le centrage
     const gridWidth = Math.max(...grid.map(row => row.length));
     const gridHeight = grid.length;
@@ -234,23 +272,13 @@ function buildIsoGrid(scene, data) {
     const dungeonTotalWidth = (gridWidth + gridHeight) * (TILE_WIDTH / 2);
     const dungeonTotalHeight = (gridWidth + gridHeight) * (TILE_HEIGHT / 2);
 
-    // --- CORRECTION MAJEURE ICI ---
-    // On utilise scene.scale.width/height pour obtenir la taille réelle du Canvas
-    // et non la config qui est à "100%"
     const originX = (scene.scale.width - dungeonTotalWidth) / 2 + (dungeonTotalWidth/2);
     const originY = (scene.scale.height - dungeonTotalHeight) / 2;
-
-    let minIsoX = Infinity, maxIsoX = -Infinity, minIsoY = Infinity, maxIsoY = -Infinity;
 
     grid.forEach(row => {
         row.forEach(cell => {
             const isoX = (cell.x - cell.y) * (TILE_WIDTH / 2) + originX;
             const isoY = (cell.x + cell.y) * (TILE_HEIGHT / 2) + originY;
-
-            minIsoX = Math.min(minIsoX, isoX);
-            maxIsoX = Math.max(maxIsoX, isoX);
-            minIsoY = Math.min(minIsoY, isoY);
-            maxIsoY = Math.max(maxIsoY, isoY);
 
             let floor = scene.add.image(isoX, isoY, 'floor').setOrigin(0.5, 1.0).setDepth(isoY);
             gridObjects.push(floor);
@@ -296,20 +324,18 @@ function buildIsoGrid(scene, data) {
     });
 
     // Heros - seulement si c'est une construction complète
-    if (gridObjects.length === 0) {
-        heroes.forEach(hero => {
-            const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
-            const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
+    heroes.forEach(hero => {
+        const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
+        const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
 
-            let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
-            gridObjects.push(heroImage);
-        });
-    }
-}   
-
+        let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
+        gridObjects.push(heroImage);
+    });
+}
+   
 function handleTileClick(scene, cell) {
-    if (gameStarted) {
-        console.log("Game started, ignoring tile click");
+    if (gameStarted || gameEnded) { // Ne pas permettre le placement si le jeu est démarré ou terminé
+        console.log("Game started or ended, ignoring tile click");
         return;
     }
     
@@ -352,38 +378,88 @@ function handleTileClick(scene, cell) {
 }
 
 function startGame(scene) {
-    gameStarted = true;
-    
-    // Désactiver la sidebar
-    const sidebarItems = document.getElementById('sidebar-items');
-    sidebarItems.classList.add('disabled');
-    
-    // Désactiver le bouton lancer
-    const launchButton = document.getElementById('launch-button');
-    launchButton.disabled = true;
-    launchButton.textContent = 'En cours...';
-    
-    // Désactiver le bouton réinitialiser
-    const resetButton = document.getElementById('reset-button');
-    resetButton.disabled = true;
-    
-    // Démarrer le déplacement automatique du héros toutes les 0.5 secondes
-    heroMoveInterval = setInterval(() => {
-        moveHero(scene);
-    }, 500);
-    
-    console.log("Game started - Hero moving automatically");
+    fetch('/api/start_simulation/')
+        .then(res => res.json())
+        .then(data => {
+            if (data.simulation_started === "false" || data.simulation_started === false) {
+                // Afficher l'erreur et ne pas démarrer le jeu
+                alert(data.error || "Impossible de démarrer la simulation: un chemin est probablement bloqué.");
+                // S'assurer que l'état du jeu est réinitialisé visuellement
+                gameStarted = false;
+                const launchButton = document.getElementById('launch-button');
+                launchButton.disabled = false;
+                launchButton.textContent = 'Lancer';
+
+                const resetButton = document.getElementById('reset-button');
+                resetButton.disabled = false;
+
+                const sidebarItems = document.getElementById('sidebar-items');
+                sidebarItems.classList.remove('disabled');
+
+            } else {
+                // Le démarrage a réussi, commencer la boucle de jeu
+                gameStarted = true;
+                gameEnded = false;
+                displayGameStatusMessage(''); // Cache tout message précédent
+                
+                // Désactiver la sidebar
+                const sidebarItems = document.getElementById('sidebar-items');
+                sidebarItems.classList.add('disabled');
+                
+                // Désactiver le bouton lancer
+                const launchButton = document.getElementById('launch-button');
+                launchButton.disabled = true;
+                launchButton.textContent = 'En cours...';
+                
+                // Désactiver le bouton réinitialiser
+                const resetButton = document.getElementById('reset-button');
+                resetButton.disabled = true;
+                
+                // Démarrer le déplacement automatique du héros toutes les 0.5 secondes
+                heroMoveInterval = setInterval(() => {
+                    moveHero(scene);
+                }, 500);
+                
+                console.log("Game started - Hero moving automatically");
+            }
+        })
+        .catch(error => {
+            console.error('Error starting simulation:', error);
+            alert('Erreur serveur lors du démarrage de la simulation.');
+        });
 }
 
-function resetGame(scene) {
-    // Arrêter le déplacement automatique
+function stopGame() {
     if (heroMoveInterval) {
         clearInterval(heroMoveInterval);
         heroMoveInterval = null;
     }
-    
-    // Réinitialiser l'état du jeu
     gameStarted = false;
+
+    // Réactiver les boutons de réinitialisation si le jeu est terminé
+    const resetButton = document.getElementById('reset-button');
+    if (resetButton) {
+        resetButton.disabled = false;
+    }
+    // Lancer le bouton si le jeu est terminé et la victoire n'est pas acquise
+    const launchButton = document.getElementById('launch-button');
+    if (launchButton && !gameEnded) { // Réactiver seulement si pas en état de victoire/défaite
+        launchButton.disabled = false;
+        launchButton.textContent = 'Lancer';
+    }
+     // Réactiver la sidebar si le jeu est terminé
+    const sidebarItems = document.getElementById('sidebar-items');
+    if (sidebarItems && !gameEnded) { // Réactiver seulement si pas en état de victoire/défaite
+        sidebarItems.classList.remove('disabled');
+    }
+}
+
+function resetGame(scene) {
+    stopGame(); // Arrêter le jeu si en cours
+
+    gameStarted = false;
+    gameEnded = false;
+    displayGameStatusMessage(''); // Cacher le message de statut
     
     // Réactiver la sidebar
     const sidebarItems = document.getElementById('sidebar-items');
@@ -481,8 +557,8 @@ function saveGame(scene) {
     }
 }
 function moveHero(scene) {
-    fetch('/api/start_simulation/', {
-        method: 'GET',
+    fetch('/api/move_hero', { // Changed from /api/start_simulation/ to /api/move_hero
+        method: 'POST', // Changed to POST as per server definition
         headers: {
             'Content-Type': 'application/json'
         }
@@ -494,6 +570,7 @@ function moveHero(scene) {
         return response.json(); 
     })
     .then(data => {
+        console.log('Hero moved:', data);
         if (data.simulation_started === "false") {
             alert("Chemin impossible")
             clearInterval(heroMoveInterval);
@@ -514,10 +591,23 @@ function moveHero(scene) {
     const resetButton = document.getElementById('reset-button');
     resetButton.disabled = false;
 
-    é
+    
+        }else{
+            if (data.tresorReached) {
+            gameEnded = true;
+            displayGameStatusMessage('Défaite ! Le trésor a été pillé.', true);
+            stopGame();
+        } else if (data.allHeroesDead) {
+            gameEnded = true;
+            displayGameStatusMessage('Victoire ! Tous les héros sont morts.');
+            stopGame();
+            // Passer au niveau suivant après un court délai
+            setTimeout(() => {
+                loadNextLevel(scene);
+            }, 2000);
         }else{
 refreshDungeon(scene, false);
-        
+        }
         checkAllHeroesDead(scene);
         }
 
@@ -525,6 +615,7 @@ refreshDungeon(scene, false);
     })
     .catch(error => console.error('Error moving hero:', error));
 }
+
 
 function updateHeroesOnly(scene, data) {
     const heroes = data.heros || [];
@@ -558,8 +649,56 @@ function updateHeroesOnly(scene, data) {
     });
 }
 
+function loadNextLevel(scene) {
+    fetch('/api/next_level/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Next level loaded:', data);
+        
+        // Attendre un peu que le serveur soit prêt
+        setTimeout(() => {
+            // Vider complètement la grille pour forcer la reconstruction
+            gridObjects.forEach(obj => {
+                if (obj && obj.destroy) {
+                    obj.destroy();
+                }
+            });
+            gridObjects = [];
+            
+            // Réinitialiser le jeu et rafraîchir l'affichage
+            gameStarted = false;
+            gameEnded = false;
+            displayGameStatusMessage(''); // Cacher le message de statut
+            refreshDungeon(scene, true);
+            
+            // Réactiver la sidebar et les boutons
+            const sidebarItems = document.getElementById('sidebar-items');
+            sidebarItems.classList.remove('disabled');
+            
+            const launchButton = document.getElementById('launch-button');
+            launchButton.disabled = false;
+            launchButton.textContent = 'Lancer';
+            
+            const resetButton = document.getElementById('reset-button');
+            resetButton.disabled = false;
+        }, 100);
+    })
+    .catch(error => console.error('Error loading next level:', error));
+}
+
+
 function checkAllHeroesDead(scene) {
-    fetch('/api/dungeon')
+    fetch('/api/dungeon?t=' + new Date().getTime())
         .then(res => res.json())
         .then(data => {
             const heroes = data.heros || [];
