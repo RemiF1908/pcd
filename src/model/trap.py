@@ -10,7 +10,7 @@ class Trap(Entity):
         damage: int -- dégâts infligés lorsqu'un héros déclenche le piège
     """
 
-    def __init__(self, damage: int = 10):
+    def __init__(self, damage: int = 25):
         self._damage = int(damage)
 
     @property

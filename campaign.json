@@ -46,8 +46,8 @@
         "col": 5
       },
       "heroes": [
-        {"pv": 80, "strategy": "safest"},
-        {"pv": 80, "strategy": "shortest"}
+        {"pv": 90, "strategy": "safest"},
+        {"pv": 90, "strategy": "shortest"}
       ]
     },
     {
@@ -79,7 +79,7 @@
       "id": 4,
       "name": "Niveau 4 - Le Grand Test",
       "difficulty": 4,
-      "budget": 500,
+      "budget": 400,
       "dungeon_file": "level4_dungeon",
       "dimensions": {
         "width": 12,
