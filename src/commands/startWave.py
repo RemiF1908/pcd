@@ -16,5 +16,5 @@ class startWave(Command):
                 h.compute_path(self.simulation.dungeon, self.simulation.dungeon.entry, self.simulation.dungeon.exit)
                 assert h.path is not None
                 # Réveiller le héros pour qu'il soit visible
-                h.awake()
+                #h.awake()
         return self.simulation.step()

@@ -167,6 +167,16 @@ async def get_dungeon_data():
     })
 
 
+
+@app.get("/api/next_level/")
+async def next_level():
+    if not context.input_handler:
+        return JSONResponse({"next_level_change": "false"})
+
+    context.input_handler.next_level()
+    
+    return JSONResponse({"next_level_change": "true"})
+
 @app.get("/api/start_simulation/")
 async def start_simulation():
     if not context.input_handler:

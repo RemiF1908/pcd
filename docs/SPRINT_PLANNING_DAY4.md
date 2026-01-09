@@ -1,6 +1,6 @@
-# SPRINT PLANNING — Day 3
+# SPRINT PLANNING — Day 5
 
-Date: 7801/25
+Date: 8/01/26
 
 ## Objectif du sprint
 

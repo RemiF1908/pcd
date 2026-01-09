@@ -15,6 +15,7 @@ class GuiView:
         invoker: GameInvoker,
         dungeon,
         simulation,
+        campaign,
     ) -> None:
         
 
@@ -25,8 +26,9 @@ class GuiView:
         self.invoker = invoker
         self.dungeon = dungeon
         self.simulation = simulation
+        self.campaign = campaign
 
-        self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker)
+        self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker, self.campaign)
     
 
 

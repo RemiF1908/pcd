@@ -156,9 +156,6 @@ def draw_simulation(
     exit_pos: tuple[int, int],
     start_y: int = 1,
     start_x: int = 1,
-    hasreachedtreasure: bool = False,
-    waveresult_dic = None,
-    is_simulation_running: bool = False,
 ) -> None:
     """Dessine le donjon sur la fenêtre curses.
 
@@ -171,123 +168,42 @@ def draw_simulation(
         exit_pos: Position de sortie.
         start_y: Ligne de départ pour l'affichage.
         start_x: Colonne de départ pour l'affichage.
-        hasreachedtreasure: Indique si le trésor a été atteint.
     """
-    if hasreachedtreasure:
-        #on a atteint le tresor, affichage d'un message de victoire 
-        _draw_str(
-            stdscr,
-            0,
-            start_x,
-            "💀 Trésor pillé ! Appuyez sur (trouver une touche) pour recommencer ! 💀",
-            curses.A_BOLD,
-        )
-        
-        result_str = (
-        f"Score: {waveresult_dic.get('score', 'N/A')} | "
-        f"heroskilled: {waveresult_dic.get('heroesKilled', 'N/A')} | "
-        f"herossurvived: {waveresult_dic.get('heroesSurvived', 'N/A')} | "
-        f"construction_cost: {waveresult_dic.get('construction_cost', 'N/A')} | "
-        f"turns: {waveresult_dic.get('turns', 'N/A')}"
-        )
-        _draw_str(
-            stdscr,
-            1,
-            start_x,
-            result_str,
-            curses.A_BOLD,
-        )
+    rows, cols = dimension
+    hero_set = set(hero_positions) if hero_positions else set()
 
-        stdscr.refresh()
-        # Attend uniquement la touche 'q' (bloquant). Les autres touches sont ignorées.
-        try:
-            stdscr.nodelay(False)
-            while True:
-                key = stdscr.getch()
-                # Accept lower/upper case q
-                if key in (ord("q"), ord("Q")):
-                    curses.ungetch(key)
-                    break
-                # ignore other keys and continue waiting
-        finally:
-            stdscr.nodelay(True)
-        
-    elif hero_positions == [] and is_simulation_running:
-        #féfense réussie
-        _draw_str(
-            stdscr,
-            0,
-            start_x,
-            "🏆 Vous avez réussi à défendre le trésor des gobelins ! Appuyez sur entrée pour passer au niveau suivant ! 🏆",
-            curses.A_BOLD,
-            
-        )
-        result_str = (
-        f"Score: {waveresult_dic.get('score', 'N/A')} | "
-        f"heroskilled: {waveresult_dic.get('heroesKilled', 'N/A')} | "
-        f"herossurvived: {waveresult_dic.get('heroesSurvived', 'N/A')} | "
-        f"construction_cost: {waveresult_dic.get('construction_cost', 'N/A')} | "
-        f"turns: {waveresult_dic.get('turns', 'N/A')}"
-        )
-        _draw_str(
-            stdscr,
-            1,
-            start_x,
-            result_str,
-            curses.A_BOLD,
-        )
-        stdscr.refresh()
-        # Attend Entrée (pour passer au niveau suivant) ou 'q' pour quitter.
-        enter_keys = (10, 13, curses.KEY_ENTER)
-        try:
-            stdscr.nodelay(False)
-            while True:
-                key = stdscr.getch()
-                if key in enter_keys:
-                    curses.ungetch(key)
-                    break
-                if key in (ord("q"), ord("Q")):
-                    curses.ungetch(key)
-                    break
-                # sinon on continue à attendre
-        finally:
-            stdscr.nodelay(True)
-    else : 
-        rows, cols = dimension
-        hero_set = set(hero_positions) if hero_positions else set()
-
-        grid_str = []
-        for row in dungeon.grid:
-            str_row = []
-            for cell in row:
-                if cell.entity is not None:
-                    str_row.append(
-                        (cell.entity.get_display_char(), cell.entity.get_color_id())
-                    )
-                else:
-                    str_row.append(("+", 0))
-            grid_str.append(str_row)
-
-        for row in range(rows):
-            for col in range(cols):
-                pos = (row, col)
-                symbol, color_pair = grid_str[row][col]
-                if pos in hero_set:
-                    symbol, color_pair = Legend.get_symbol_for("HERO"), ColorPair.HERO.value
-                elif pos == entry_pos:
-                    symbol, color_pair = (
-                        Legend.get_symbol_for("ENTRANCE"),
-                        ColorPair.ENTRANCE.value,
-                    )
-                elif pos == exit_pos:
-                    symbol, color_pair = Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
-                _draw_str(
-                    stdscr,
-                    start_y + row,
-                    start_x + col * 2,
-                    symbol,
-                    curses.color_pair(color_pair),
+    grid_str = []
+    for row in dungeon.grid:
+        str_row = []
+        for cell in row:
+            if cell.entity is not None:
+                str_row.append(
+                    (cell.entity.get_display_char(), cell.entity.get_color_id())
                 )
+            else:
+                str_row.append(("+", 0))
+        grid_str.append(str_row)
+
+    for row in range(rows):
+        for col in range(cols):
+            pos = (row, col)
+            symbol, color_pair = grid_str[row][col]
+            if pos in hero_set:
+                symbol, color_pair = Legend.get_symbol_for("HERO"), ColorPair.HERO.value
+            elif pos == entry_pos:
+                symbol, color_pair = (
+                    Legend.get_symbol_for("ENTRANCE"),
+                    ColorPair.ENTRANCE.value,
+                )
+            elif pos == exit_pos:
+                symbol, color_pair = Legend.get_symbol_for("EXIT"), ColorPair.EXIT.value
+            _draw_str(
+                stdscr,
+                start_y + row,
+                start_x + col * 2,
+                symbol,
+                curses.color_pair(color_pair),
+            )
 
 
 
@@ -341,15 +257,19 @@ def draw_log(
     _draw_str(stdscr, start_y, start_x, "=== Log ===", curses.A_BOLD)
     for i, hero in enumerate(simulation.heroes):
         _draw_str(stdscr, start_y + 1 + i * 3, start_x, f"{hero.pv_cur}/{hero.pv_total} HP")
-        if simulation.dungeon.get_cell((1,1)).entity.type == "DRAGON":
-            if (simulation.dungeon.get_cell((1,1)).entity.current_cooldown == 0):
-                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"wouaff")
-            else:
-                _draw_str(stdscr, start_y + 2 + i * 3, start_x, f"la bombe n'a pas encore explosé.")
+        _draw_str(stdscr, start_y + 2 + i * 3, start_x, str(hero.ticktoAwake))
 
 
 class TUIView:
     """Interface TUI interactive avec gestion des inputs utilisateur."""
+
+    def _update_layout(self) -> None:
+        """Met à jour la disposition de la TUI en fonction de la taille du donjon."""
+        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
+        self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
+        self.LOG_START_X = self.DUNGEON_START_X + self.dimension[1] * 8
+        self.FOOTER_Y = self.LEGEND_START_Y + 10
+        self.HELP_START_X = self.STATUS_START_X + 23
 
     def __init__(
         self,
@@ -361,6 +281,7 @@ class TUIView:
         invoker: GameInvoker,
         dungeon,
         simulation,
+        campaign,
     ) -> None:
         """Initialise la vue TUI."""
 
@@ -374,6 +295,7 @@ class TUIView:
         self.hero_positions = heros_positions
         self.dungeon = dungeon
         self.simulation = simulation
+        self.campaign = campaign
         self.log = ""
 
         self.waveresult_dic = None
@@ -381,20 +303,17 @@ class TUIView:
         self.TITLE_X = 1
         self.DUNGEON_START_Y = 2
         self.DUNGEON_START_X = 1
-        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
         self.LEGEND_START_X = self.DUNGEON_START_X
         self.LEGEND_X = self.DUNGEON_START_X
         self.STATUS_START_Y = self.DUNGEON_START_Y
-        self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
-        self.LOG_START_Y = self.DUNGEON_START_Y 
-        self.LOG_START_X = self.DUNGEON_START_X + self.dimension[1] * 8 
-        self.FOOTER_Y = self.LEGEND_START_Y + 10
+        self.LOG_START_Y = self.DUNGEON_START_Y
         self.FOOTER_X = self.DUNGEON_START_X
         self.HELP_START_Y = self.DUNGEON_START_Y
-        self.HELP_START_X = self.STATUS_START_X + 23
+
+        self._update_layout()
 
         self.invoker = invoker
-        self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker)
+        self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker, self.campaign)
 
         # Mapping des touches vers les commandes
         self.key_bindings: dict[int, Callable[[], None]] = {
@@ -413,8 +332,7 @@ class TUIView:
             ord("z"): lambda: self.input_handler.place_dragon(self.cursor_pos),
             ord("b"): lambda: self.input_handler.place_bombe(self.cursor_pos),
             ord("d"): lambda: self.input_handler.remove_entity(self.cursor_pos),
-            # il faut ajouter le load next level qui est déclanché avec entrée ici pour lorsque le trésor est atteint
-            #il faut donc aussi implémenter la fonction load level, il faudra utiliser self.simulation.level + 1
+            ord("n"): lambda: self.input_handler.load_next_level(),
             curses.KEY_ENTER: lambda: self.input_handler.load_next_level(),
             #
             
@@ -496,38 +414,79 @@ class TUIView:
     def render(self, stdscr) -> None:
         stdscr.clear()
 
-        rows, cols = self.dimension
         _draw_str(
             stdscr, self.TITLE_Y, self.TITLE_X, "🏰 DUNGEON MANAGER", curses.A_BOLD
         )
-        
-        draw_simulation(
-            stdscr,
-            self.hero_positions,
-            self.dimension,
-            self.simulation.dungeon,
-            self.entry_pos,
-            self.exit_pos,
-            self.DUNGEON_START_Y,
-            self.DUNGEON_START_X,
-            self.simulation.tresorReached,
-            self.waveresult_dic,
-            self.simulation.isSimStarted,
-        )
-        if not self.simulation.tresorReached:
+
+        is_victory = self.simulation.tresorReached
+        is_defeat = not self.hero_positions and self.simulation.isSimStarted
+
+        if is_victory:
+            _draw_str(
+                stdscr,
+                self.DUNGEON_START_Y,
+                self.DUNGEON_START_X,
+                "💀 Trésor pillé ! Appuyez sur 'q' pour quitter. 💀",
+                curses.A_BOLD,
+            )
+            if self.waveresult_dic:
+                result_str = (
+                    f"Score: {self.waveresult_dic.get('score', 'N/A')} | "
+                    f"Héros tués: {self.waveresult_dic.get('heroesKilled', 'N/A')} | "
+                    f"Héros survivants: {self.waveresult_dic.get('heroesSurvived', 'N/A')} | "
+                    f"Coût de construction: {self.waveresult_dic.get('construction_cost', 'N/A')} | "
+                    f"Tours: {self.waveresult_dic.get('turns', 'N/A')}"
+                )
+                _draw_str(
+                    stdscr,
+                    self.DUNGEON_START_Y + 2,
+                    self.DUNGEON_START_X,
+                    result_str,
+                    curses.A_BOLD,
+                )
+        elif is_defeat:
+            _draw_str(
+                stdscr,
+                self.DUNGEON_START_Y,
+                self.DUNGEON_START_X,
+                "🏆 Victoire ! Appuyez sur 'n' ou Entrée pour le niveau suivant, ou 'q' pour quitter. 🏆",
+                curses.A_BOLD,
+            )
+            if self.waveresult_dic:
+                result_str = (
+                    f"Score: {self.waveresult_dic.get('score', 'N/A')} | "
+                    f"Héros tués: {self.waveresult_dic.get('heroesKilled', 'N/A')} | "
+                    f"Héros survivants: {self.waveresult_dic.get('heroesSurvived', 'N/A')} | "
+                    f"Coût de construction: {self.waveresult_dic.get('construction_cost', 'N/A')} | "
+                    f"Tours: {self.waveresult_dic.get('turns', 'N/A')}"
+                )
+                _draw_str(
+                    stdscr,
+                    self.DUNGEON_START_Y + 2,
+                    self.DUNGEON_START_X,
+                    result_str,
+                    curses.A_BOLD,
+                )
+        else:
+            # Game is running, draw the full UI
+            draw_simulation(
+                stdscr,
+                self.hero_positions,
+                self.dimension,
+                self.simulation.dungeon,
+                self.entry_pos,
+                self.exit_pos,
+                self.DUNGEON_START_Y,
+                self.DUNGEON_START_X,
+            )
             self._draw_cursor(stdscr, self.DUNGEON_START_Y, self.DUNGEON_START_X)
-
             draw_legend(stdscr, self.LEGEND_START_Y, self.LEGEND_START_X)
-
             if self.status_info:
                 draw_status(
                     stdscr, self.STATUS_START_Y, self.STATUS_START_X, self.status_info
                 )
-
             draw_log(stdscr, self.LOG_START_Y, self.LOG_START_X, self.simulation)
-
             self._draw_help(stdscr, self.HELP_START_Y, self.HELP_START_X)
-
             _draw_str(
                 stdscr,
                 self.HELP_START_Y - 1,
@@ -549,6 +508,13 @@ class TUIView:
             self.running = True
             
             while self.running:
+                if self.dungeon is not self.simulation.dungeon:
+                    self.dungeon = self.simulation.dungeon
+                    self.dimension = self.dungeon.dimension
+                    self.entry_pos = self.dungeon.entry
+                    self.exit_pos = self.dungeon.exit
+                    self.input_handler.dungeon = self.dungeon
+                    self._update_layout()
                 # Met à jour les positions des héros depuis la simulation
                 self.update_hero_positions_from_simulation()
                 if self.simulation.heroes and hasattr(

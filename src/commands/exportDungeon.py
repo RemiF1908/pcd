@@ -1,5 +1,6 @@
 from .Command import Command
 import json
+from ..model.hero import Hero # Added import
 
 
 class exportDungeon(Command):
@@ -10,11 +11,28 @@ class exportDungeon(Command):
         self.campaign_progress = campaign_progress
 
     def execute(self, game_controller):
+        if not game_controller or not game_controller.simulation:
+            print("Export failed: Simulation data is not available.")
+            return
+
+        sim = game_controller.simulation
+        
+        heroes_data = []
+        for hero in sim.heroes:
+            heroes_data.append({
+                "position": hero.coord,
+                "pv_current": hero.pv_cur,
+                "pv_total": hero.pv_total,
+                "strategy": hero.strategy,
+            })
+
         dungeon_data = {
+            "level_id": sim.level.difficulty,
             "dimension": self.dungeon.dimension,
             "entry": self.dungeon.entry,
             "exit": self.dungeon.exit,
             "grid": [],
+            "heroes": heroes_data,
         }
         for row in self.dungeon.grid:
             row_data = []

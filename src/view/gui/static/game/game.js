@@ -124,11 +124,7 @@ function updateSidebar(data) {
 }
 
 function refreshDungeon(scene, forceRebuild = false) {
-    // Si c'est le premier chargement ou reconstruction forcée, on nettoie tout
-    if (gridObjects.length === 0 || forceRebuild) {
-        gridObjects.forEach(obj => obj.destroy());
-        gridObjects = [];
-    }
+
 
     // Récupérer les nouvelles données du donjon
     fetch('/api/dungeon')
