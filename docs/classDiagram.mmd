@@ -5,8 +5,16 @@ classDiagram
         +passable bool
         +damage int
         +attack_power int
+        +cost int
+        +current_cooldown int
+        +max_cooldown int
         +get_display_char()* str
         +get_color_id()* int
+        +init_range(coord)
+        +getrange() list
+        +reset_cooldown()
+        +decrease_cooldown()
+        +update(cell)*
     }
     
     class Floor {
@@ -16,6 +24,7 @@ classDiagram
         +damage int
         +get_display_char() str
         +get_color_id() int
+        +update(cell)
     }
     
     class Wall {
@@ -24,6 +33,7 @@ classDiagram
         +damage int
         +get_display_char() str
         +get_color_id() int
+        +update(cell)
     }
     
     class Trap {
@@ -33,6 +43,40 @@ classDiagram
         +damage int
         +get_display_char() str
         +get_color_id() int
+        +update(cell)
+    }
+    
+    class Dragon {
+        -_damage int
+        +orientation str
+        +range list
+        +triggered bool
+        +type str
+        +passable bool
+        +damage int
+        +cost int
+        +get_display_char() str
+        +get_color_id() int
+        +init_range(coord)
+        +getrange() list
+        +update(cell)
+        +decrease_cooldown()
+        +max_cooldown int
+    }
+    
+    class Bombe {
+        -_damage int
+        +range list
+        +triggered bool
+        +type str
+        +passable bool
+        +damage int
+        +cost int
+        +get_display_char() str
+        +get_color_id() int
+        +init_range(coord)
+        +getrange() list
+        +update(cell)
     }
     
     class Cell {
@@ -42,6 +86,9 @@ classDiagram
         +is_walkable() bool
         +is_dangerous() bool
         +get_damage() int
+        +return_damage_if_CD() int
+        +remove_monster()
+        +update()
     }
     
     class Dungeon {
@@ -55,6 +102,8 @@ classDiagram
         +validMove(coord) bool
         +place_entity(entity, position)
         +reset()
+        +update()
+        +blank_grid(rows, cols) list
     }
     
     class Hero {
@@ -66,6 +115,8 @@ classDiagram
         +stepsTaken int
         +path list
         +strategy str
+        +hero_number int
+        +ticktoAwake int
         +awake()
         +getHero_coord() tuple
         +take_damage(damage)
@@ -73,6 +124,7 @@ classDiagram
         +getMove() tuple
         +update(dungeon)
         +compute_path(dungeon, start, goal)
+        +reset()
     }
     
     class EntityCreator {
@@ -94,12 +146,24 @@ classDiagram
         +factory_method() Trap
     }
     
+    class DragonCreator {
+        -orientation str
+        +factory_method() Dragon
+    }
+    
+    class BombeCreator {
+        +factory_method() Bombe
+    }
+    
     class EntityFactory {
         <<Static Facade>>
         +create_floor() Floor
         +create_wall() Wall
         +create_trap(damage) Trap
+        +create_dragon(orientation) Dragon
+        +create_bombe() Bombe
     }
+    
     class PathStrategy {
         <<Interface>>
         +find_path(dungeon, start, goal)* list
@@ -134,8 +198,13 @@ classDiagram
         +add_hero(hero)
         +remove_hero(hero)
         +get_alive_heroes() list
+        +get_nb_killed_heroes() int
+        +get_sum_HP() int
+        +get_nb_heroes() int
         +get_hero_positions() list
         +awake_all_heroes()
+        +awake_hero(hero)
+        +reset()
     }
     
     class LevelBuilder {
@@ -160,100 +229,244 @@ classDiagram
         +custom(difficulty, budget, dungeon, hero_count, hero_pv, strategy) Level
     }
     
+    class Campaign {
+        -_data dict
+        -_current_level_num int
+        -_completed_levels list
+        -campaign_json_path str
+        +load_level(level_num) Level
+        +load_next_level() Level
+        +complete_level(level_num)
+        +is_completed(level_num) bool
+        +get_completed_levels() list
+        +get_campaign_info() dict
+        +reset()
+    }
+    
     class Command {
         <<Interface>>
-        +execute()*
+        +execute(game_controller)*
     }
     
     class placeEntity {
-        +execute(dungeon, entity, position)
+        -dungeon Dungeon
+        -entity Entity
+        -position tuple
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class removeEntity {
         -dungeon Dungeon
         -coord tuple
-        +execute()
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class resetDungeon {
-        +execute(dungeon)
+        -dungeon Dungeon
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class startWave {
-        +execute(simulation)
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class stopWave {
-        +execute(simulation)
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class exportDungeon {
-        +execute(dungeon, filepath)
+        -dungeon Dungeon
+        -filename str
+        +execute(game_controller)
     }
     
     class importDungeon {
-        +execute(filepath) str
+        -filepath str
+        -result Dungeon
+        +execute(game_controller)
+    }
+    
+    class getDungeonList {
+        -result list
+        +execute(game_controller)
+    }
+    
+    class nextLevel {
+        -campaign Campaign
+        -simulation Simulation
+        +execute(game_controller)
     }
     
     class GameInvoker {
-        +history list~Command~
-        +commandstack list~Command~
-        +execute()
+        -game_controller GameController
+        -history list~Command~
+        -commandstack list~Command~
         +push_command(command)
+        +execute()
     }
     
     class Simulation {
         +dungeon Dungeon
-        +budget_tot int
+        +level Level
         +score int
-        +level int
+        +totalscore int
+        +ticks int
         +nb_heroes int
         +heroes list~Hero~~
         +current_budget int
-        +ticks int
         +running bool
         +tresorReached bool
         +allHeroesDead bool
+        +isSimStarted bool
+        +observers list~Observer~
+        +dmgobserver DamageObserver
         +launch() dict
         +stop()
         +step()
-        +add_hero(hero)
-        +remove_hero(hero)
-        +apply_cell_effects(hero)
+        +attach(observer)
+        +detach(observer)
+        +notify()
+        +apply_cell_effects(hero) int
+        +compute_score() int
+        +check_on_treasure(hero) bool
+        +notifyDamageObserver(dmg)
+        +get_all_hero_positions() list
+        +get_all_alive_hero_positions() list
         +reset()
-        +summary() dict
     }
     
     class GameController {
-        +interface
+        +interface TUIView|GuiView
         +simulation Simulation
+        +invoker GameInvoker
+        +campaign Campaign
         +start_wave()
         +stop()
+        +reset_dungeon()
+        +place_trap(position, damage)
+        +place_wall(position)
+        +place_dragon(position, orientation)
+        +place_bombe(position)
+        +remove_entity(position)
+        +export_dungeon(filename)
+        +import_dungeon(filepath)
+        +getDungeonList() list
+        +get_status_info() dict
+        +get_hero_positions() list
+        +grid_str() list
+        +dimension() tuple
+        +entry() tuple
+        +exit() tuple
+        +get_budget() int
+        +get_dungeon() Dungeon
+        +setup_level(level)
     }
     
-    class DungeonDisplay {
-        <<Module>>
-        +draw_dungeon(stdscr, dungeon, start_y, start_x, hero_positions)
-        +draw_legend(stdscr, start_y, start_x)
-        +draw_status(stdscr, start_y, start_x, info)
-        +display_dungeon(dungeon, hero_positions, status_info)
+    class Observer {
+        <<Abstract>>
+        +update()*
+    }
+    
+    class DamageObserver {
+        -totaldamage int
+        -lastdamage int
+        +update(damage)
+        +getTotalDmg() int
+    }
+    
+    class waveResult {
+        <<Dataclass>>
+        +heroesKilled int
+        +heroesSurvived int
+        +construction_cost int
+        +score int
+        +turns int
+        +to_dict() dict
+        +getResult() str
+        +getHerosKilled(simulation) int
+        +getHerosSurvived(simulation) int
+        +from_simulation(simulation) waveResult
+    }
+    
+    class TUIView {
+        -dungeon Dungeon
+        -simulation Simulation
+        -campaign Campaign
+        -invoker GameInvoker
+        -input_handler InputHandler
+        -status_info dict
+        -dimension tuple
+        -cursor_pos tuple
+        -hero_positions list
+        -running bool
+        +render(stdscr)
+        +run()
+        +move_cursor_up()
+        +move_cursor_down()
+        +move_cursor_left()
+        +move_cursor_right()
+        +quit()
+    }
+    
+    class GuiView {
+        -dimension tuple
+        -entry_pos tuple
+        -exit_pos tuple
+        -heros_positions list
+        -invoker GameInvoker
+        -dungeon Dungeon
+        -simulation Simulation
+        -campaign Campaign
+        -input_handler InputHandler
+        +run()
+    }
+    
+    class InputHandler {
+        -simulation Simulation
+        -dungeon Dungeon
+        -invoker GameInvoker
+        -campaign Campaign
+        +start_wave()
+        +stop_wave()
+        +reset_dungeon()
+        +export_dungeon()
+        +import_dungeon()
+        +place_trap(pos)
+        +place_wall(pos)
+        +place_dragon(pos, orientation)
+        +place_bombe(pos)
+        +remove_entity(pos)
+        +load_next_level()
+        +update_dungeon(new_dungeon)
     }
     
     Entity <|-- Floor
     Entity <|-- Wall
     Entity <|-- Trap
+    Entity <|-- Dragon
+    Entity <|-- Bombe
     Cell *-- Entity : contains
     Dungeon *-- Cell : contains
     Dungeon o-- EntityCreator : uses
     Simulation *-- Dungeon : uses
     Simulation *-- Hero : manages
+    Simulation *-- Level : contains
     Hero --> PathStrategy : uses
     EntityCreator <|-- FloorCreator
     EntityCreator <|-- WallCreator
     EntityCreator <|-- TrapCreator
+    EntityCreator <|-- DragonCreator
+    EntityCreator <|-- BombeCreator
     EntityFactory --> FloorCreator : uses
     EntityFactory --> WallCreator : uses
     EntityFactory --> TrapCreator : uses
+    EntityFactory --> DragonCreator : uses
+    EntityFactory --> BombeCreator : uses
     PathStrategy <|.. ShortestPathStrategy
     PathStrategy <|.. SafestPathStrategy
     PathStrategyFactory --> PathStrategy : creates
@@ -262,6 +475,7 @@ classDiagram
     Level o-- Hero : manages
     LevelBuilder --> Level : creates
     LevelPresets --> LevelBuilder : uses
+    Campaign --> Level : loads
     Command <|.. placeEntity
     Command <|.. removeEntity
     Command <|.. resetDungeon
@@ -269,5 +483,21 @@ classDiagram
     Command <|.. stopWave
     Command <|.. exportDungeon
     Command <|.. importDungeon
+    Command <|.. getDungeonList
+    Command <|.. nextLevel
     GameInvoker *-- Command : executes
+    GameInvoker --> GameController : uses
     GameController *-- Simulation : orchestrates
+    GameController *-- Campaign : manages
+    Observer <|.. DamageObserver
+    Simulation *-- Observer : notifies
+    Simulation *-- DamageObserver : uses
+    waveResult --> Simulation : from
+    TUIView *-- GameController : communicates
+    TUIView *-- InputHandler : uses
+    GuiView *-- GameController : communicates
+    GuiView *-- InputHandler : uses
+    InputHandler *-- GameInvoker : uses
+    InputHandler *-- Simulation : modifies
+    InputHandler *-- Dungeon : modifies
+    InputHandler *-- Campaign : uses

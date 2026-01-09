@@ -6,36 +6,6 @@
 
 **Dungeon Manager** est un jeu de gestion/simulation où vous incarnez le maître du donjon. Votre objectif est de concevoir un labyrinthe rempli de pièges et de monstres pour empêcher les héros d'atteindre votre trésor.
 
-## 🎮 Fonctionnalités
-
-### Implémentées ✅
-
-- **Système d'entités** :
-  - Classe abstraite `Entity` (ABC) comme contrat pour toutes les entités
-  - Entités concrètes : `Floor` (sol), `Wall` (mur), `Trap` (piège)
-  - Factory Pattern pour créer facilement les entités
-- **Case du donjon (`Cell`)** :
-  - Gestion des coordonnées et entité associée
-  - Méthodes : `is_walkable()`, `is_dangerous()`, `get_damage()`
-- **Tests unitaires** : Suite complète avec pytest
-
-### En développement 🚧
-
-- **Éditeur de donjon** : Créez votre donjon sur une grille 2D
-- **Placement d'éléments** : Murs, pièges, monstres
-- **Gestion de budget** : Chaque élément a un coût
-- **Simulation de vagues** : Lancez des héros contre votre donjon
-- **Stratégies d'IA** : Les héros utilisent différentes stratégies de déplacement
-  - Plus court chemin (BFS/Dijkstra)
-  - Chemin le moins dangereux
-- **Système de score** : Évaluez vos performances
-- **Persistance** : Sauvegardez et chargez vos donjons
-
-## 🖥️ Interfaces
-
-Le jeu propose deux interfaces :
-- **Interface Terminal (TUI)** : Interface textuelle ergonomique
-- **Interface Web** : Application web avec serveur local
 
 ## 🚀 Installation
 
@@ -44,6 +14,10 @@ Le jeu propose deux interfaces :
 - Python 3.10+
 - pip
 
+Optionnel : Création d'un environnement virtuel python
+```bash
+python -m venv venv
+```
 ### Installation des dépendances
 
 ```bash
@@ -52,63 +26,64 @@ pip install -r requirements.txt
 
 ## 🎯 Lancement
 
-### Interface Terminal
+### Interface Terminal (TUI)
 
 ```bash
 python -m src.main --tui
 ```
 
-### Interface Web
+### Interface Web (GUI)
 
 ```bash
 python -m src.main --web
 ```
 
-Puis ouvrez votre navigateur à l'adresse : `http://localhost:5000`
+Puis ouvrez votre navigateur à l'adresse : `http://localhost:8000`
 
-## 🏗️ Architecture
+## 💻 Usage
 
-Le projet suit une architecture MVC (Modèle-Vue-Contrôleur) :
+### Interface Terminal
 
-```text
-src/
-├── model/              # Modèle de données
-│   ├── entity.py       # Classe abstraite Entity (ABC)
-│   ├── floor.py        # Entité Floor (sol)
-│   ├── wall.py         # Entité Wall (mur)
-│   ├── trap.py         # Entité Trap (piège)
-│   ├── entity_factory.py  # Factory Pattern pour créer les entités
-│   ├── cell.py         # Case du donjon
-│   └── ...             # (Donjon, Héros, etc.)
-├── view/
-│   ├── terminal/       # Interface TUI
-│   └── web/            # Interface Web (Flask)
-├── controller/         # Logique de contrôle
-├── strategies/         # Stratégies d'IA des héros
-└── main.py             # Point d'entrée
+Le jeu se contrôle entièrement au clavier avec les commandes suivantes :
 
-tests/
-├── test_entities.py    # Tests des entités
-├── test_factory.py     # Tests du Factory Pattern
-└── ...
-```
+- **Flèches directionnelles** : Déplacer le curseur sur la grille
+- **T** : Placer un piège 
+- **M** : Placer un mur 
+- **B** : Placer un mur 
+- **U** : Placer un dragon vers le haut
+- **H** : Placer un dragon vers le gauche
+- **J** : Placer un dragon vers le bas
+- **K** : Placer un murdragon vers le droite
 
-## 🧪 Tests
+- **N** : Passer au niveau suivant
+- **S** : Faire avancer les héro d'un pas
+- **I** : Importer un donjon
+- **E** : Exporter le donjon actuel
+- **R** : Réinitialiser le donjon
+- **Q** : Quitter le jeu
 
-```bash
-pytest tests/
-```
+### Objectif du jeu
 
-## 📚 Documentation
+1. **Construire** votre donjon en plaçant des murs et des pièges
+2. **Lancer** des vagues de héros avec la touche S
+3. **Empêcher** les héros d'atteindre la sortie en les tuant avec vos pièges
+4. **Progresser** à travers les niveaux en réussissant à tuer tous les héros
 
-- [ROADMAP.md](docs/ROADMAP.md) - Planning et progression du projet
-- [IA_USAGE.md](docs/IA_USAGE.md) - Journal d'utilisation de l'IA
-- [docs/](docs/) - Documentation technique et UML
+### Système de campagne
+
+Le jeu propose une campagne avec plusieurs niveaux :
+- Chaque niveau a un budget différent
+- Le niveau actuel et l'or disponible sont affichés dans le panneau de statut
+- Réussissez tous les niveaux pour gagner la campagne
+
+
+
 
 ## 👥 Équipe
 
-Groupe 24 - TELECOM Nancy - CodingWeek 2026
+- Malo GRUYERE
+- Mathis PACCOUD
+- Noah ANDRIAMAMPIANINA
+- Rémi FERRATO
 
-## 📝 Licence
 
-Projet académique - TELECOM Nancy
