@@ -1,15 +1,16 @@
 {
+  "level_id": 2,
   "dimension": [
-    10,
-    10
+    6,
+    6
   ],
   "entry": [
     0,
     0
   ],
   "exit": [
-    9,
-    9
+    5,
+    5
   ],
   "grid": [
     [
@@ -60,38 +61,6 @@
           5
         ],
         "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          0,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          0,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          0,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          0,
-          9
-        ],
-        "damage": 0
       }
     ],
     [
@@ -104,7 +73,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           1,
           1
@@ -142,38 +111,6 @@
           5
         ],
         "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          1,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          1,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          1,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          1,
-          9
-        ],
-        "damage": 0
       }
     ],
     [
@@ -182,22 +119,6 @@
         "position": [
           2,
           0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          2
         ],
         "damage": 0
       },
@@ -205,6 +126,22 @@
         "type": "Wall",
         "position": [
           2,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          2,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          2,
           3
         ],
         "damage": 0
@@ -224,38 +161,6 @@
           5
         ],
         "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          2,
-          9
-        ],
-        "damage": 0
       }
     ],
     [
@@ -264,14 +169,6 @@
         "position": [
           3,
           0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          3,
-          1
         ],
         "damage": 0
       },
@@ -279,6 +176,14 @@
         "type": "Wall",
         "position": [
           3,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          3,
           2
         ],
         "damage": 0
@@ -292,50 +197,18 @@
         "damage": 0
       },
       {
-        "type": "Dragon",
+        "type": "Floor",
         "position": [
           3,
           4
         ],
-        "damage": 30
+        "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           3,
           5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          3,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          3,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          3,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          3,
-          9
         ],
         "damage": 0
       }
@@ -346,30 +219,6 @@
         "position": [
           4,
           0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          3
         ],
         "damage": 0
       },
@@ -377,6 +226,30 @@
         "type": "Wall",
         "position": [
           4,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Trap",
+        "position": [
+          4,
+          2
+        ],
+        "damage": 10
+      },
+      {
+        "type": "Trap",
+        "position": [
+          4,
+          3
+        ],
+        "damage": 10
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
           4
         ],
         "damage": 0
@@ -388,48 +261,16 @@
           5
         ],
         "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          9
-        ],
-        "damage": 0
       }
     ],
     [
       {
-        "type": "Dragon",
+        "type": "Floor",
         "position": [
           5,
           0
         ],
-        "damage": 30
+        "damage": 0
       },
       {
         "type": "Floor",
@@ -468,369 +309,29 @@
         "position": [
           5,
           5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          9
-        ],
-        "damage": 0
-      }
-    ],
-    [
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Bombe",
-        "position": [
-          6,
-          1
-        ],
-        "damage": 50
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Bombe",
-        "position": [
-          6,
-          3
-        ],
-        "damage": 50
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          4
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          6,
-          9
-        ],
-        "damage": 0
-      }
-    ],
-    [
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          3
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          4
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          7,
-          9
-        ],
-        "damage": 0
-      }
-    ],
-    [
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          3
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          4
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          8,
-          9
-        ],
-        "damage": 0
-      }
-    ],
-    [
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          3
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          4
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          9,
-          9
         ],
         "damage": 0
       }
     ]
+  ],
+  "heroes": [
+    {
+      "position": [
+        0,
+        0
+      ],
+      "pv_current": 80,
+      "pv_total": 80,
+      "strategy": "safest"
+    },
+    {
+      "position": [
+        0,
+        0
+      ],
+      "pv_current": 80,
+      "pv_total": 80,
+      "strategy": "shortest"
+    }
   ]
 }
