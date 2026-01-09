@@ -179,7 +179,7 @@ def draw_simulation(
             stdscr,
             0,
             start_x,
-            "🏆 Trésor atteint ! Appuyez sur Entrée pour passer au niveau suivant ! 🏆",
+            "💀 Trésor pillé ! Appuyez sur (trouver une touche) pour recommencer ! 💀",
             curses.A_BOLD,
         )
         
@@ -215,7 +215,7 @@ def draw_simulation(
             stdscr,
             0,
             start_x,
-            "💀 Tous les héros sont morts ! Appuyez sur 'r' pour réinitialiser le donjon. 💀",
+            "🏆 Vous avez réussi à défendre le trésor des gobelins ! Appuyez sur entrée pour passer au niveau suivant ! 🏆",
             curses.A_BOLD,
             
         )
