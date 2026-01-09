@@ -344,11 +344,11 @@ def run_server(dungeon_instance, input_handler, simulation):
     dungeon_observer = DungeonObserver(manager)
     simulation.attach(dungeon_observer)
 
-    print(f"🚀 Serveur GUI lancé sur http://127.0.0.1:8000")
+    print(f"🚀 Serveur GUI lancé sur http://0.0.0.0:8000")
     print(f"Donjon de taille {dungeon_instance.dimension} chargé.")
     
     # Lancement d'Uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
     print("Ce fichier ne doit pas être lancé directement.")
