@@ -30,5 +30,8 @@ class nextLevel(Command):
                     self.simulation.reset()
 
                     self.result = next_level_instance
+                    
+                    # Notifier les observers (WebSocket) pour rafraîchir l'affichage
+                    self.simulation.notify()
                 else:
                     self.result = None

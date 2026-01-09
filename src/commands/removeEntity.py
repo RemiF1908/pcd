@@ -19,5 +19,7 @@ class removeEntity(Command):
                     self.simulation.current_budget += entity_to_remove.cost
                 cell.entity = Floor()
                 print(f"Entity removed from {self.coord} and budget refunded.")
+                # Notifier les observers (WebSocket) pour rafraîchir l'affichage
+                self.simulation.notify()
 
 

@@ -157,16 +157,27 @@ function updateSidebar(data) {
 }
 
 function refreshDungeon(scene, forceRebuild = false) {
-
+    console.log("refreshDungeon called with forceRebuild:", forceRebuild, "gridObjects.length:", gridObjects.length);
 
     // Récupérer les nouvelles données du donjon
     fetch('/api/dungeon')
         .then(res => res.json())
         .then(data => {
+            console.log("Dungeon data received:", data);
+            // Log détaillé de la première ligne de la grille
+            if (data.grid && data.grid.length > 0) {
+                console.log("First row of grid:", data.grid[0]);
+                // Log détaillé de chaque cellule de la première ligne
+                data.grid[0].forEach((cell, index) => {
+                    console.log(`Cell [0][${index}]:`, cell);
+                });
+            }
             if (gridObjects.length === 0 || forceRebuild) {
+                console.log("Building complete grid");
                 buildIsoGrid(scene, data);
             } else {
                 // Juste mettre à jour les héros
+                console.log("Updating heroes only");
                 updateHeroesOnly(scene, data);
             }
         })
@@ -176,6 +187,7 @@ function refreshDungeon(scene, forceRebuild = false) {
     fetch('/api/dungeon_data')
         .then(res => res.json())
         .then(data => {
+            console.log("Sidebar data received:", data);
             updateSidebar(data);
         })
         .catch(err => console.error("Erreur chargement données sidebar:", err));
@@ -247,7 +259,10 @@ function buildIsoGrid(scene, data) {
                 if (floor.entityImage) floor.entityImage.clearTint();
             });
 
-            floor.on('pointerdown', () => handleTileClick(scene, cell));
+            floor.on('pointerdown', () => {
+                console.log("Tile clicked at:", cell.x, cell.y, "type:", cell.type, "selected:", selectedEntityType);
+                handleTileClick(scene, cell);
+            });
         });
     });
 
@@ -264,9 +279,12 @@ function buildIsoGrid(scene, data) {
 }
 
 function handleTileClick(scene, cell) {
-    if (gameStarted) return;
+    if (gameStarted) {
+        console.log("Game started, ignoring tile click");
+        return;
+    }
     
-    console.log(`Tile clicked at: (${cell.x}, ${cell.y}) with entity ${selectedEntityType}`);
+    console.log(`Tile clicked at: (${cell.x}, ${cell.y}) with entity ${selectedEntityType}, current cell type: ${cell.type}`);
 
     // On ne peut pas placer sur les cases de départ et de fin
     if (cell.type === 'START' || cell.type === 'EXIT') {
@@ -274,21 +292,30 @@ function handleTileClick(scene, cell) {
         return;
     }
 
+    const requestBody = {
+        type_entity: selectedEntityType,
+        x: cell.x,
+        y: cell.y
+    };
+    
+    console.log("Sending request with body:", JSON.stringify(requestBody));
+
     fetch(`/api/place_entity/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            type_entity: selectedEntityType,
-            x: cell.x,
-            y: cell.y
-        })
+        body: JSON.stringify(requestBody)
     })
     .then(response => {
+        console.log("Response status:", response.status);
         if (!response.ok) {
-            return response.text().then(text => { throw new Error(text) });
+            return response.text().then(text => { 
+                console.log("Error response:", text);
+                throw new Error(text) 
+            });
         }
+        console.log("Entity placed successfully");
         // Si le placement est réussi, on rafraîchit l'affichage
         refreshDungeon(scene, true);
     })
@@ -350,11 +377,11 @@ function resetGame(scene) {
         }
     })
     .then(response => response.json())
-    .then(data => {
-        console.log('Simulation reset:', data);
-        // Rafraîchir l'affichage pour montrer les héros au départ
-        refreshDungeon(scene, true);
-    })
+        .then(data => {
+            console.log('Simulation reset:', data);
+            // Rafraîchir l'affichage pour montrer les héros au départ
+            refreshDungeon(scene, true);
+        })
     .catch(error => console.error('Error resetting simulation:', error));
     
     console.log("Game reset - Back to edit mode");
@@ -507,20 +534,32 @@ function checkAllHeroesDead(scene) {
                 })
                 .then(data => {
                     console.log('Next level loaded:', data);
-                    // Réinitialiser le jeu et rafraîchir l'affichage
-                    gameStarted = false;
-                    refreshDungeon(scene, true);
                     
-                    // Réactiver la sidebar et les boutons
-                    const sidebarItems = document.getElementById('sidebar-items');
-                    sidebarItems.classList.remove('disabled');
-                    
-                    const launchButton = document.getElementById('launch-button');
-                    launchButton.disabled = false;
-                    launchButton.textContent = 'Lancer';
-                    
-                    const resetButton = document.getElementById('reset-button');
-                    resetButton.disabled = false;
+                    // Attendre un peu que le serveur soit prêt
+                    setTimeout(() => {
+                        // Vider complètement la grille pour forcer la reconstruction
+                        gridObjects.forEach(obj => {
+                            if (obj && obj.destroy) {
+                                obj.destroy();
+                            }
+                        });
+                        gridObjects = [];
+                        
+                        // Réinitialiser le jeu et rafraîchir l'affichage
+                        gameStarted = false;
+                        refreshDungeon(scene, true);
+                        
+                        // Réactiver la sidebar et les boutons
+                        const sidebarItems = document.getElementById('sidebar-items');
+                        sidebarItems.classList.remove('disabled');
+                        
+                        const launchButton = document.getElementById('launch-button');
+                        launchButton.disabled = false;
+                        launchButton.textContent = 'Lancer';
+                        
+                        const resetButton = document.getElementById('reset-button');
+                        resetButton.disabled = false;
+                    }, 100);
                 })
                 .catch(error => console.error('Error loading next level:', error));
             }
