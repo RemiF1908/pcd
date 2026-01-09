@@ -96,13 +96,7 @@ async def get_dungeon():
     
     print(f"API Dungeon: Using dungeon from simulation, Level: {context.simulation.level.difficulty if context.simulation and context.simulation.level else 'unknown'}")
 
-    # Log pour voir le contenu de la première ligne avant sérialisation
-    if dng.grid and len(dng.grid) > 0:
-        print(f"First row of dungeon grid before serialization:")
-        for c, cell in enumerate(dng.grid[0]):
-            entity_info = f"entity={cell.entity}, type={getattr(cell.entity, 'type', 'None') if cell.entity else 'None'}"
-            print(f"  Cell [0][{c}]: {entity_info}")
-
+   
     # Sérialisation de la grille
     serialized_grid = []
     for r, row in enumerate(dng.grid):
@@ -219,7 +213,8 @@ async def start_simulation():
     if not context.input_handler:
         return JSONResponse({"simulation_started": "false"})
 
-    context.input_handler.start_wave()
+    if not(context.input_handler.start_wave()):
+        return JSONResponse({"simulation_started": "false"})
     
     return JSONResponse({"simulation_started": "true"})
 

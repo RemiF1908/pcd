@@ -186,15 +186,7 @@ function refreshDungeon(scene, forceRebuild = false) {
     fetch('/api/dungeon')
         .then(res => res.json())
         .then(data => {
-            console.log("Dungeon data received:", data);
-            // Log détaillé de la première ligne de la grille
-            if (data.grid && data.grid.length > 0) {
-                console.log("First row of grid:", data.grid[0]);
-                // Log détaillé de chaque cellule de la première ligne
-                data.grid[0].forEach((cell, index) => {
-                    console.log(`Cell [0][${index}]:`, cell);
-                });
-            }
+            
             if (gridObjects.length === 0 || forceRebuild) {
                 console.log("Building complete grid");
                 buildIsoGrid(scene, data);
@@ -483,7 +475,6 @@ function saveGame(scene) {
         });
     }
 }
-
 function moveHero(scene) {
     fetch('/api/start_simulation/', {
         method: 'GET',
@@ -495,11 +486,37 @@ function moveHero(scene) {
         if (!response.ok) {
             return response.text().then(text => { throw new Error(text) });
         }
-        // Rafraîchir l'affichage après le déplacement
-        refreshDungeon(scene, false);
+        return response.json(); 
+    })
+    .then(data => {
+        if (data.simulation_started === "false") {
+            alert("Chemin impossible")
+            clearInterval(heroMoveInterval);
+            heroMoveInterval = null
+             // Réinitialiser l'état du jeu
+    gameStarted = false;
+    
+    // Réactiver la sidebar
+    const sidebarItems = document.getElementById('sidebar-items');
+    sidebarItems.classList.remove('disabled');
+    
+    // Réactiver le bouton lancer
+    const launchButton = document.getElementById('launch-button');
+    launchButton.disabled = false;
+    launchButton.textContent = 'Lancer';
+    
+    // Réactiver le bouton réinitialiser
+    const resetButton = document.getElementById('reset-button');
+    resetButton.disabled = false;
+
+    é
+        }else{
+refreshDungeon(scene, false);
         
-        // Vérifier si tous les héros sont morts
         checkAllHeroesDead(scene);
+        }
+
+        
     })
     .catch(error => console.error('Error moving hero:', error));
 }
