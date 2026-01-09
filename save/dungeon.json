@@ -38,7 +38,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           0,
           3
@@ -46,7 +46,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           0,
           4
@@ -54,7 +54,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           0,
           5
@@ -62,7 +62,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           0,
           6
@@ -70,7 +70,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           0,
           7
@@ -194,7 +194,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           2,
           2
@@ -202,7 +202,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           2,
           3
@@ -268,7 +268,7 @@
         "damage": 0
       },
       {
-        "type": "Wall",
+        "type": "Floor",
         "position": [
           3,
           1
@@ -276,7 +276,7 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           3,
           2
@@ -292,15 +292,15 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Dragon",
         "position": [
           3,
           4
         ],
-        "damage": 0
+        "damage": 30
       },
       {
-        "type": "Floor",
+        "type": "Wall",
         "position": [
           3,
           5
@@ -350,33 +350,33 @@
         "damage": 0
       },
       {
+        "type": "Floor",
+        "position": [
+          4,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          3
+        ],
+        "damage": 0
+      },
+      {
         "type": "Wall",
         "position": [
           4,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
-          3
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          4,
           4
         ],
         "damage": 0
@@ -417,88 +417,6 @@
         "type": "Floor",
         "position": [
           4,
-          9
-        ],
-        "damage": 0
-      }
-    ],
-    [
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          0
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          1
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          2
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          3
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          4
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          5
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          6
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          7
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
-          8
-        ],
-        "damage": 0
-      },
-      {
-        "type": "Floor",
-        "position": [
-          5,
           9
         ],
         "damage": 0
@@ -508,7 +426,7 @@
       {
         "type": "Dragon",
         "position": [
-          6,
+          5,
           0
         ],
         "damage": 30
@@ -516,10 +434,92 @@
       {
         "type": "Floor",
         "position": [
-          6,
+          5,
           1
         ],
         "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          3
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          4
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          5
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          6
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          7
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          8
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          5,
+          9
+        ],
+        "damage": 0
+      }
+    ],
+    [
+      {
+        "type": "Floor",
+        "position": [
+          6,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Bombe",
+        "position": [
+          6,
+          1
+        ],
+        "damage": 50
       },
       {
         "type": "Floor",
@@ -530,12 +530,12 @@
         "damage": 0
       },
       {
-        "type": "Dragon",
+        "type": "Bombe",
         "position": [
           6,
           3
         ],
-        "damage": 30
+        "damage": 50
       },
       {
         "type": "Floor",
