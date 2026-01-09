@@ -94,6 +94,35 @@ function create() {
         resetGame(scene);
     });
 
+    // --- Import Dungeon UI handlers (simplified)
+    const importBtn = document.getElementById('import-button');
+    const statusEl = document.getElementById('import-status');
+
+    function setImportStatus(msg, isError = false){
+        if(!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.style.color = isError ? '#f88' : '#bff';
+    }
+
+    if(importBtn){
+        importBtn.addEventListener('click', async () => {
+            setImportStatus('Import en cours...');
+            try{
+                const resp = await fetch('/api/import_dungeon', { method: 'POST' });
+                if(resp.ok){
+                    refreshDungeon(scene, true);
+                    setImportStatus('Donjon importé avec succès.');
+                    refreshDungeon(scene, true);
+                }else{
+                    const txt = await resp.text();
+                    setImportStatus('Erreur serveur: ' + (txt || resp.statusText), true);
+                }
+            }catch(err){
+                setImportStatus('Erreur lors de l\'import: ' + String(err), true);
+            }
+        });
+    }
+
     // Écouteur pour redimensionnement de la fenêtre (optionnel avec RESIZE mais utile pour recentrer)
     scene.scale.on('resize', () => {
         refreshDungeon(scene, true);

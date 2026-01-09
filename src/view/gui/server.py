@@ -8,6 +8,8 @@ from typing import List
 import asyncio
 from pydantic import BaseModel
 from src.model.entity_factory import EntityFactory
+import json
+import pathlib
 
 # --- GESTION DES IMPORTS ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +19,7 @@ if root_dir not in sys.path:
 
 from src.observers.Observer import Observer
 from src.simulation import Simulation
+from src.commands.importDungeon import importDungeon
 
 # --- WEBSOCKETS ---
 class ConnectionManager:
@@ -204,7 +207,29 @@ async def move_hero():
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
+@app.post("/api/import_dungeon")
+async def api_import_dungeon():
+    """Appelle uniquement `context.input_handler.import_dungeon()`.
 
+    Ce endpoint ne prend aucun payload et délègue l'import à
+    l'`InputHandler` côté serveur (méthode `import_dungeon`).
+    """
+    if not context.input_handler:
+        return JSONResponse({"error": "Aucun input_handler configuré"}, status_code=500)
+
+    try:
+        # N'exécute que la méthode publique de l'input handler.
+        context.input_handler.import_dungeon()
+        
+        # Mettre à jour le contexte global avec le nouveau donjon
+        context.dungeon = context.simulation.dungeon
+        
+        # Broadcast WebSocket pour forcer le client à rafraîchir
+        await manager.broadcast("dungeon_updated")
+        
+        return JSONResponse({"imported": True})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # --- FICHIERS STATIQUES ---
 static_path = os.path.join(current_dir, "static")
