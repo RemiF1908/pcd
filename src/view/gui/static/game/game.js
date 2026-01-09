@@ -94,6 +94,13 @@ function create() {
         resetGame(scene);
     });
 
+    // Gestion du bouton sauvegarder
+    const saveButton = document.getElementById('save-button');
+    saveButton.addEventListener('click', () => {
+        console.log("Save button clicked");
+        saveGame(scene);
+    });
+
     // Écouteur pour redimensionnement de la fenêtre (optionnel avec RESIZE mais utile pour recentrer)
     scene.scale.on('resize', () => {
         refreshDungeon(scene, true);
@@ -318,6 +325,71 @@ function resetGame(scene) {
     .catch(error => console.error('Error resetting simulation:', error));
     
     console.log("Game reset - Back to edit mode");
+}
+
+function saveGame(scene) {
+    console.log("saveGame function called");
+    
+    // Demander le nom du fichier à l'utilisateur
+    const filename = prompt("Entrez le nom du fichier de sauvegarde:", "dungeon_save");
+    console.log("Filename:", filename);
+    if (!filename) {
+        console.log("Save cancelled by user");
+        return;
+    }
+
+    // Récupérer la progression de campagne actuelle si disponible
+    let campaignProgress = [];
+    
+    // Sauvegarder directement sans progression (l'API n'existe pas encore)
+    performSave([]);
+
+    function performSave(campaignProgress) {
+        console.log("performSave called with progress:", campaignProgress);
+        
+        const saveData = {
+            filename: filename,
+            campaign_progress: campaignProgress
+        };
+
+        console.log("Save data:", saveData);
+
+        // Désactiver le bouton pendant la sauvegarde
+        const saveButton = document.getElementById('save-button');
+        saveButton.disabled = true;
+        saveButton.textContent = 'Sauvegarde...';
+
+        console.log("Sending fetch request to /api/save_dungeon");
+        
+        fetch('/api/save_dungeon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(saveData)
+        })
+        .then(response => {
+            console.log("Response received:", response);
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Game saved successfully:', data);
+            alert(`Donjon sauvegardé avec succès sous "${filename}.json"!`);
+        })
+        .catch(error => {
+            console.error('Error saving game:', error);
+            alert('Erreur lors de la sauvegarde: ' + error.message);
+        })
+        .finally(() => {
+            // Réactiver le bouton
+            saveButton.disabled = false;
+            saveButton.textContent = 'Sauvegarder';
+            console.log("Save process completed");
+        });
+    }
 }
 
 function moveHero(scene) {

@@ -14,6 +14,7 @@ class importDungeon(Command):
         self.filename = filename
         self.filepath = f"./save/{filename}.json"
         self.result = None
+        self.campaign_progress = None
 
     def execute(self, game_controller) -> None:
         if not game_controller or not game_controller.simulation:

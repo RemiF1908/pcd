@@ -4,10 +4,11 @@ from ..model.hero import Hero # Added import
 
 
 class exportDungeon(Command):
-    def __init__(self, dungeon, filename: str):
+    def __init__(self, dungeon, filename: str, campaign_progress=None):
         self.dungeon = dungeon
         self.filename = filename
         self.filepath="./save/"+filename + ".json"
+        self.campaign_progress = campaign_progress
 
     def execute(self, game_controller):
         if not game_controller or not game_controller.simulation:
@@ -44,6 +45,10 @@ class exportDungeon(Command):
                     entity_info["damage"] = cell.entity.damage
                 row_data.append(entity_info)
             dungeon_data["grid"].append(row_data)
+
+        # Ajouter la progression de campagne si disponible
+        if self.campaign_progress is not None:
+            dungeon_data["campaign_progress"] = self.campaign_progress
 
         with open(self.filepath, "w") as file:
             json.dump(dungeon_data, file, indent=2)
