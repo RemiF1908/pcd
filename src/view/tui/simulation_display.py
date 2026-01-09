@@ -67,7 +67,7 @@ class Legend:
         LegendEntry(".", "Floor", ColorPair.FLOOR),
         LegendEntry("#", "Wall", ColorPair.WALL),
         LegendEntry("^", "Trap", ColorPair.TRAP),
-        LegendEntry("Z", "Dragon", ColorPair.DRAGON),
+        LegendEntry("D", "Dragon", ColorPair.DRAGON),
         LegendEntry("E", "Entrance", ColorPair.ENTRANCE),
         LegendEntry("S", "Exit", ColorPair.EXIT),
         LegendEntry("H", "Hero", ColorPair.HERO),
