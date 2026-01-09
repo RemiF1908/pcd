@@ -1,0 +1,16 @@
+.git
+.gitignore
+.gitlab
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.ruff_cache
+.pytest_cache
+.idea
+docs
+tests
+save
+*.md
+sujet-codingweek-2026-x.pdf
