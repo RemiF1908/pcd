@@ -1,0 +1,155 @@
+{
+  "level_id": 1,
+  "dimension": [
+    4,
+    4
+  ],
+  "entry": [
+    0,
+    0
+  ],
+  "exit": [
+    2,
+    2
+  ],
+  "grid": [
+    [
+      {
+        "type": "Floor",
+        "position": [
+          0,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Wall",
+        "position": [
+          0,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          0,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          0,
+          3
+        ],
+        "damage": 0
+      }
+    ],
+    [
+      {
+        "type": "Wall",
+        "position": [
+          1,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Wall",
+        "position": [
+          1,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          1,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          1,
+          3
+        ],
+        "damage": 0
+      }
+    ],
+    [
+      {
+        "type": "Wall",
+        "position": [
+          2,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          2,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          2,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Wall",
+        "position": [
+          2,
+          3
+        ],
+        "damage": 0
+      }
+    ],
+    [
+      {
+        "type": "Floor",
+        "position": [
+          3,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          3,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          3,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Wall",
+        "position": [
+          3,
+          3
+        ],
+        "damage": 0
+      }
+    ]
+  ],
+  "current_budget": 80,
+  "campaign_progress": []
+}

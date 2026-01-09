@@ -57,6 +57,7 @@ class GuiContext:
     dungeon = None
     input_handler = None
     simulation = None
+    game_controller = None
 
 context = GuiContext()
 app = FastAPI()
@@ -212,12 +213,15 @@ async def save_dungeon(request: SaveDungeonRequest):
     if not context.dungeon:
         return JSONResponse({"error": "Aucun donjon chargé"}, status_code=500)
     
+    if not context.game_controller:
+        return JSONResponse({"error": "Game controller non disponible"}, status_code=500)
+    
     try:
         from src.commands.exportDungeon import exportDungeon
         
         # Créer la commande d'export avec le filename et la progression de campagne
         command = exportDungeon(context.dungeon, request.filename, request.campaign_progress)
-        command.execute(None)
+        command.execute(context.game_controller)
         
         return JSONResponse({"saved": "true", "filename": request.filename})
     except Exception as e:
@@ -248,6 +252,7 @@ def run_server(dungeon_instance, input_handler, simulation):
     context.dungeon = dungeon_instance
     context.input_handler = input_handler
     context.simulation = simulation
+    context.game_controller = input_handler.invoker.game_controller if input_handler and input_handler.invoker else None
     
     dungeon_observer = DungeonObserver(manager)
     simulation.attach(dungeon_observer)
