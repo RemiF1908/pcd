@@ -12,7 +12,12 @@ class removeEntity(Command):
     def execute(self, game_controller):
         if not(self.simulation.isSimStarted):
             cell = self.dungeon.get_cell(self.coord)
-            if not isinstance(cell.entity, Floor):
+            
+            entity_to_remove = cell.entity
+            if not isinstance(entity_to_remove, Floor):
+                if hasattr(entity_to_remove, 'cost'):
+                    self.simulation.current_budget += entity_to_remove.cost
                 cell.entity = Floor()
-                print(f"Entity removed from {self.coord}")
+                print(f"Entity removed from {self.coord} and budget refunded.")
+
 

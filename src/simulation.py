@@ -30,7 +30,7 @@ class Simulation:
         level: Level,
         dungeon: Dungeon = None,
     ) -> None:
-        self.dungeon = dungeon
+        self.dungeon = level.dungeon
         self.score = 0
         self.level = level
         self.heroes = self.level.heroes if self.level else []
