@@ -96,13 +96,7 @@ async def get_dungeon():
     
     print(f"API Dungeon: Using dungeon from simulation, Level: {context.simulation.level.difficulty if context.simulation and context.simulation.level else 'unknown'}")
 
-    # Log pour voir le contenu de la première ligne avant sérialisation
-    if dng.grid and len(dng.grid) > 0:
-        print(f"First row of dungeon grid before serialization:")
-        for c, cell in enumerate(dng.grid[0]):
-            entity_info = f"entity={cell.entity}, type={getattr(cell.entity, 'type', 'None') if cell.entity else 'None'}"
-            print(f"  Cell [0][{c}]: {entity_info}")
-
+   
     # Sérialisation de la grille
     serialized_grid = []
     for r, row in enumerate(dng.grid):
@@ -160,8 +154,14 @@ async def place_entity(request: PlaceEntityRequest):
             context.input_handler.place_trap((request.y, request.x))
         case "wall":
             context.input_handler.place_wall((request.y, request.x))
-        case "dragon":
+        case "dragonU":
             context.input_handler.place_dragon((request.y, request.x), orientation="U")
+        case "dragonL":
+            context.input_handler.place_dragon((request.y, request.x), orientation="L")
+        case "dragonD":
+            context.input_handler.place_dragon((request.y, request.x), orientation="D")
+        case "dragonR":
+            context.input_handler.place_dragon((request.y, request.x), orientation="R")
         case "bombe":
             context.input_handler.place_bombe((request.y, request.x))
         case "floor":
@@ -176,7 +176,10 @@ async def get_dungeon_data():
 
     prices = {
         "trap": EntityFactory.create_trap().cost,
-        "dragon": EntityFactory.create_dragon().cost,
+        "dragonU": EntityFactory.create_dragon().cost,
+        "dragonL": EntityFactory.create_dragon().cost,
+        "dragonD": EntityFactory.create_dragon().cost,
+        "dragonR": EntityFactory.create_dragon().cost,
         "bombe": EntityFactory.create_bombe().cost,
         "wall": EntityFactory.create_wall().cost,
         "floor": 0
@@ -220,7 +223,8 @@ async def start_simulation():
     if not context.input_handler:
         return JSONResponse({"simulation_started": "false"})
 
-    context.input_handler.start_wave()
+    if not(context.input_handler.start_wave()):
+        return JSONResponse({"simulation_started": "false"})
     
     return JSONResponse({"simulation_started": "true"})
 
