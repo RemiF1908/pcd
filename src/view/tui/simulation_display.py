@@ -365,6 +365,20 @@ class TUIView:
         _draw_reverse_char(stdscr, start_y + row, start_x + col * 2)
 
     def _draw_help(self, stdscr, start_y: int, start_x: int) -> None:
+        # read costs from class property fget to avoid instantiating entities
+        try:
+            from src.model.trap import Trap
+            from src.model.wall import Wall
+            from src.model.dragon import Dragon
+            from src.model.bombe import Bombe
+
+            trap_cost = Trap.cost.fget(None) if hasattr(Trap, "cost") else "?"
+            wall_cost = Wall.cost.fget(None) if hasattr(Wall, "cost") else "?"
+            dragon_cost = Dragon.cost.fget(None) if hasattr(Dragon, "cost") else "?"
+            bombe_cost = Bombe.cost.fget(None) if hasattr(Bombe, "cost") else "?"
+        except Exception:
+            trap_cost = wall_cost = dragon_cost = bombe_cost = "?"
+
         help_text = [
             ("=== Commandes ===", curses.A_BOLD),
             ("q: Quitter", 0),
@@ -378,13 +392,13 @@ class TUIView:
             ("Flèches: Déplacer", 0),
             ("", 0),
             ("=== Placer entités ===", curses.A_BOLD),
-            ("t: Trap (piège)", 0),
-            ("w: Wall (mur)", 0),
-            ("u: Dragon up", 0),
-            ("h: Dragon left", 0),
-            ("j: Dragon down", 0),
-            ("k: Dragon right", 0),
-            ("b: Bombe", 0),
+            (f"t: Trap (piège) — coût: {trap_cost}", 0),
+            (f"w: Wall (mur) — coût: {wall_cost}", 0),
+            (f"u: Dragon up — coût: {dragon_cost}", 0),
+            (f"h: Dragon left — coût: {dragon_cost}", 0),
+            (f"j: Dragon down — coût: {dragon_cost}", 0),
+            (f"k: Dragon right — coût: {dragon_cost}", 0),
+            (f"b: Bombe — coût: {bombe_cost}", 0),
             ("d: Delete (supprimer)", 0),
         ]
 
