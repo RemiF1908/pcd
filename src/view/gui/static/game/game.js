@@ -224,10 +224,10 @@ function refreshDungeon(scene, forceRebuild = false) {
                 gameEnded = true;
                 displayGameStatusMessage('Victoire ! Tous les héros sont morts.');
                 stopGame();
-                // Passer au niveau suivant après un court délai
+                // Passer au niveau suivant après un délai plus long
                 setTimeout(() => {
                     loadNextLevel(scene);
-                }, 2000);
+                }, 5000);
             } else {
                 if (gridObjects.length === 0 || forceRebuild) {
                     console.log("Building complete grid");
@@ -496,12 +496,13 @@ function saveGame(scene) {
     console.log("saveGame function called");
     
     // Demander le nom du fichier à l'utilisateur
-    const filename = prompt("Entrez le nom du fichier de sauvegarde:", "dungeon_save");
+    // const filename = prompt("Entrez le nom du fichier de sauvegarde:", "dungeon_save");
+    const filename = "dungeon"; // Hardcode filename to "dungeon"
     console.log("Filename:", filename);
-    if (!filename) {
-        console.log("Save cancelled by user");
-        return;
-    }
+    // if (!filename) { // No need to check if filename is empty as it's hardcoded
+    //     console.log("Save cancelled by user");
+    //     return;
+    // }
 
     // Récupérer la progression de campagne actuelle si disponible
     let campaignProgress = [];
@@ -601,10 +602,10 @@ function moveHero(scene) {
             gameEnded = true;
             displayGameStatusMessage('Victoire ! Tous les héros sont morts.');
             stopGame();
-            // Passer au niveau suivant après un court délai
+            // Passer au niveau suivant après un délai plus long
             setTimeout(() => {
                 loadNextLevel(scene);
-            }, 2000);
+            }, 5000);
         }else{
 refreshDungeon(scene, false);
         }

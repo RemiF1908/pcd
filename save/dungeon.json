@@ -1,16 +1,16 @@
 {
   "level_id": 1,
   "dimension": [
-    4,
-    4
+    5,
+    5
   ],
   "entry": [
     0,
     0
   ],
   "exit": [
-    2,
-    2
+    4,
+    4
   ],
   "grid": [
     [
@@ -31,12 +31,12 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Dragon",
         "position": [
           0,
           2
         ],
-        "damage": 0
+        "damage": 30
       },
       {
         "type": "Floor",
@@ -45,6 +45,14 @@
           3
         ],
         "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          0,
+          4
+        ],
+        "damage": 0
       }
     ],
     [
@@ -57,26 +65,34 @@
         "damage": 0
       },
       {
-        "type": "Bombe",
+        "type": "Floor",
         "position": [
           1,
           1
         ],
-        "damage": 50
+        "damage": 0
       },
       {
-        "type": "Bombe",
+        "type": "Floor",
         "position": [
           1,
           2
         ],
-        "damage": 50
+        "damage": 0
       },
       {
         "type": "Floor",
         "position": [
           1,
           3
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          1,
+          4
         ],
         "damage": 0
       }
@@ -99,10 +115,18 @@
         "damage": 0
       },
       {
-        "type": "Floor",
+        "type": "Dragon",
         "position": [
           2,
           2
+        ],
+        "damage": 30
+      },
+      {
+        "type": "Floor",
+        "position": [
+          2,
+          3
         ],
         "damage": 0
       },
@@ -110,7 +134,7 @@
         "type": "Floor",
         "position": [
           2,
-          3
+          4
         ],
         "damage": 0
       }
@@ -145,10 +169,61 @@
         "position": [
           3,
           3
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          3,
+          4
+        ],
+        "damage": 0
+      }
+    ],
+    [
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          0
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          1
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          2
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          3
+        ],
+        "damage": 0
+      },
+      {
+        "type": "Floor",
+        "position": [
+          4,
+          4
         ],
         "damage": 0
       }
     ]
   ],
-  "current_budget": 40
+  "current_budget": 199864,
+  "campaign_progress": []
 }
