@@ -1,6 +1,6 @@
 # SPRINT PLANNING — Day 2
 
-Date: 6/12/25
+Date: 6/01/26
 
 ## Objectif du sprint
 

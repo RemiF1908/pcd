@@ -1,6 +1,6 @@
 # SPRINT PLANNING — Day 3
 
-Date: 7/01/25
+Date: 7/01/26
 
 ## Objectif du sprint
 
