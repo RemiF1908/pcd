@@ -185,7 +185,8 @@ async def get_dungeon_data():
     return JSONResponse({
         "money": context.simulation.current_budget,
         "prices": prices,
-        "level": context.simulation.level.difficulty if context.simulation.level else 1
+        "level": context.simulation.level.difficulty if context.simulation.level else 1,
+        "score": context.simulation.score if hasattr(context.simulation, 'score') else 0
     })
 
 

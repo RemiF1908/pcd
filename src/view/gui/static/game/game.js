@@ -169,11 +169,16 @@ function updateSidebar(data) {
         levelElement.innerText = data.level;
     }
 
+    const scoreElement = document.getElementById('score');
+    if (scoreElement && data.score !== undefined) {
+        scoreElement.innerText = data.score;
+    }
+
     if (data.prices) {
         for (const item in data.prices) {
             const priceElement = document.querySelector(`#${item} .price`);
             if (priceElement) {
-                priceElement.innerText = `${data.prices[item]} €`;
+                priceElement.innerText = `${data.prices[item]}`;
             }
         }
     }
