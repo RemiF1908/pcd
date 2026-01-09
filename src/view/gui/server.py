@@ -91,7 +91,17 @@ async def get_dungeon():
     if not context.dungeon:
         return JSONResponse({"error": "Aucun donjon chargé"}, status_code=500)
 
-    dng = context.dungeon
+    # Utiliser toujours le donjon de la simulation pour être sûr d'être synchro
+    dng = context.simulation.dungeon if context.simulation and context.simulation.dungeon else context.dungeon
+    
+    print(f"API Dungeon: Using dungeon from simulation, Level: {context.simulation.level.difficulty if context.simulation and context.simulation.level else 'unknown'}")
+
+    # Log pour voir le contenu de la première ligne avant sérialisation
+    if dng.grid and len(dng.grid) > 0:
+        print(f"First row of dungeon grid before serialization:")
+        for c, cell in enumerate(dng.grid[0]):
+            entity_info = f"entity={cell.entity}, type={getattr(cell.entity, 'type', 'None') if cell.entity else 'None'}"
+            print(f"  Cell [0][{c}]: {entity_info}")
 
     # Sérialisation de la grille
     serialized_grid = []
@@ -113,6 +123,10 @@ async def get_dungeon():
                 "y": r, 
                 "type": entity_type
             })
+            
+            # Log pour la position où on a placé la bombe (2, 0)
+            if r == 0 and c == 2:
+                print(f"Cell at ({r}, {c}) in serialization: entity_type = {entity_type}")
         serialized_grid.append(row_data)
 
     hero_positions = []
@@ -135,6 +149,9 @@ async def get_dungeon():
 async def place_entity(request: PlaceEntityRequest):
     if not context.input_handler:
         return JSONResponse({"entity_placed": "true"})
+
+    # Log pour vérifier quel donjon est utilisé
+    print(f"Placing entity at ({request.y}, {request.x}) on dungeon level: {context.simulation.level.difficulty if context.simulation and context.simulation.level else 'unknown'}")
 
     # Le modèle attend les coordonnées en (row, col), ce qui correspond à (y, x)
     # venant du front-end.
@@ -167,7 +184,8 @@ async def get_dungeon_data():
 
     return JSONResponse({
         "money": context.simulation.current_budget,
-        "prices": prices
+        "prices": prices,
+        "level": context.simulation.level.difficulty if context.simulation.level else 1
     })
 
 
@@ -177,7 +195,22 @@ async def next_level():
     if not context.input_handler:
         return JSONResponse({"next_level_change": "false"})
 
-    context.input_handler.next_level()
+    # 1. On demande à l'handler de charger le niveau suivant
+    # (Cela modifie self.simulation à l'intérieur de input_handler)
+    context.input_handler.load_next_level()
+    
+    # 2. CORRECTION CRITIQUE : On met à jour les références du serveur
+    # pour qu'elles pointent vers la NOUVELLE simulation créée par l'handler
+    context.simulation = context.input_handler.simulation
+    context.dungeon = context.input_handler.dungeon
+    
+    # 3. CORRECTION IMPORTANTE : Réattacher l'Observer WebSocket
+    # La nouvelle simulation est toute neuve, elle n'a pas d'observer.
+    # Si on ne fait pas ça, le serveur ne préviendra plus le frontend des mises à jour.
+    observer = DungeonObserver(manager)
+    context.simulation.attach(observer)
+    
+    print(f">>> Passage au niveau suivant. Difficulté: {context.simulation.level.difficulty}")
     
     return JSONResponse({"next_level_change": "true"})
 

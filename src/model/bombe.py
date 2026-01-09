@@ -5,7 +5,7 @@ from .entity import Entity
 class Bombe(Entity):
     """Entité représentant une bombe."""
 
-    def __init__(self, damage: int = 50) -> None:
+    def __init__(self, damage: int = 40) -> None:
         self._damage = int(damage)
         self.range = []
         self.triggered = False
@@ -16,7 +16,7 @@ class Bombe(Entity):
 
     @property
     def cost(self) -> int :
-        return 80
+        return 120
 
     @property
     def passable(self) -> bool:
