@@ -31,7 +31,7 @@
       "id": 2,
       "name": "Niveau 2 - Premiers Défis",
       "difficulty": 2,
-      "budget": 220,
+      "budget": 300,
       "dungeon_file": "level2_dungeon",
       "dimensions": {
         "width": 6,

@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable
 import curses
+import inspect
 from src.commands import *
 from src.commands.GameInvoker import GameInvoker
 from src.commands.startWave import startWave
@@ -269,7 +270,7 @@ class TUIView:
         
         self.FOOTER_Y = self.LEGEND_START_Y + 10
         self.HELP_START_X = self.STATUS_START_X + 27
-        self.LOG_START_X = self.HELP_START_X + 31
+        self.LOG_START_X = self.HELP_START_X + 47
 
     def __init__(
         self,
@@ -376,8 +377,30 @@ class TUIView:
             wall_cost = Wall.cost.fget(None) if hasattr(Wall, "cost") else "?"
             dragon_cost = Dragon.cost.fget(None) if hasattr(Dragon, "cost") else "?"
             bombe_cost = Bombe.cost.fget(None) if hasattr(Bombe, "cost") else "?"
+
+            def _default_arg(cls, name):
+                # try to read default from __init__ signature
+                try:
+                    sig = inspect.signature(cls.__init__)
+                    p = sig.parameters.get(name)
+                    if p and p.default is not inspect._empty:
+                        return p.default
+                except Exception:
+                    pass
+                # fallback: try to call property fget with None (works for constants)
+                try:
+                    prop = getattr(cls, name)
+                    return prop.fget(None)
+                except Exception:
+                    return "?"
+
+            trap_damage = _default_arg(Trap, "damage")
+            wall_damage = _default_arg(Wall, "damage")
+            dragon_damage = _default_arg(Dragon, "damage")
+            bombe_damage = _default_arg(Bombe, "damage")
         except Exception:
             trap_cost = wall_cost = dragon_cost = bombe_cost = "?"
+            trap_damage = wall_damage = dragon_damage = bombe_damage = "?"
 
         help_text = [
             ("=== Commandes ===", curses.A_BOLD),
@@ -392,13 +415,13 @@ class TUIView:
             ("Flèches: Déplacer", 0),
             ("", 0),
             ("=== Placer entités ===", curses.A_BOLD),
-            (f"t: Trap (piège) — coût: {trap_cost}", 0),
-            (f"w: Wall (mur) — coût: {wall_cost}", 0),
-            (f"u: Dragon up — coût: {dragon_cost}", 0),
-            (f"h: Dragon left — coût: {dragon_cost}", 0),
-            (f"j: Dragon down — coût: {dragon_cost}", 0),
-            (f"k: Dragon right — coût: {dragon_cost}", 0),
-            (f"b: Bombe — coût: {bombe_cost}", 0),
+            (f"t: Trap (piège) — coût: {trap_cost}, dégâts: {trap_damage}", 0),
+            (f"w: Wall (mur) — coût: {wall_cost}, dégâts: {wall_damage}", 0),
+            (f"u: Dragon up — coût: {dragon_cost}, dégâts: {dragon_damage}", 0),
+            (f"h: Dragon left — coût: {dragon_cost}, dégâts: {dragon_damage}", 0),
+            (f"j: Dragon down — coût: {dragon_cost}, dégâts: {dragon_damage}", 0),
+            (f"k: Dragon right — coût: {dragon_cost}, dégâts: {dragon_damage}", 0),
+            (f"b: Bombe — coût: {bombe_cost}, dégâts: {bombe_damage}", 0),
             ("d: Delete (supprimer)", 0),
         ]
 
