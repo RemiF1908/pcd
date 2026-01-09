@@ -42,6 +42,7 @@ class Simulation:
         self.isSimStarted = False
         self.dmgobserver = DamageObserver()
         self.observers: List[Observer] = []
+        self.totalscore = 0
 
     def attach(self, observer: Observer) -> None:
         """Attach an observer to the simulation."""
@@ -127,6 +128,11 @@ class Simulation:
         
         self.notify()
         wave_res_dict = waveResult.from_simulation(self).to_dict()
+        
+        if not self.level.get_alive_heroes():
+            self.allHeroesDead = True
+            
+            
         return wave_res_dict
 
 
@@ -166,24 +172,24 @@ class Simulation:
         En moyenne on fera maximum Width*Height ticks pour une wave
         """
 
-        timescore = self.ticks / (WIDTH * HEIGHT)
-        killscore = self.level.get_nb_killed_heroes() / self.level.get_nb_heroes()
-        damagescore = self.dmgobserver.getTotalDmg() / self.level.get_sum_HP()
+        killscore = self.level.get_nb_killed_heroes() 
+        damagescore = self.dmgobserver.getTotalDmg() 
         treasurePenalty = int(self.tresorReached)
-        alpha = 0.30
-        beta = 0.45
-        gamma = 0.25
-        eta = 0.9
+        killCoeff = 7
+        dmgCoeff = 3
 
-        score = (alpha * timescore + beta * killscore + gamma * damagescore ) * (1 - eta * treasurePenalty) #entre 0 et 1
-        MAX_SCORE = 10000
-        return round(score * MAX_SCORE)
+
+        score = (killCoeff * killscore + dmgCoeff * damagescore ) 
+        return round(score)
 
     def reset(self) -> None:
         self.ticks = 0
         self.score = 0
         self.current_budget = self.level.budget_tot
         self.running = False
+        self.tresorReached = False
+        self.allHeroesDead = False
+        self.isSimStarted = False
         try:
             if self.dungeon and hasattr(self.dungeon, "reset"):
                 self.dungeon.reset()

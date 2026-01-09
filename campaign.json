@@ -10,8 +10,21 @@
       "difficulty": 1,
       "budget": 200,
       "dungeon_file": "level1_dungeon",
+      "dimensions": {
+        "width": 4,
+        "height": 4
+      },
+      "entry": {
+        "row": 0,
+        "col": 0
+      },
+      "exit": {
+        "row": 2,
+        "col": 2
+      },
+      
       "heroes": [
-        {"pv": 50, "strategy": "random"}
+        {"pv": 50, "strategy": "shortest"}
       ]
     },
     {
@@ -20,6 +33,18 @@
       "difficulty": 2,
       "budget": 150,
       "dungeon_file": "level2_dungeon",
+      "dimensions": {
+        "width": 6,
+        "height": 6
+      },
+      "entry": {
+        "row": 0,
+        "col": 0
+      },
+      "exit": {
+        "row": 5,
+        "col": 5
+      },
       "heroes": [
         {"pv": 80, "strategy": "safest"},
         {"pv": 80, "strategy": "shortest"}

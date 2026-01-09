@@ -69,6 +69,10 @@ class PlaceEntityRequest(BaseModel):
     x: int
     y: int
 
+class SaveDungeonRequest(BaseModel):
+    filename: str
+    campaign_progress: list = []
+
 # --- ENDPOINTS ---
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -166,6 +170,16 @@ async def get_dungeon_data():
     })
 
 
+
+@app.get("/api/next_level/")
+async def next_level():
+    if not context.input_handler:
+        return JSONResponse({"next_level_change": "false"})
+
+    context.input_handler.next_level()
+    
+    return JSONResponse({"next_level_change": "true"})
+
 @app.get("/api/start_simulation/")
 async def start_simulation():
     if not context.input_handler:
@@ -193,6 +207,22 @@ async def reset_simulation():
                 hero.stepsTaken = 0
         
         return JSONResponse({"simulation_reset": "true"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/save_dungeon")
+async def save_dungeon(request: SaveDungeonRequest):
+    if not context.dungeon:
+        return JSONResponse({"error": "Aucun donjon chargé"}, status_code=500)
+    
+    try:
+        from src.commands.exportDungeon import exportDungeon
+        
+        # Créer la commande d'export avec le filename et la progression de campagne
+        command = exportDungeon(context.dungeon, request.filename, request.campaign_progress)
+        command.execute(None)
+        
+        return JSONResponse({"saved": "true", "filename": request.filename})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
