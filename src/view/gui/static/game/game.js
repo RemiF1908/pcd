@@ -90,9 +90,11 @@ function create() {
 
     // Gestion du bouton réinitialiser
     const resetButton = document.getElementById('reset-button');
-    resetButton.addEventListener('click', () => {
-        resetGame(scene);
-    });
+    if(resetButton){
+        resetButton.addEventListener('click', () => {
+            resetGame(scene);
+        });
+    }
 
     // --- Import Dungeon UI handlers (simplified)
     const importBtn = document.getElementById('import-button');
@@ -110,7 +112,6 @@ function create() {
             try{
                 const resp = await fetch('/api/import_dungeon', { method: 'POST' });
                 if(resp.ok){
-                    refreshDungeon(scene, true);
                     setImportStatus('Donjon importé avec succès.');
                     refreshDungeon(scene, true);
                 }else{
@@ -133,6 +134,7 @@ function create() {
     scene.scale.on('resize', () => {
         refreshDungeon(scene, true);
     });
+    
 }
 
 function updateSidebar(data) {
@@ -180,6 +182,15 @@ function buildIsoGrid(scene, data) {
     const grid = data.grid;
     const heroes = data.heros || [];
     if (!grid || grid.length === 0) return;
+
+    // Nettoyer les anciens objets graphiques avant de reconstruire
+    gridObjects.forEach(obj => {
+        if (obj.input) {
+            obj.removeInteractive();
+        }
+        obj.destroy();
+    });
+    gridObjects = [];
 
     // Calculer les dimensions pour le centrage
     const gridWidth = Math.max(...grid.map(row => row.length));
@@ -256,7 +267,7 @@ function buildIsoGrid(scene, data) {
             gridObjects.push(heroImage);
         });
     }
-}
+}   
 
 function handleTileClick(scene, cell) {
     if (gameStarted) return;

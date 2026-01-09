@@ -184,7 +184,7 @@ class Simulation:
 
     def reset(self) -> None:
         self.ticks = 0
-        self.score = 0
+        self.score = self.totalscore
         self.current_budget = self.level.budget_tot
         self.running = False
         self.tresorReached = False

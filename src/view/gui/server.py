@@ -144,7 +144,7 @@ async def place_entity(request: PlaceEntityRequest):
         case "wall":
             context.input_handler.place_wall((request.y, request.x))
         case "dragon":
-            context.input_handler.place_dragon((request.y, request.x))
+            context.input_handler.place_dragon((request.y, request.x), orientation="U")
         case "bombe":
             context.input_handler.place_bombe((request.y, request.x))
         case "floor":
@@ -206,7 +206,15 @@ async def reset_simulation():
                 hero.coord = context.simulation.dungeon.entry
                 hero.isAlive = False
                 hero.stepsTaken = 0
-        
+        # Notifier les observers et forcer un broadcast websocket
+        try:
+            context.simulation.notify()
+            # manager.broadcast est async - on l'attend pour garantir l'envoi
+            await manager.broadcast("dungeon_updated")
+        except Exception:
+            # Ne pas empêcher la réponse en cas d'erreur de notification
+            pass
+
         return JSONResponse({"simulation_reset": "true"})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
