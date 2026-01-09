@@ -68,8 +68,8 @@ class InputHandler:
         self.invoker.push_command(command)
         self.invoker.execute()
 
-    def place_dragon(self, pos) -> None:
-        dragon = EntityFactory.create_dragon()
+    def place_dragon(self, pos, orientation) -> None:
+        dragon = EntityFactory.create_dragon(orientation=orientation)
         command = placeEntity(self.dungeon, dragon, pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
