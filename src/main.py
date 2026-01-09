@@ -41,6 +41,7 @@ def main():
             invoker=invoker,
             dungeon=gamecontroller.dungeon,
             simulation=gamecontroller.simulation,
+            campaign=campaign,
         )
 
     elif args.web:
@@ -52,9 +53,9 @@ def main():
             invoker=invoker,
             dungeon=gamecontroller.dungeon,
             simulation=gamecontroller.simulation,
+            campaign=campaign,
         )
 
-    print("ee")
     gamecontroller.interface = view
 
     view.run()

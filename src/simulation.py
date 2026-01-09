@@ -127,6 +127,11 @@ class Simulation:
         
         self.notify()
         wave_res_dict = waveResult.from_simulation(self).to_dict()
+        
+        if not self.level.get_alive_heroes():
+            self.allHeroesDead = True
+            
+            
         return wave_res_dict
 
 
@@ -184,6 +189,9 @@ class Simulation:
         self.score = 0
         self.current_budget = self.level.budget_tot
         self.running = False
+        self.tresorReached = False
+        self.allHeroesDead = False
+        self.isSimStarted = False
         try:
             if self.dungeon and hasattr(self.dungeon, "reset"):
                 self.dungeon.reset()
