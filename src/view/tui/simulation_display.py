@@ -265,11 +265,12 @@ class TUIView:
 
     def _update_layout(self) -> None:
         """Met à jour la disposition de la TUI en fonction de la taille du donjon."""
-        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 2
+        self.LEGEND_START_Y = self.DUNGEON_START_Y + self.dimension[0] + 3
         self.STATUS_START_X = self.DUNGEON_START_X + self.dimension[1] * 2 + 3
-        self.LOG_START_X = self.DUNGEON_START_X + self.dimension[1] * 8
+        
         self.FOOTER_Y = self.LEGEND_START_Y + 10
-        self.HELP_START_X = self.STATUS_START_X + 23
+        self.HELP_START_X = self.STATUS_START_X + 30
+        self.LOG_START_X = self.HELP_START_X + 25
 
     def __init__(
         self,
@@ -314,6 +315,10 @@ class TUIView:
 
         self.invoker = invoker
         self.input_handler = InputHandler(self.simulation, self.dungeon, self.invoker, self.campaign)
+
+        # Debug message shown briefly (message + ttl in render loops)
+        self._debug_message = None
+        self._debug_ttl = 0
 
         # Mapping des touches vers les commandes
         self.key_bindings: dict[int, Callable[[], None]] = {
@@ -501,6 +506,13 @@ class TUIView:
                 curses.A_DIM,
             )
 
+        # Affiche un message de debug temporaire si nécessaire
+        if getattr(self, "_debug_ttl", 0) > 0 and getattr(self, "_debug_message", None):
+            _draw_str(stdscr, self.FOOTER_Y, self.FOOTER_X, self._debug_message, curses.A_BOLD)
+            self._debug_ttl -= 1
+            if self._debug_ttl <= 0:
+                self._debug_message = None
+
         stdscr.refresh()
     
     def run(self) -> None:
@@ -531,8 +543,16 @@ class TUIView:
                 key = stdscr.getch()
                 if key in self.key_bindings:
                     if key == ord("s"):
-                        #pour récupérer le dictionnaire de résultats de la wave
-                        self.waveresult_dic = self.key_bindings[key]()
+                        # récupérer le résultat de la commande start_wave
+                        res = self.key_bindings[key]()
+                        # Si la commande a retourné False, cela signifie qu'un héros n'a pas de chemin
+                        if res is False:
+                            self._debug_message = "Impossible de lancer la simulation : un héros n'a pas de chemin"
+                            # afficher pendant ~3 secondes (30 cycles à timeout=100ms)
+                            self._debug_ttl = 30
+                        else:
+                            # stocker le dictionnaire de résultat si disponible
+                            self.waveresult_dic = res
                     else:
                         self.key_bindings[key]()
 
