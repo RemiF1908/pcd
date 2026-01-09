@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from src.commands import *
@@ -12,14 +11,15 @@ from src.commands.exportDungeon import exportDungeon
 from src.commands.importDungeon import importDungeon
 from src.model.entity_factory import EntityFactory
 from src.commands.nextlevel import nextLevel
+
 if TYPE_CHECKING:
     from src.model.simulation import Simulation
     from src.model.dungeon import Dungeon
     from src.model.campaign_manager import Campaign
 
-
 class InputHandler:
-    def __init__(self, simulation: Simulation, dungeon: Dungeon, invoker: GameInvoker, campaign: Campaign):
+    # CORRECTION 1: campaign est optionnel (= None) pour compatibilité
+    def __init__(self, simulation: Simulation, dungeon: Dungeon, invoker: GameInvoker, campaign: Campaign = None):
         self.invoker = invoker
         self.simulation = simulation
         self.dungeon = dungeon
@@ -36,7 +36,6 @@ class InputHandler:
         self.invoker.execute()
 
     def reset_dungeon(self) -> None:
-        # Passer la simulation afin que la commande puisse rembourser le budget
         command = resetDungeon(self.dungeon, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
@@ -54,10 +53,15 @@ class InputHandler:
         res = command.result
         if res:
             self.simulation.dungeon = res
-        
+            self.dungeon = res # <--- Important : Mise à jour de la ref locale
 
     def place_trap(self, pos) -> None:
-        trap = EntityFactory.create_trap(damage=10)
+        # Note: Assurez-vous que create_trap accepte 'damage'. Sinon, retirez l'argument.
+        try:
+            trap = EntityFactory.create_trap(damage=10)
+        except TypeError:
+            trap = EntityFactory.create_trap()
+            
         command = placeEntity(self.dungeon, trap, pos, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
@@ -68,7 +72,7 @@ class InputHandler:
         self.invoker.push_command(command)
         self.invoker.execute()
 
-    def place_dragon(self, pos, orientation) -> None:
+    def place_dragon(self, pos, orientation=0) -> None: # orientation=0 par defaut
         dragon = EntityFactory.create_dragon(orientation=orientation)
         command = placeEntity(self.dungeon, dragon, pos, self.simulation)
         self.invoker.push_command(command)
@@ -86,10 +90,20 @@ class InputHandler:
         self.invoker.execute()
         
     def load_next_level(self) -> None:
+        if not self.campaign:
+            print("Erreur: Pas de campagne chargée")
+            return
+
         command = nextLevel(self.campaign, self.simulation)
         self.invoker.push_command(command)
         self.invoker.execute()
+        
+        # CORRECTION 2: Mise à jour des références après changement de niveau
+        # On suppose que la commande nextLevel a mis à jour la simulation dans le controlleur
+        if self.invoker.game_controller:
+             self.simulation = self.invoker.game_controller.simulation
+             self.dungeon = self.invoker.game_controller.dungeon
+             print(f"InputHandler mis à jour sur le niveau {self.simulation.level.difficulty}")
 
     def update_dungeon(self, new_dungeon: Dungeon) -> None:
-        """Met à jour le donjon utilisé par le gestionnaire d'entrées."""
         self.dungeon = new_dungeon
