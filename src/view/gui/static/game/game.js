@@ -24,6 +24,8 @@ const TILE_HEIGHT = 32;
 // Références globales
 let gridObjects = [];
 let selectedEntityType = 'trap';
+let gameStarted = false;
+let heroMoveInterval = null;
 
 function preload() {
     this.load.image('floor', 'assets/floor.png');
@@ -55,7 +57,7 @@ function create() {
     ws.onmessage = (event) => {
         if (event.data === "dungeon_updated") {
             console.log("Dungeon update received. Refreshing...");
-            refreshDungeon(scene);
+            refreshDungeon(scene, true);
         }
     };
 
@@ -70,6 +72,7 @@ function create() {
 
     sidebarItems.forEach(item => {
         item.addEventListener('click', () => {
+            if (gameStarted) return;
             sidebarItems.forEach(i => i.classList.remove('selected'));
             item.classList.add('selected');
             selectedEntityType = item.id;
@@ -77,9 +80,23 @@ function create() {
         });
     });
 
+    // Gestion du bouton lancer
+    const launchButton = document.getElementById('launch-button');
+    launchButton.addEventListener('click', () => {
+        if (!gameStarted) {
+            startGame(scene);
+        }
+    });
+
+    // Gestion du bouton réinitialiser
+    const resetButton = document.getElementById('reset-button');
+    resetButton.addEventListener('click', () => {
+        resetGame(scene);
+    });
+
     // Écouteur pour redimensionnement de la fenêtre (optionnel avec RESIZE mais utile pour recentrer)
     scene.scale.on('resize', () => {
-        refreshDungeon(scene);
+        refreshDungeon(scene, true);
     });
 }
 
@@ -99,16 +116,23 @@ function updateSidebar(data) {
     }
 }
 
-function refreshDungeon(scene) {
-    // Supprimer les anciens objets
-    gridObjects.forEach(obj => obj.destroy());
-    gridObjects = [];
+function refreshDungeon(scene, forceRebuild = false) {
+    // Si c'est le premier chargement ou reconstruction forcée, on nettoie tout
+    if (gridObjects.length === 0 || forceRebuild) {
+        gridObjects.forEach(obj => obj.destroy());
+        gridObjects = [];
+    }
 
     // Récupérer les nouvelles données du donjon
     fetch('/api/dungeon')
         .then(res => res.json())
         .then(data => {
-            buildIsoGrid(scene, data);
+            if (gridObjects.length === 0 || forceRebuild) {
+                buildIsoGrid(scene, data);
+            } else {
+                // Juste mettre à jour les héros
+                updateHeroesOnly(scene, data);
+            }
         })
         .catch(err => console.error("Erreur chargement donjon:", err));
 
@@ -191,17 +215,21 @@ function buildIsoGrid(scene, data) {
         });
     });
 
-    // Heros
-    heroes.forEach(hero => {
-        const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
-        const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
+    // Heros - seulement si c'est une construction complète
+    if (gridObjects.length === 0) {
+        heroes.forEach(hero => {
+            const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
+            const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
 
-        let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
-        gridObjects.push(heroImage);
-    });
+            let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
+            gridObjects.push(heroImage);
+        });
+    }
 }
 
 function handleTileClick(scene, cell) {
+    if (gameStarted) return;
+    
     console.log(`Tile clicked at: (${cell.x}, ${cell.y}) with entity ${selectedEntityType}`);
 
     // On ne peut pas placer sur les cases de départ et de fin
@@ -226,9 +254,123 @@ function handleTileClick(scene, cell) {
             return response.text().then(text => { throw new Error(text) });
         }
         // Si le placement est réussi, on rafraîchit l'affichage
-        refreshDungeon(scene);
+        refreshDungeon(scene, true);
     })
     .catch(error => console.error('Error placing entity:', error));
+}
+
+function startGame(scene) {
+    gameStarted = true;
+    
+    // Désactiver la sidebar
+    const sidebarItems = document.getElementById('sidebar-items');
+    sidebarItems.classList.add('disabled');
+    
+    // Désactiver le bouton lancer
+    const launchButton = document.getElementById('launch-button');
+    launchButton.disabled = true;
+    launchButton.textContent = 'En cours...';
+    
+    // Désactiver le bouton réinitialiser
+    const resetButton = document.getElementById('reset-button');
+    resetButton.disabled = true;
+    
+    // Démarrer le déplacement automatique du héros toutes les 0.5 secondes
+    heroMoveInterval = setInterval(() => {
+        moveHero(scene);
+    }, 500);
+    
+    console.log("Game started - Hero moving automatically");
+}
+
+function resetGame(scene) {
+    // Arrêter le déplacement automatique
+    if (heroMoveInterval) {
+        clearInterval(heroMoveInterval);
+        heroMoveInterval = null;
+    }
+    
+    // Réinitialiser l'état du jeu
+    gameStarted = false;
+    
+    // Réactiver la sidebar
+    const sidebarItems = document.getElementById('sidebar-items');
+    sidebarItems.classList.remove('disabled');
+    
+    // Réactiver le bouton lancer
+    const launchButton = document.getElementById('launch-button');
+    launchButton.disabled = false;
+    launchButton.textContent = 'Lancer';
+    
+    // Réactiver le bouton réinitialiser
+    const resetButton = document.getElementById('reset-button');
+    resetButton.disabled = false;
+    
+    // Réinitialiser la simulation côté serveur
+    fetch('/api/reset_simulation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Simulation reset:', data);
+        // Rafraîchir l'affichage pour montrer les héros au départ
+        refreshDungeon(scene, true);
+    })
+    .catch(error => console.error('Error resetting simulation:', error));
+    
+    console.log("Game reset - Back to edit mode");
+}
+
+function moveHero(scene) {
+    fetch('/api/start_simulation/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        // Rafraîchir l'affichage après le déplacement
+        refreshDungeon(scene, false);
+    })
+    .catch(error => console.error('Error moving hero:', error));
+}
+
+function updateHeroesOnly(scene, data) {
+    const heroes = data.heros || [];
+    const grid = data.grid;
+    if (!grid || grid.length === 0) return;
+
+    // Calculer les dimensions pour le centrage
+    const gridWidth = Math.max(...grid.map(row => row.length));
+    const gridHeight = grid.length;
+
+    const dungeonTotalWidth = (gridWidth + gridHeight) * (TILE_WIDTH / 2);
+    const dungeonTotalHeight = (gridWidth + gridHeight) * (TILE_HEIGHT / 2);
+
+    const originX = (scene.scale.width - dungeonTotalWidth) / 2 + (dungeonTotalWidth/2);
+    const originY = (scene.scale.height - dungeonTotalHeight) / 2;
+
+    // Supprimer uniquement les anciens héros
+    const heroObjects = gridObjects.filter(obj => obj.texture.key === 'hero');
+    heroObjects.forEach(obj => obj.destroy());
+    
+    // Filtrer les héros de la liste
+    gridObjects = gridObjects.filter(obj => obj.texture.key !== 'hero');
+
+    // Ajouter les nouveaux héros
+    heroes.forEach(hero => {
+        const isoX = (hero.x - hero.y) * (TILE_WIDTH / 2) + originX;
+        const isoY = (hero.x + hero.y) * (TILE_HEIGHT / 2) + originY;
+
+        let heroImage = scene.add.image(isoX, isoY, 'hero').setOrigin(0.5, 1.0).setDepth(isoY + 2);
+        gridObjects.push(heroImage);
+    });
 }
 
 function update() {

@@ -56,7 +56,7 @@ class DungeonObserver(Observer):
 class GuiContext:
     dungeon = None
     input_handler = None
-    simulation: Simulation = None
+    simulation = None
 
 context = GuiContext()
 app = FastAPI()
@@ -108,8 +108,13 @@ async def get_dungeon():
         serialized_grid.append(row_data)
 
     hero_positions = []
-    if context.simulation:
-        hero_positions = [{"x": pos[1], "y": pos[0]} for pos in context.simulation.get_all_alive_hero_positions()]
+    if context.simulation and context.simulation.heroes:
+        try:
+            for hero in context.simulation.heroes:
+                if hero.isAlive and hero.coord:
+                    hero_positions.append({"x": hero.coord[1], "y": hero.coord[0]})
+        except:
+            pass
 
     return JSONResponse({
         "rows": dng.dimension[0],
@@ -166,6 +171,40 @@ async def start_simulation():
     context.input_handler.start_wave()
     
     return JSONResponse({"simulation_started": "true"})
+
+@app.post("/api/reset_simulation")
+async def reset_simulation():
+    if not context.simulation:
+        return JSONResponse({"error": "Aucune simulation chargée"}, status_code=500)
+    
+    try:
+        # Réinitialiser la simulation
+        context.simulation.reset()
+        context.simulation.isSimStarted = False
+        
+        # Remettre les héros à leur position de départ et désactivés
+        if context.simulation.heroes and context.simulation.dungeon:
+            for hero in context.simulation.heroes:
+                hero.coord = context.simulation.dungeon.entry
+                hero.isAlive = False
+                hero.stepsTaken = 0
+        
+        return JSONResponse({"simulation_reset": "true"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/move_hero")
+async def move_hero():
+    if not context.simulation:
+        return JSONResponse({"error": "Aucune simulation chargée"}, status_code=500)
+    
+    try:
+        result = context.simulation.step()
+        return JSONResponse({"hero_moved": "true", "result": result})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
 
 # --- FICHIERS STATIQUES ---
 static_path = os.path.join(current_dir, "static")
